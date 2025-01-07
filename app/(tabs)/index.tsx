@@ -1,9 +1,9 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
+import { Image, StyleSheet, Platform, ScrollView, FlatList } from 'react-native';
+import { mockNflGames, mockNbaGames } from './mockData';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import GameCard from './gameCard';
 
 export default function HomeScreen() {
   return (
@@ -16,23 +16,54 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Musen</ThemedText>
+        <ThemedText type="title">League</ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="default">Sports commentary how you want it</ThemedText>
-        {/* <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText> */}
+      
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">NFL</ThemedText>
       </ThemedView>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        directionalLockEnabled={true}
+        alwaysBounceVertical={false}
+      >
+        <FlatList
+          contentContainerStyle={styles.gamesContainer}
+          numColumns={Math.ceil(mockNflGames.length / 2)}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          data={mockNflGames}
+          directionalLockEnabled={true}
+          alwaysBounceVertical={false}
+          renderItem={({ item }) => (
+            <GameCard key={item.id} game={item} />
+          )}
+        />
+      </ScrollView>
+
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">NBA</ThemedText>
+      </ThemedView>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        directionalLockEnabled={true}
+        alwaysBounceVertical={false}
+      >
+        <FlatList
+          contentContainerStyle={styles.gamesContainer}
+          numColumns={Math.ceil(mockNbaGames.length / 2)}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          data={mockNbaGames}
+          directionalLockEnabled={true}
+          alwaysBounceVertical={false}
+          renderItem={({ item }) => (
+            <GameCard key={item.id} game={item} />
+          )}
+        />
+      </ScrollView>
     </ParallaxScrollView>
   );
 }
@@ -43,15 +74,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
   logo: {
     height: 178,
     width: 290,
     bottom: 20,
     left: 50,
     position: 'absolute',
+  },
+  gamesContainer: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    gap: 8,
   },
 });
