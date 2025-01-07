@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Game } from './interfaces';
 
 interface GameCardProps {

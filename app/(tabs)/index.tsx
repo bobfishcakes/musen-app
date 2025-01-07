@@ -4,10 +4,11 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import GameCard from './gameCard';
+import MainScrollView from '@/components/MainScrollView';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
+    <MainScrollView
       headerBackgroundColor={{ light: '#3A5241', dark: '#3A5241' }}
       headerImage={
         <Image
@@ -16,11 +17,11 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">League</ThemedText>
+        <ThemedText type="title">Live Now</ThemedText>
       </ThemedView>
       
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">NFL</ThemedText>
+        <ThemedText type="subtitle">NFL</ThemedText>
       </ThemedView>
       <ScrollView
         horizontal
@@ -43,7 +44,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">NBA</ThemedText>
+        <ThemedText type="subtitle">NBA</ThemedText>
       </ThemedView>
       <ScrollView
         horizontal
@@ -64,7 +65,7 @@ export default function HomeScreen() {
           )}
         />
       </ScrollView>
-    </ParallaxScrollView>
+    </MainScrollView>
   );
 }
 
