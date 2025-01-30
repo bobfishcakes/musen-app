@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Game } from './interfaces';
+import { Game } from '../constants/Interfaces';
 
 interface GameCardProps {
   game: Game;

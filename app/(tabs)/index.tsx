@@ -2,7 +2,7 @@ import { Image, StyleSheet, Platform, ScrollView, FlatList } from 'react-native'
 import { mockNflGames, mockNbaGames } from '../mockData';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import GameCard from '../gameCard';
+import GameCard from '@/components/GameCard';
 import MainScrollView from '@/components/MainScrollView';
 
 export default function HomeScreen() {

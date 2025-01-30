@@ -1,4 +1,4 @@
-import { Game } from './interfaces';
+import { Game } from '../constants/Interfaces';
 
 
 export const mockNcaaFootballGames: Game[] = [
