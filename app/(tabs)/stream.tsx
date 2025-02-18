@@ -1,186 +1,213 @@
-import { StyleSheet, View, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { ThemedText } from '@/components/ThemedText';
-import { ChatMessage } from '@/components/ChatMessage';
-import { useState } from 'react';
+import React from 'react';
+import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import WavesBackground from '../../components/WavesBackground';
+import { mockNbaGames } from '../mockData';
+import { statusMap } from '../../components/GameCard';
 
-export default function TabTwoScreen() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [message, setMessage] = useState('');
-  const streamTitle = "Live Stream Title";
+const Stream = () => {
+  const currentGame = mockNbaGames[0];
+  const viewerCount = 1234;
   
-  const messages = [
-    { username: "user1", message: "Hello!" },
-    { username: "user2", message: "Great stream!" },
-  ];
-
-  const handleSend = () => {
-    if (message.trim()) {
-      // Handle sending message
-      setMessage('');
-    }
-  };
-
-  const handleBack = () => {
-    // Handle back action
-  };
-
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Title Section */}
-        <View style={styles.titleSection}>
-          <ThemedText style={styles.title}>{streamTitle}</ThemedText>
-          <ThemedText style={styles.subtitle}>@StreamerName</ThemedText>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.actionButton}>
-              <ThemedText>Follow</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, styles.donateButton]}>
-              <ThemedText>Donate</ThemedText>
-            </TouchableOpacity>
+          <Text style={styles.title}>{currentGame.league.name}</Text>
+          <View style={styles.viewerCount}>
+            <Ionicons name="headset" size={24} color="#333" />
+            <Text style={styles.countText}>{viewerCount}</Text>
           </View>
         </View>
 
-        {/* Main Content Area */}
-        <View style={styles.contentArea}>
-          {isPlaying && (
-            <View style={styles.wavesBackground}>
-              <WavesBackground/>
-            </View>
-          )}
-          <TouchableOpacity 
-            onPress={() => setIsPlaying(!isPlaying)}
-            style={styles.playButton}
-          >
-            <Ionicons 
-              name={isPlaying ? 'pause-circle' : 'play-circle'} 
-              size={80} 
-              color="#fff" 
-            />
-          </TouchableOpacity>
+        <View style={styles.profile}>
+          <Image 
+            source={{ uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png' }}
+            style={styles.profilePic}
+          />
+          <Text style={styles.username}>John Player</Text>
         </View>
 
-        {/* Chat Section */}
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        >
-          <View style={styles.chatSection}>
-            <View style={{ flex: 1, width: '100%' }}>
-              <ScrollView style={styles.chatScroll}>
-                {messages.map((msg, index) => (
-                  <ChatMessage 
-                    key={index}
-                    username={msg.username}
-                    message={msg.message}
-                  />
-                ))}
-              </ScrollView>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={message}
-                  onChangeText={setMessage}
-                  placeholder="Type a message..."
-                  placeholderTextColor="#666"
-                />
-                <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-                  <Ionicons name="send" size={24} color="#fff" />
-                </TouchableOpacity>
+        <View style={styles.scoreBoard}>
+          <View style={styles.scoreContainer}>
+            <View style={styles.scoreRow}>
+              <Text style={styles.score}>{currentGame.scores?.home.total}</Text>
+              <View style={styles.statusSection}>
+                <Text style={styles.gameStatus}>{statusMap[currentGame.status.short]}</Text>
+                <View style={styles.controls}>
+                  <Ionicons name="volume-mute" size={24} color="#333" />
+                  <Ionicons name="bluetooth" size={24} color="#333" />
+                </View>
               </View>
+              <Text style={styles.score}>{currentGame.scores?.away.total}</Text>
             </View>
           </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </SafeAreaProvider>
+
+          <View style={styles.teamsRow}>
+            <View style={styles.teamContainer}>
+              <Image 
+                source={{ uri: currentGame.teams.home.logo }}
+                style={styles.teamLogo}
+              />
+              <Text style={styles.teamName}>{currentGame.teams.home.name}</Text>
+            </View>
+
+            <View style={styles.teamContainer}>
+              <Image 
+                source={{ uri: currentGame.teams.away.logo }}
+                style={styles.teamLogo}
+              />
+              <Text style={styles.teamName}>{currentGame.teams.away.name}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Placeholder section */}
+        <View style={styles.placeholderSection}>
+          <View style={styles.placeholder} />
+          <View style={styles.placeholder} />
+          <View style={styles.placeholder} />
+        </View>
+      </View>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
+  // ... existing styles ...
+  
+  // New placeholder styles
+  placeholderSection: {
+    flex: 1,
+    padding: 16,
+    gap: 16,
+  },
+  placeholder: {
+    height: 80,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  
+  // Make sure all existing styles are included here
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#F5F5F5',
+    padding: 16,
   },
   header: {
-    padding: 15,
-  },
-  titleSection: {
-    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#333333',
   },
-  subtitle: {
+  viewerCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 8,
+  },
+  countText: {
     fontSize: 16,
-    color: '#888',
-    marginTop: 5,
+    color: '#333333',
+    fontWeight: '500',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
-    gap: 10,
+  scoreBoard: {
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    marginTop: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  actionButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#333',
+  scoreContainer: {
     alignItems: 'center',
   },
-  donateButton: {
-    backgroundColor: '#3A5241',
-  },
-  contentArea: {
-    flex: 0.25, // 25% of screen height
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative', // Add this
-    overflow: 'hidden', // Add this
-  },
-  playButton: {
-    padding: 20,
-  },
-  chatSection: {
-    flex: 0.85,
-    position: 'relative',
-  },
-  chatScroll: {
-    flex: 1,
-  },
-  inputContainer: {
+  scoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#222',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    marginRight: 10,
-    color: '#fff',
-  },
-  sendButton: {
     justifyContent: 'center',
-    alignItems: 'center',
-    width: 40,
+    gap: 24,
   },
-  wavesBackground: {
-    position: 'absolute',
+  score: {
+    fontSize: 64,
+    fontWeight: '800',
+    color: '#333',
+  },
+  teamsRow: {
+    flexDirection: 'row',
     width: '100%',
-    height: '100%',
-    zIndex: -1,
+    justifyContent: 'space-between',
+    marginTop: 32,
+    paddingHorizontal: 20,
+  },
+  teamContainer: {
+    alignItems: 'center',
+    width: '40%',
+  },
+  teamLogo: {
+    width: 60,
+    height: 60,
+    resizeMode: 'contain',
+  },
+  teamName: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'center',
+  },
+  gameStatus: {
+    fontSize: 14,
+    color: '#FF4444',
+    textAlign: 'center',
+  },
+  controls: {
+    flexDirection: 'row',
+    gap: 16,
+    marginTop: 8,
+  },
+  profile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginVertical: 8,
+  },
+  profilePic: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#E0E0E0', // Fallback color while loading
+  },
+  username: {
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  statusContainer: {
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  statusSection: {
+    alignItems: 'center',
+    minWidth: 100,
+    gap: 12,
   }
 });
+
+export default Stream;
