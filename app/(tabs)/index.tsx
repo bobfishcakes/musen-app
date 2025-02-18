@@ -4,15 +4,18 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import GameCard from '@/components/GameCard';
 import MainScrollView from '@/components/MainScrollView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function HomeScreen() {
   return (
     <MainScrollView
       headerBackgroundColor={{ light: '#3A5241', dark: '#3A5241' }}
       headerImage={
-        <Image
-          source={require('./musen-logo.png')}
-          style={styles.logo}
+        <IconSymbol
+          size={310}
+          color="#50775B"
+          name="radio"
+          style={styles.headerImage}
         />
       }>
       <ThemedView style={styles.titleContainer}>
@@ -73,6 +76,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  headerImage: {
+    bottom: -90,
+    left: -35,
+    position: 'absolute',
   },
   logo: {
     height: 178,

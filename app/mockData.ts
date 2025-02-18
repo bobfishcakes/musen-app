@@ -8,10 +8,12 @@ export const mockNcaaFootballGames: Game[] = [
       home: {
         name: "Texas",
         id: "195",
+        logo: 'https://media.api-sports.io/american-football/teams/195.png'
       },
       away: {
         name: "Texas A&M",
         id: "111",
+        logo: 'https://media.api-sports.io/american-football/teams/111.png'
       }
     },
     league: {
@@ -43,10 +45,12 @@ export const mockNflGames: Game[] = [
       home: {
         name: "Las Vegas Raiders",
         id: "1",
+        logo: 'https://media.api-sports.io/american-football/teams/1.png'
       },
       away: {
         name: "Baltimore Ravens",
         id: "5",
+        logo: 'https://media.api-sports.io/american-football/teams/5.png'
       }
     },
     league: {
@@ -75,10 +79,12 @@ export const mockNflGames: Game[] = [
       home: {
         name: "Jacksonville Jaguars",
         id: "2",
+        logo: 'https://media.api-sports.io/american-football/teams/2.png'
       },
       away: {
         name: "New England Patriots",
         id: "3",
+        logo: 'https://media.api-sports.io/american-football/teams/3.png'
       }
     },
     league: {
@@ -107,10 +113,12 @@ export const mockNflGames: Game[] = [
       home: {
         name: "New York Giants",
         id: "4",
+        logo: 'https://media.api-sports.io/american-football/teams/4.png'
       },
       away: {
         name: "Tennessee Titans",
         id: "6",
+        logo: 'https://media.api-sports.io/american-football/teams/6.png'
       }
     },
     league: {
@@ -139,10 +147,12 @@ export const mockNflGames: Game[] = [
       home: {
         name: "Detroit Lions",
         id: "7",
+        logo: 'https://media.api-sports.io/american-football/teams/7.png'
       },
       away: {
         name: "Atlanta Falcons",
         id: "8",
+        logo: 'https://media.api-sports.io/american-football/teams/8.png'
       }
     },
     league: {
@@ -171,10 +181,12 @@ export const mockNflGames: Game[] = [
       home: {
         name: "Cleveland Browns",
         id: "9",
+        logo: 'https://media.api-sports.io/american-football/teams/9.png'
       },
       away: {
         name: "Cincinnati Bengals",
         id: "10",
+        logo: 'https://media.api-sports.io/american-football/teams/10.png'
       }
     },
     league: {
@@ -205,11 +217,13 @@ export const mockNbaGames: Game[] = [
     teams: {
       home: {
         name: "Atlanta Hawks",
-        id: "132"
+        id: "132",
+        logo: 'https://media.api-sports.io/basketball/teams/132.png'
       },
       away: {
         name: "Boston Celtics",
-        id: "133"
+        id: "133",
+        logo: 'https://media.api-sports.io/basketball/teams/133.png'
       }
     },
     league: {
@@ -237,11 +251,13 @@ export const mockNbaGames: Game[] = [
     teams: {
       home: {
         name: "Brooklyn Nets",
-        id: "134"
+        id: "134",
+        logo: 'https://media.api-sports.io/basketball/teams/134.png'
       },
       away: {
         name: "Charlotte Hornets",
-        id: "135"
+        id: "135",
+        logo: 'https://media.api-sports.io/basketball/teams/135.png'
       }
     },
     league: {
@@ -269,11 +285,13 @@ export const mockNbaGames: Game[] = [
     teams: {
       home: {
         name: "Chicago Bulls",
-        id: "136"
+        id: "136",
+        logo: 'https://media.api-sports.io/basketball/teams/136.png'
       },
       away: {
         name: "Cleveland Cavaliers",
-        id: "137"
+        id: "137",
+        logo: 'https://media.api-sports.io/basketball/teams/137.png'
       }
     },
     league: {
@@ -304,11 +322,13 @@ export const mockNcaaBasketballGames: Game[] = [
     teams: {
       home: {
         name: "Norfolk State",
-        id: "196"
+        id: "196",
+        logo: 'https://media.api-sports.io/basketball/teams/196.png'
       },
       away: {
         name: "Wright State",
-        id: "206"
+        id: "206",
+        logo: 'https://media.api-sports.io/basketball/teams/206.png'
       }
     },
     league: {
@@ -336,11 +356,13 @@ export const mockNcaaBasketballGames: Game[] = [
     teams: {
       home: {
         name: "Utah Valley State",
-        id: "222"
+        id: "222",
+        logo: 'https://media.api-sports.io/basketball/teams/222.png'
       },
       away: {
         name: "Kent State",
-        id: "235"
+        id: "235",
+        logo: 'https://media.api-sports.io/basketball/teams/235.png'
       }
     },
     league: {

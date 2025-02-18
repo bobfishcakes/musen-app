@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 import { Game } from '../constants/Interfaces';
 
 interface GameCardProps {
@@ -35,26 +35,22 @@ const GameCard = ({ game }: GameCardProps) => {
         <View style={styles.gameContainer}>
           <View style={styles.teamContainer}>
             <View style={styles.teamColumn}>
-              <Text 
-                numberOfLines={1} 
-                style={styles.innerText}
-              >
-                {game.teams.away.name}
-              </Text>
+              <Image 
+                source={{ uri: game.teams.away.logo }}
+                style={styles.teamLogo}
+                resizeMode="contain"
+              />
             </View>
             <View style={styles.centerColumn}>
-              <Text style={styles.innerText}>at</Text>
               <Text style={styles.scoreText}>{`${awayScore}-${homeScore}`}</Text>
               <Text style={styles.statusText}>{`${status}`}</Text>
             </View>
             <View style={styles.teamColumn}>
-              <Text 
-                numberOfLines={1} 
-                ellipsizeMode="tail" 
-                style={styles.innerText}
-              >
-                {game.teams.home.name}
-              </Text>
+              <Image 
+                source={{ uri: game.teams.home.logo }}
+                style={styles.teamLogo}
+                resizeMode="contain"
+              />
             </View>
           </View>
         </View>
@@ -67,9 +63,9 @@ const styles = StyleSheet.create({
   card: {
     paddingVertical: 25,
     paddingHorizontal: 10,
-    backgroundColor: '#3e3e3e',
+    backgroundColor: '#d3d3d3',
     borderRadius: 8,
-    width: 400,
+    width: 300,
     marginHorizontal: 5,
   },
   gameContainer: {
@@ -89,22 +85,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   innerText: {
-    color: 'white',
+    color: 'black',
     fontSize: 14,
     marginHorizontal: 2,
     textAlign: 'center',
   },
   scoreText: {
-    color: 'white',
+    fontSize: 20,  // Increase from current size
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  statusText: {
+    color: '#50775B',
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 8,
   },
-  statusText: {
-    color: '#BAE0C0',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginTop: 8,
+  teamLogo: {
+    width: 50,
+    height: 50,
   },
 });
 
