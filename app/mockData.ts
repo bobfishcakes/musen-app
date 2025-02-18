@@ -213,17 +213,17 @@ export const mockNflGames: Game[] = [
 
 export const mockNbaGames: Game[] = [
   {
-    id: "132",
+    id: "0",
     teams: {
       home: {
-        name: "Atlanta Hawks",
-        id: "132",
-        logo: 'https://media.api-sports.io/basketball/teams/132.png'
+        name: "Los Angeles Lakers",
+        id: "145",
+        logo: 'https://media.api-sports.io/basketball/teams/145.png'
       },
       away: {
-        name: "Boston Celtics",
-        id: "133",
-        logo: 'https://media.api-sports.io/basketball/teams/133.png'
+        name: "Dallas Mavericks",
+        id: "138",
+        logo: 'https://media.api-sports.io/basketball/teams/138.png'
       }
     },
     league: {
@@ -238,7 +238,7 @@ export const mockNbaGames: Game[] = [
       }
     },
     status: {
-      short: "NS",
+      short: "Q3",
       long: ""
     },
     scores: {

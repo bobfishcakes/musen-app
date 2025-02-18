@@ -6,14 +6,22 @@ import { statusMap } from '../../components/GameCard';
 
 const Stream = () => {
   const currentGame = mockNbaGames[0];
-  const viewerCount = 1234;
-  
+  const viewerCount = 12;
+  const streamTitle = 'Mavs Money Enjoyers';
+  const [isLiked, setIsLiked] = React.useState(false);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>{currentGame.league.name}</Text>
+          <Text style={styles.title}>{streamTitle}</Text>
           <View style={styles.viewerCount}>
+            <Ionicons 
+              name={isLiked ? "heart" : "heart-outline"} 
+              size={24} 
+              color={isLiked ? "#FF4444" : "#333"}
+              onPress={() => setIsLiked(!isLiked)}
+            />
             <Ionicons name="headset" size={24} color="#333" />
             <Text style={styles.countText}>{viewerCount}</Text>
           </View>
@@ -24,7 +32,7 @@ const Stream = () => {
             source={{ uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png' }}
             style={styles.profilePic}
           />
-          <Text style={styles.username}>John Player</Text>
+          <Text style={styles.username}>bobfishcakes</Text>
         </View>
 
         <View style={styles.scoreBoard}>
@@ -126,7 +134,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 24,
+    padding: 20,
     marginTop: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
@@ -141,7 +149,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
+    gap: 12,
   },
   score: {
     fontSize: 64,
@@ -152,7 +160,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
-    marginTop: 32,
+    marginTop: 20,
     paddingHorizontal: 20,
   },
   teamContainer: {
@@ -173,7 +181,6 @@ const styles = StyleSheet.create({
   },
   gameStatus: {
     fontSize: 14,
-    color: '#FF4444',
     textAlign: 'center',
   },
   controls: {
@@ -206,7 +213,6 @@ const styles = StyleSheet.create({
   statusSection: {
     alignItems: 'center',
     minWidth: 100,
-    gap: 12,
   }
 });
 
