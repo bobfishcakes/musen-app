@@ -1,4 +1,5 @@
 import { Image, StyleSheet, Platform, ScrollView, FlatList } from 'react-native';
+import ScoreBoard from '@/components/ScoreBoard';
 import { mockNflGames, mockNbaGames } from '../mockData';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -25,24 +26,14 @@ export default function HomeScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="subtitle">Popular Streams</ThemedText>
       </ThemedView>
+
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         directionalLockEnabled={true}
         alwaysBounceVertical={false}
       >
-        <FlatList
-          contentContainerStyle={styles.gamesContainer}
-          numColumns={Math.ceil(mockNflGames.length / 2)}
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-          data={mockNflGames}
-          directionalLockEnabled={true}
-          alwaysBounceVertical={false}
-          renderItem={({ item }) => (
-            <GameCard key={item.id} game={item} />
-          )}
-        />
+      <ScoreBoard game={mockNbaGames[0]} />
       </ScrollView>
       
       <ThemedView style={styles.titleContainer}>
