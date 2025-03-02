@@ -35,7 +35,7 @@ const Stream = () => {
           <Text style={styles.username}>bobfishcakes</Text>
         </View>
 
-        <ScoreBoard game={currentGame} />
+        <ScoreBoard game={currentGame} showControls={true}/>
 
         {/* Placeholder section */}
         <View style={styles.placeholderSection}>

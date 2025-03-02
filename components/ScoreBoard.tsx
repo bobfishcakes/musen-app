@@ -19,9 +19,10 @@ type GameType = {
 
 interface ScoreBoardProps {
   game: GameType;
+  showControls?: boolean;
 }
 
-const ScoreBoard = ({ game }: ScoreBoardProps) => {
+const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
   return (
     <View style={styles.scoreBoard}>
       <View style={styles.scoreContainer}>
@@ -29,10 +30,12 @@ const ScoreBoard = ({ game }: ScoreBoardProps) => {
           <Text style={styles.score}>{game.scores?.home.total}</Text>
           <View style={styles.statusSection}>
             <Text style={styles.gameStatus}>{statusMap[game.status.short]}</Text>
-            <View style={styles.controls}>
-              <Ionicons name="volume-mute" size={24} color="#333" />
-              <Ionicons name="bluetooth" size={24} color="#333" />
-            </View>
+            {showControls && (
+              <View style={styles.controls}>
+                <Ionicons name="volume-mute" size={24} color="#333" />
+                <Ionicons name="bluetooth" size={24} color="#333" />
+              </View>
+            )}
           </View>
           <Text style={styles.score}>{game.scores?.away.total}</Text>
         </View>

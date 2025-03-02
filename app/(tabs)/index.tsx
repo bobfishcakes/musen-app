@@ -33,7 +33,7 @@ export default function HomeScreen() {
         directionalLockEnabled={true}
         alwaysBounceVertical={false}
       >
-      <ScoreBoard game={mockNbaGames[0]} />
+      <ScoreBoard game={mockNbaGames[0]} showControls={false}/>
       </ScrollView>
       
       <ThemedView style={styles.titleContainer}>
