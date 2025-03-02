@@ -28,12 +28,12 @@ export interface Game {
     date: GameDate
   }
   status: {
-    long: string;
-    short: string;
-  };
+    long: string
+    short: string
+  }
   scores?: Scores
-  streamers?: number;
-  listeners?: number;
+  streamers?: number
+  listeners?: number
 }
 
 export interface Scores {

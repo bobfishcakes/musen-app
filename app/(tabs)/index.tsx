@@ -6,6 +6,7 @@ import { ThemedView } from '@/components/ThemedView';
 import GameCard from '@/components/GameCard';
 import MainScrollView from '@/components/MainScrollView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   return (
@@ -13,7 +14,7 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: '#3A5241', dark: '#3A5241' }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={0}
           color="#50775B"
           name="radio"
           style={styles.headerImage}

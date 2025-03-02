@@ -1,5 +1,3 @@
-
-
 // export const StyledCard = styled.TouchableOpacity`
 //   background-color: #1e1e1e;
 //   border-radius: 8px;

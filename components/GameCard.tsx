@@ -1,33 +1,33 @@
-import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
-import { Game } from '../constants/Interfaces';
+import React from 'react'
+import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native'
+import { Game } from '../constants/Interfaces'
 
 interface GameCardProps {
-  game: Game;
+  game: Game
 }
 
 export const statusMap: { [key: string]: string } = {
-    NS: "Not Started",
-    Q1: "1st Quarter",
-    Q2: "2nd Quarter",
-    Q3: "3rd Quarter",
-    Q4: "4th Quarter",
-    OT: "Overtime",
-    BT: "Break",
-    HT: "Halftime",
-    FT: "Final",
-    AOT: "After Over Time",
-    POST: "Game Postponed",
-    CANC: "Game Cancelled",
-    SUSP: "Game Suspended",
-    AWD: "Game Awarded",
-    ABD: "Game Abandoned"
-  };
+  NS: 'Not Started',
+  Q1: '1st Quarter',
+  Q2: '2nd Quarter',
+  Q3: '3rd Quarter',
+  Q4: '4th Quarter',
+  OT: 'Overtime',
+  BT: 'Break',
+  HT: 'Halftime',
+  FT: 'Final',
+  AOT: 'After Over Time',
+  POST: 'Game Postponed',
+  CANC: 'Game Cancelled',
+  SUSP: 'Game Suspended',
+  AWD: 'Game Awarded',
+  ABD: 'Game Abandoned',
+}
 
 const GameCard = ({ game }: GameCardProps) => {
-  const homeScore = game.scores?.home.total ?? '0';
-  const awayScore = game.scores?.away.total ?? '0';
-  const status = game.status? statusMap[game.status.short] : 'N/A';
+  const homeScore = game.scores?.home.total ?? '0'
+  const awayScore = game.scores?.away.total ?? '0'
+  const status = game.status ? statusMap[game.status.short] : 'N/A'
 
   return (
     <View>
@@ -35,18 +35,20 @@ const GameCard = ({ game }: GameCardProps) => {
         <View style={styles.gameContainer}>
           <View style={styles.teamContainer}>
             <View style={styles.teamColumn}>
-              <Image 
+              <Image
                 source={{ uri: game.teams.away.logo }}
                 style={styles.teamLogo}
                 resizeMode="contain"
               />
             </View>
             <View style={styles.centerColumn}>
-              <Text style={styles.scoreText}>{`${awayScore}-${homeScore}`}</Text>
+              <Text
+                style={styles.scoreText}
+              >{`${awayScore}-${homeScore}`}</Text>
               <Text style={styles.statusText}>{`${status}`}</Text>
             </View>
             <View style={styles.teamColumn}>
-              <Image 
+              <Image
                 source={{ uri: game.teams.home.logo }}
                 style={styles.teamLogo}
                 resizeMode="contain"
@@ -56,8 +58,8 @@ const GameCard = ({ game }: GameCardProps) => {
         </View>
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   card: {
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   scoreText: {
-    fontSize: 20,  // Increase from current size
+    fontSize: 20, // Increase from current size
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -105,6 +107,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
-});
+})
 
-export default GameCard;
+export default GameCard

@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { mockNbaGames } from '../mockData';
-import ScoreBoard from '../../components/ScoreBoard';
+import React from 'react'
+import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { mockNbaGames } from '../mockData'
+import ScoreBoard from '../../components/ScoreBoard'
 
 const Stream = () => {
-  const currentGame = mockNbaGames[0];
-  const viewerCount = 12;
-  const streamTitle = 'Mavs Money Enjoyers';
-  const [isLiked, setIsLiked] = React.useState(false);
+  const currentGame = mockNbaGames[0]
+  const viewerCount = 12
+  const streamTitle = 'Mavs Money Enjoyers'
+  const [isLiked, setIsLiked] = React.useState(false)
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -16,10 +16,10 @@ const Stream = () => {
         <View style={styles.header}>
           <Text style={styles.title}>{streamTitle}</Text>
           <View style={styles.viewerCount}>
-            <Ionicons 
-              name={isLiked ? "heart" : "heart-outline"} 
-              size={24} 
-              color={isLiked ? "#FF4444" : "#333"}
+            <Ionicons
+              name={isLiked ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isLiked ? '#FF4444' : '#333'}
               onPress={() => setIsLiked(!isLiked)}
             />
             <Ionicons name="headset" size={24} color="#333" />
@@ -28,14 +28,16 @@ const Stream = () => {
         </View>
 
         <View style={styles.profile}>
-          <Image 
-            source={{ uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png' }}
+          <Image
+            source={{
+              uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
+            }}
             style={styles.profilePic}
           />
           <Text style={styles.username}>bobfishcakes</Text>
         </View>
 
-        <ScoreBoard game={currentGame} showControls={true}/>
+        <ScoreBoard game={currentGame} showControls={true} />
 
         {/* Placeholder section */}
         <View style={styles.placeholderSection}>
@@ -45,8 +47,8 @@ const Stream = () => {
         </View>
       </View>
     </SafeAreaView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   // Remove scoreboard-related styles and keep only the styles needed for Stream component
@@ -112,6 +114,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
   },
-});
+})
 
-export default Stream;
+export default Stream

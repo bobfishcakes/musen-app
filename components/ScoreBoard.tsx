@@ -1,25 +1,25 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { statusMap } from './GameCard';
+import React from 'react'
+import { View, Text, Image, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { statusMap } from './GameCard'
 
 type GameType = {
   scores?: {
-    home: { total: number };
-    away: { total: number };
-  };
+    home: { total: number }
+    away: { total: number }
+  }
   status: {
-    short: string;
-  };
+    short: string
+  }
   teams: {
-    home: { logo: string; name: string };
-    away: { logo: string; name: string };
-  };
-};
+    home: { logo: string; name: string }
+    away: { logo: string; name: string }
+  }
+}
 
 interface ScoreBoardProps {
-  game: GameType;
-  showControls?: boolean;
+  game: GameType
+  showControls?: boolean
 }
 
 const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
@@ -29,7 +29,9 @@ const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
         <View style={styles.scoreRow}>
           <Text style={styles.score}>{game.scores?.home.total}</Text>
           <View style={styles.statusSection}>
-            <Text style={styles.gameStatus}>{statusMap[game.status.short]}</Text>
+            <Text style={styles.gameStatus}>
+              {statusMap[game.status.short]}
+            </Text>
             {showControls && (
               <View style={styles.controls}>
                 <Ionicons name="volume-mute" size={24} color="#333" />
@@ -43,7 +45,7 @@ const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
 
       <View style={styles.teamsRow}>
         <View style={styles.teamContainer}>
-          <Image 
+          <Image
             source={{ uri: game.teams.home.logo }}
             style={styles.teamLogo}
           />
@@ -51,7 +53,7 @@ const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
         </View>
 
         <View style={styles.teamContainer}>
-          <Image 
+          <Image
             source={{ uri: game.teams.away.logo }}
             style={styles.teamLogo}
           />
@@ -59,8 +61,8 @@ const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
         </View>
       </View>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   scoreBoard: {
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginTop: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
   statusSection: {
     alignItems: 'center',
     minWidth: 100,
-  }
-});
+  },
+})
 
-export default ScoreBoard;
+export default ScoreBoard
