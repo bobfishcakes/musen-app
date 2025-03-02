@@ -21,6 +21,29 @@ export default function HomeScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Live Now</ThemedText>
       </ThemedView>
+
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="subtitle">Popular Streams</ThemedText>
+      </ThemedView>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        directionalLockEnabled={true}
+        alwaysBounceVertical={false}
+      >
+        <FlatList
+          contentContainerStyle={styles.gamesContainer}
+          numColumns={Math.ceil(mockNflGames.length / 2)}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          data={mockNflGames}
+          directionalLockEnabled={true}
+          alwaysBounceVertical={false}
+          renderItem={({ item }) => (
+            <GameCard key={item.id} game={item} />
+          )}
+        />
+      </ScrollView>
       
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="subtitle">NFL</ThemedText>
