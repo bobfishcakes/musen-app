@@ -1,114 +1,132 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import {
-  RTCPeerConnection,
-  mediaDevices,
-  MediaStream as RCTMediaStream,
-} from 'react-native-webrtc';
-
-// Extend the MediaStream type to include optional event properties
-interface CustomMediaStream extends RCTMediaStream {
-  onaddtrack?: ((ev: any) => void) | null;
-  onremovetrack?: ((ev: any) => void) | null;
-}
+import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { RTCPeerConnection, mediaDevices } from 'react-native-webrtc';
 
 const configuration = {
-  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    // You can add TURN servers here if needed:
+    // { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' },
+  ],
 };
 
 const WebRTCClient: React.FC = () => {
-  const [localStream, setLocalStream] = useState<CustomMediaStream | null>(null);
-  const [remoteStream, setRemoteStream] = useState<CustomMediaStream | null>(null);
-  const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
+  const [localStream, setLocalStream] = useState<any>(null);
+  const [remoteStream, setRemoteStream] = useState<any>(null);
+  const [pc, setPc] = useState<RTCPeerConnection | null>(null);
+  const [offerSDP, setOfferSDP] = useState<any>(null);
+  const [answerSDP, setAnswerSDP] = useState<any>(null);
 
-  // Request local audio stream on component mount
+  // Get local audio stream on mount
   useEffect(() => {
-    const getLocalAudioStream = async () => {
+    const getLocalStream = async () => {
       try {
         const stream = await mediaDevices.getUserMedia({
           audio: true,
           video: false,
         });
-        setLocalStream(stream as CustomMediaStream);
+        setLocalStream(stream);
         console.log('Local audio stream acquired');
       } catch (error) {
-        console.error('Failed to get local audio stream:', error);
+        console.error('getUserMedia error: ', error);
       }
     };
+    getLocalStream();
 
-    getLocalAudioStream();
-
-    // Cleanup on unmount
+    // Cleanup when component unmounts
     return () => {
-      localStream?.getTracks().forEach((track) => track.stop());
+      localStream?.getTracks().forEach((track: any) => track.stop());
     };
   }, []);
 
-  // Create and configure the RTCPeerConnection
-  const createPeerConnection = (): RTCPeerConnection => {
-    const pc = new RTCPeerConnection(configuration);
+  // Create and configure RTCPeerConnection
+  const createPeerConnection = () => {
+    const peerConnection = new RTCPeerConnection(configuration);
 
     // Add local audio tracks to the peer connection
     if (localStream) {
-      localStream.getTracks().forEach((track) => {
-        pc.addTrack(track, localStream);
+      localStream.getTracks().forEach((track: any) => {
+        peerConnection.addTrack(track, localStream);
       });
     }
 
-    // Use a cast to "any" to set the ICE candidate handler
-    (pc as any).onicecandidate = (event: any) => {
+    // Handle ICE candidate events
+    peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         console.log('New ICE candidate:', event.candidate);
-        // TODO: Send the candidate to the remote peer via your signaling server
+        // In a real application, send this candidate to the remote peer via your signaling server.
       }
     };
 
-    // Handle incoming remote audio tracks
-    (pc as any).ontrack = (event: any) => {
-      console.log('Received remote audio track:', event);
+    // When a remote track is received, set it as the remote stream
+    peerConnection.ontrack = (event) => {
+      console.log('Remote track received:', event);
       if (event.streams && event.streams[0]) {
-        setRemoteStream(event.streams[0] as CustomMediaStream);
+        setRemoteStream(event.streams[0]);
       }
     };
 
-    setPeerConnection(pc);
-    return pc;
+    setPc(peerConnection);
+    return peerConnection;
   };
 
-  // Start the call by creating an SDP offer
+  // Caller: Create an SDP offer
   const startCall = async () => {
-    const pc = peerConnection || createPeerConnection();
+    const peerConnection = pc || createPeerConnection();
     try {
-      const offer = await pc.createOffer({}); // Passing an empty options object
-      await pc.setLocalDescription(offer);
-      console.log('SDP Offer created:', offer);
-      // --- Loopback simulation ---
-      // Instead of waiting for a remote answer via signaling,
-      // immediately set the remote stream to the local stream.
-      if (localStream) {
-        setRemoteStream(localStream as CustomMediaStream);
-        console.log('Simulated remote stream set from local stream');
-      }
-      // ---------------------------
-      // In a real scenario, you'd send the offer to a remote peer
-      // and wait for an answer and ICE candidates.
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      console.log('Offer created:', offer);
+      setOfferSDP(offer);
+      // For testing, display the offer so you can manually copy it to the callee
+      Alert.alert('SDP Offer', JSON.stringify(offer, null, 2));
     } catch (error) {
-      console.error('Error creating offer:', error);
+      console.error('Error starting call:', error);
+    }
+  };
+
+  // Callee: Set remote description and create an answer
+  const answerCall = async () => {
+    if (!pc) createPeerConnection();
+
+    // In a real scenario, the offer would come from your signaling server.
+    // For testing, we assume that you’ve copied the offer from the caller.
+    if (offerSDP) {
+      try {
+        await pc!.setRemoteDescription(offerSDP);
+        const answer = await pc!.createAnswer();
+        await pc!.setLocalDescription(answer);
+        console.log('Answer created:', answer);
+        setAnswerSDP(answer);
+        // For testing, display the answer so you can send it back to the caller
+        Alert.alert('SDP Answer', JSON.stringify(answer, null, 2));
+      } catch (error) {
+        console.error('Error answering call:', error);
+      }
+    } else {
+      Alert.alert('No Offer', 'No SDP offer available. Start a call from the caller first.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Audio-Only WebRTC Client</Text>
-      <View style={styles.infoContainer}>
-        <Text style={styles.infoText}>
-          {localStream ? 'Local audio is active.' : 'Acquiring local audio...'}
-        </Text>
-        <Text style={styles.infoText}>
-          {remoteStream ? 'Remote audio connected.' : 'Waiting for remote audio...'}
-        </Text>
+      <Text style={styles.header}>WebRTC Audio Connection</Text>
+      <Text style={styles.status}>
+        {localStream ? 'Local audio is active' : 'Acquiring local audio...'}
+      </Text>
+      <Text style={styles.status}>
+        {remoteStream ? 'Remote audio connected' : 'Waiting for remote audio...'}
+      </Text>
+      <View style={styles.buttonContainer}>
+        <Button title="Start Call (Caller)" onPress={startCall} />
+        <Button title="Answer Call (Callee)" onPress={answerCall} />
       </View>
-      <Button title="Start Call" onPress={startCall} />
+      <Text style={styles.info}>
+        {offerSDP ? 'Offer SDP: ' + JSON.stringify(offerSDP, null, 2) : ''}
+      </Text>
+      <Text style={styles.info}>
+        {answerSDP ? 'Answer SDP: ' + JSON.stringify(answerSDP, null, 2) : ''}
+      </Text>
     </View>
   );
 };
@@ -124,16 +142,24 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
+    fontSize: 24,
     color: '#fff',
-    fontSize: 20,
     marginBottom: 20,
   },
-  infoContainer: {
-    marginBottom: 20,
-  },
-  infoText: {
-    color: '#fff',
+  status: {
     fontSize: 16,
-    marginBottom: 10,
+    color: '#fff',
+    marginVertical: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginVertical: 20,
+  },
+  info: {
+    color: '#fff',
+    fontSize: 12,
+    marginVertical: 5,
   },
 });
