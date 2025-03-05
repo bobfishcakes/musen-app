@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.musen"
+      "bundleIdentifier": "com.musen",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +36,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "@config-plugins/react-native-webrtc"
     ],
     "experiments": {
       "typedRoutes": true
@@ -43,7 +47,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "ec807d45-ffe8-42c2-9e9b-70b1a0bc5f59"
+        "projectId": "323ef88c-2f52-4410-bf60-85e7b8fa5e50"
       }
     }
   }
