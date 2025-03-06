@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert, ScrollView } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { RTCPeerConnection, mediaDevices } from 'react-native-webrtc';
 
 const configuration = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    // You can add TURN servers here if needed:
+    // Optionally add TURN servers if needed:
     // { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' },
   ],
 };
@@ -79,7 +80,7 @@ const WebRTCClient: React.FC = () => {
       console.log('Offer created:', offer);
       setOfferSDP(offer);
       // For testing, display the offer so you can manually copy it to the callee
-      Alert.alert('SDP Offer', JSON.stringify(offer, null, 2));
+      Alert.alert('SDP Offer', 'Offer generated. Use the "Copy Offer" button to copy it.');
     } catch (error) {
       console.error('Error starting call:', error);
     }
@@ -99,7 +100,7 @@ const WebRTCClient: React.FC = () => {
         console.log('Answer created:', answer);
         setAnswerSDP(answer);
         // For testing, display the answer so you can send it back to the caller
-        Alert.alert('SDP Answer', JSON.stringify(answer, null, 2));
+        Alert.alert('SDP Answer', 'Answer generated. Use the "Copy Answer" button to copy it.');
       } catch (error) {
         console.error('Error answering call:', error);
       }
@@ -108,8 +109,14 @@ const WebRTCClient: React.FC = () => {
     }
   };
 
+  // Function to copy text to clipboard and alert user
+  const copyToClipboard = (text: string, label: string) => {
+    Clipboard.setString(text);
+    Alert.alert(label, `${label} copied to clipboard.`);
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>WebRTC Audio Connection</Text>
       <Text style={styles.status}>
         {localStream ? 'Local audio is active' : 'Acquiring local audio...'}
@@ -121,13 +128,29 @@ const WebRTCClient: React.FC = () => {
         <Button title="Start Call (Caller)" onPress={startCall} />
         <Button title="Answer Call (Callee)" onPress={answerCall} />
       </View>
-      <Text style={styles.info}>
-        {offerSDP ? 'Offer SDP: ' + JSON.stringify(offerSDP, null, 2) : ''}
-      </Text>
-      <Text style={styles.info}>
-        {answerSDP ? 'Answer SDP: ' + JSON.stringify(answerSDP, null, 2) : ''}
-      </Text>
-    </View>
+
+      {offerSDP && (
+        <View style={styles.sdpContainer}>
+          <Text style={styles.sdpLabel}>SDP Offer:</Text>
+          <Text style={styles.sdpText}>{JSON.stringify(offerSDP, null, 2)}</Text>
+          <Button
+            title="Copy Offer"
+            onPress={() => copyToClipboard(JSON.stringify(offerSDP, null, 2), 'SDP Offer')}
+          />
+        </View>
+      )}
+
+      {answerSDP && (
+        <View style={styles.sdpContainer}>
+          <Text style={styles.sdpLabel}>SDP Answer:</Text>
+          <Text style={styles.sdpText}>{JSON.stringify(answerSDP, null, 2)}</Text>
+          <Button
+            title="Copy Answer"
+            onPress={() => copyToClipboard(JSON.stringify(answerSDP, null, 2), 'SDP Answer')}
+          />
+        </View>
+      )}
+    </ScrollView>
   );
 };
 
@@ -135,11 +158,11 @@ export default WebRTCClient;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#000',
     alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
+    justifyContent: 'center',
   },
   header: {
     fontSize: 24,
@@ -157,9 +180,21 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 20,
   },
-  info: {
+  sdpContainer: {
+    width: '100%',
+    backgroundColor: '#222',
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
+  },
+  sdpLabel: {
     color: '#fff',
-    fontSize: 12,
-    marginVertical: 5,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  sdpText: {
+    color: '#ccc',
+    fontSize: 10,
+    marginBottom: 5,
   },
 });
