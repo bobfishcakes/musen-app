@@ -7,7 +7,6 @@ interface GameCardProps {
 }
 
 export const statusMap: { [key: string]: string } = {
-    NS: "Not Started",
     Q1: "1st Quarter",
     Q2: "2nd Quarter",
     Q3: "3rd Quarter",
@@ -22,12 +21,33 @@ export const statusMap: { [key: string]: string } = {
     SUSP: "Game Suspended",
     AWD: "Game Awarded",
     ABD: "Game Abandoned"
-  };
+};
 
 const GameCard = ({ game }: GameCardProps) => {
   const homeScore = game.scores?.home.total ?? '0';
   const awayScore = game.scores?.away.total ?? '0';
-  const status = game.status? statusMap[game.status.short] : 'N/A';
+
+  // Replace the simple status mapping with this function
+  const getStatus = () => {
+    if (!game.status) return 'N/A';
+
+    // For games that haven't started
+    if (game.status.short === 'NS') {
+      // Make sure we have the time
+      if (game.game?.date?.time) {
+        // Convert 24-hour time to 12-hour time
+        const [hours, minutes] = game.game.date.time.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        return `Starts at ${hour12}:${minutes} ${ampm}`;
+      }
+      return 'Not Started';
+    }
+
+    // For all other statuses, use the statusMap
+    return statusMap[game.status.short] || game.status.short;
+  };
 
   return (
     <View>
@@ -43,7 +63,7 @@ const GameCard = ({ game }: GameCardProps) => {
             </View>
             <View style={styles.centerColumn}>
               <Text style={styles.scoreText}>{`${awayScore}-${homeScore}`}</Text>
-              <Text style={styles.statusText}>{`${status}`}</Text>
+              <Text style={styles.statusText}>{getStatus()}</Text>
             </View>
             <View style={styles.teamColumn}>
               <Image 
@@ -58,7 +78,6 @@ const GameCard = ({ game }: GameCardProps) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   card: {
     paddingVertical: 25,
