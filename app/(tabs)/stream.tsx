@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { mockNbaGames } from '../mockData';
-import { statusMap } from '../../components/GameCard';
+import React from 'react'
+import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { mockNbaGames } from '../mockData'
+import ScoreBoard from '../../components/ScoreBoard'
 
 const Stream = () => {
-  const currentGame = mockNbaGames[0];
-  const viewerCount = 12;
-  const streamTitle = 'Mavs Money Enjoyers';
-  const [isLiked, setIsLiked] = React.useState(false);
+  const currentGame = mockNbaGames[0]
+  const viewerCount = 12
+  const streamTitle = 'Mavs Money Enjoyers'
+  const [isLiked, setIsLiked] = React.useState(false)
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -16,10 +16,10 @@ const Stream = () => {
         <View style={styles.header}>
           <Text style={styles.title}>{streamTitle}</Text>
           <View style={styles.viewerCount}>
-            <Ionicons 
-              name={isLiked ? "heart" : "heart-outline"} 
-              size={24} 
-              color={isLiked ? "#FF4444" : "#333"}
+            <Ionicons
+              name={isLiked ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isLiked ? '#FF4444' : '#333'}
               onPress={() => setIsLiked(!isLiked)}
             />
             <Ionicons name="headset" size={24} color="#333" />
@@ -28,46 +28,16 @@ const Stream = () => {
         </View>
 
         <View style={styles.profile}>
-          <Image 
-            source={{ uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png' }}
+          <Image
+            source={{
+              uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
+            }}
             style={styles.profilePic}
           />
           <Text style={styles.username}>bobfishcakes</Text>
         </View>
 
-        <View style={styles.scoreBoard}>
-          <View style={styles.scoreContainer}>
-            <View style={styles.scoreRow}>
-              <Text style={styles.score}>{currentGame.scores?.home.total}</Text>
-              <View style={styles.statusSection}>
-                <Text style={styles.gameStatus}>{statusMap[currentGame.status.short]}</Text>
-                <View style={styles.controls}>
-                  <Ionicons name="volume-mute" size={24} color="#333" />
-                  <Ionicons name="bluetooth" size={24} color="#333" />
-                </View>
-              </View>
-              <Text style={styles.score}>{currentGame.scores?.away.total}</Text>
-            </View>
-          </View>
-
-          <View style={styles.teamsRow}>
-            <View style={styles.teamContainer}>
-              <Image 
-                source={{ uri: currentGame.teams.home.logo }}
-                style={styles.teamLogo}
-              />
-              <Text style={styles.teamName}>{currentGame.teams.home.name}</Text>
-            </View>
-
-            <View style={styles.teamContainer}>
-              <Image 
-                source={{ uri: currentGame.teams.away.logo }}
-                style={styles.teamLogo}
-              />
-              <Text style={styles.teamName}>{currentGame.teams.away.name}</Text>
-            </View>
-          </View>
-        </View>
+        <ScoreBoard game={currentGame} showControls={true} />
 
         {/* Placeholder section */}
         <View style={styles.placeholderSection}>
@@ -77,26 +47,11 @@ const Stream = () => {
         </View>
       </View>
     </SafeAreaView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
-  // ... existing styles ...
-  
-  // New placeholder styles
-  placeholderSection: {
-    flex: 1,
-    padding: 16,
-    gap: 16,
-  },
-  placeholder: {
-    height: 80,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  
-  // Make sure all existing styles are included here
+  // Remove scoreboard-related styles and keep only the styles needed for Stream component
   safeArea: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -130,64 +85,6 @@ const styles = StyleSheet.create({
     color: '#333333',
     fontWeight: '500',
   },
-  scoreBoard: {
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  scoreContainer: {
-    alignItems: 'center',
-  },
-  scoreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  score: {
-    fontSize: 64,
-    fontWeight: '800',
-    color: '#333',
-  },
-  teamsRow: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  teamContainer: {
-    alignItems: 'center',
-    width: '40%',
-  },
-  teamLogo: {
-    width: 60,
-    height: 60,
-    resizeMode: 'contain',
-  },
-  teamName: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
-  },
-  gameStatus: {
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  controls: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 8,
-  },
   profile: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -198,7 +95,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#E0E0E0', // Fallback color while loading
+    backgroundColor: '#E0E0E0',
   },
   username: {
     marginLeft: 12,
@@ -206,14 +103,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
   },
-  statusContainer: {
-    minWidth: 100,
-    alignItems: 'center',
+  placeholderSection: {
+    flex: 1,
+    padding: 16,
+    gap: 16,
   },
-  statusSection: {
-    alignItems: 'center',
-    minWidth: 100,
-  }
-});
+  placeholder: {
+    height: 80,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+})
 
-export default Stream;
+export default Stream
