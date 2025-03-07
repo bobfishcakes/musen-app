@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
-import { Game } from '../constants/Interfaces';
+import React from 'react'
+import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native'
+import { Game } from '../constants/Interfaces'
 
 interface GameCardProps {
-  game: Game;
+  game: Game
 }
 
 export const statusMap: { [key: string]: string } = {
@@ -55,7 +55,7 @@ const GameCard = ({ game }: GameCardProps) => {
         <View style={styles.gameContainer}>
           <View style={styles.teamContainer}>
             <View style={styles.teamColumn}>
-              <Image 
+              <Image
                 source={{ uri: game.teams.away.logo }}
                 style={styles.teamLogo}
                 resizeMode="contain"
@@ -66,7 +66,7 @@ const GameCard = ({ game }: GameCardProps) => {
               <Text style={styles.statusText}>{getStatus()}</Text>
             </View>
             <View style={styles.teamColumn}>
-              <Image 
+              <Image
                 source={{ uri: game.teams.home.logo }}
                 style={styles.teamLogo}
                 resizeMode="contain"
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   card: {
     paddingVertical: 25,
     paddingHorizontal: 10,
-    backgroundColor: '#d3d3d3',
+    backgroundColor: 'white',
     borderRadius: 8,
     width: 300,
     marginHorizontal: 5,
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   scoreText: {
-    fontSize: 20,  // Increase from current size
+    fontSize: 20, // Increase from current size
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -124,6 +124,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
-});
+})
 
-export default GameCard;
+export default GameCard

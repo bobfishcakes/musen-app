@@ -1,12 +1,13 @@
 import { Image, StyleSheet, Platform, ScrollView, FlatList, ActivityIndicator } from 'react-native';
+import ScoreBoard from '@/components/ScoreBoard';
 import { mockNflGames } from '../mockData';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import GameCard from '@/components/GameCard';
 import MainScrollView from '@/components/MainScrollView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { useBasketballGames } from '/Users/atharvsonawane/musen-app/api/basketball/basketballHooks';
-import { convertBasketballGame } from '/Users/atharvsonawane/musen-app/api/basketball/basketballTypes';
+import { useBasketballGames } from '@/api/basketball/basketballHooks';
+import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { format, addDays } from 'date-fns';
 
 export default function HomeScreen() {
@@ -38,7 +39,7 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: '#3A5241', dark: '#3A5241' }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={0}
           color="#50775B"
           name="radio"
           style={styles.headerImage}
@@ -47,6 +48,19 @@ export default function HomeScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Live Now</ThemedText>
       </ThemedView>
+
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="subtitle">Popular Streams</ThemedText>
+      </ThemedView>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        directionalLockEnabled={true}
+        alwaysBounceVertical={false}
+      >
+      <ScoreBoard game={mockNflGames[0]} showControls={false}/>
+      </ScrollView>
       
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="subtitle">NFL</ThemedText>
