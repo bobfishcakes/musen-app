@@ -1,41 +1,54 @@
 import React from 'react'
-import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, Image } from 'react-native'
 import { Game } from '../constants/Interfaces'
+import { ThemedText } from './ThemedText'
+import { LinearGradient } from 'expo-linear-gradient'
+import { getTeamColor } from '/Users/atharvsonawane/musen-app-latest/app/mockData'
 
 interface GameCardProps {
   game: Game
 }
 
 export const statusMap: { [key: string]: string } = {
-    Q1: "1st Quarter",
-    Q2: "2nd Quarter",
-    Q3: "3rd Quarter",
-    Q4: "4th Quarter",
-    OT: "Overtime",
-    BT: "Break",
-    HT: "Halftime",
-    FT: "Final",
-    AOT: "After Over Time",
-    POST: "Game Postponed",
-    CANC: "Game Cancelled",
-    SUSP: "Game Suspended",
-    AWD: "Game Awarded",
-    ABD: "Game Abandoned"
+  Q1: "1st Quarter",
+  Q2: "2nd Quarter",
+  Q3: "3rd Quarter",
+  Q4: "4th Quarter",
+  OT: "Overtime",
+  BT: "Break",
+  HT: "Halftime",
+  FT: "Final",
+  AOT: "After Over Time",
+  POST: "Game Postponed",
+  CANC: "Game Cancelled",
+  SUSP: "Game Suspended",
+  AWD: "Game Awarded",
+  ABD: "Game Abandoned"
 };
 
 const GameCard = ({ game }: GameCardProps) => {
   const homeScore = game.scores?.home.total ?? '0';
   const awayScore = game.scores?.away.total ?? '0';
+  
+  const homeColor = game.teams.home.primaryColor || getTeamColor(game.teams.home.name);
+  const awayColor = game.teams.away.primaryColor || getTeamColor(game.teams.away.name);
+  
+  const getContrastColor = (backgroundColor: string) => {
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  };
 
-  // Replace the simple status mapping with this function
+  const textColor = '#ffffff'; // Always white text for better contrast
+
   const getStatus = () => {
     if (!game.status) return 'N/A';
 
-    // For games that haven't started
     if (game.status.short === 'NS') {
-      // Make sure we have the time
       if (game.game?.date?.time) {
-        // Convert 24-hour time to 12-hour time
         const [hours, minutes] = game.game.date.time.split(':');
         const hour = parseInt(hours);
         const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -45,32 +58,49 @@ const GameCard = ({ game }: GameCardProps) => {
       return 'Not Started';
     }
 
-    // For all other statuses, use the statusMap
     return statusMap[game.status.short] || game.status.short;
   };
 
   return (
-    <View>
-      <TouchableOpacity style={styles.card}>
-        <View style={styles.gameContainer}>
-          <View style={styles.teamContainer}>
-            <View style={styles.teamColumn}>
-              <Image
-                source={{ uri: game.teams.away.logo }}
-                style={styles.teamLogo}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.centerColumn}>
-              <Text style={styles.scoreText}>{`${awayScore}-${homeScore}`}</Text>
-              <Text style={styles.statusText}>{getStatus()}</Text>
-            </View>
-            <View style={styles.teamColumn}>
-              <Image
-                source={{ uri: game.teams.home.logo }}
-                style={styles.teamLogo}
-                resizeMode="contain"
-              />
+    <View style={styles.cardWrapper}>
+      <TouchableOpacity>
+        <View style={styles.card}>
+          <LinearGradient
+            colors={[awayColor, homeColor]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={styles.gameContainer}>
+            <View style={styles.teamContainer}>
+              <View style={styles.teamColumn}>
+                <Image
+                  source={{ uri: game.teams.away.logo }}
+                  style={styles.teamLogo}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.centerColumn}>
+              <ThemedText 
+  type="subtitle" 
+  style={[styles.scoreText, { color: '#000000' }]} // Changed to black
+>
+  {`${awayScore} - ${homeScore}`}
+</ThemedText>
+<ThemedText 
+  type="defaultSemiBold" 
+  style={[styles.statusText, { color: '#203024' }]} // Changed to green
+>
+  {getStatus()}
+</ThemedText>
+              </View>
+              <View style={styles.teamColumn}>
+                <Image
+                  source={{ uri: game.teams.home.logo }}
+                  style={styles.teamLogo}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
           </View>
         </View>
@@ -78,22 +108,34 @@ const GameCard = ({ game }: GameCardProps) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
+  cardWrapper: {
+    margin: 5,
+  },
   card: {
-    paddingVertical: 25,
-    paddingHorizontal: 10,
-    backgroundColor: 'white',
-    borderRadius: 8,
+    height: 120,
     width: 300,
-    marginHorizontal: 5,
+    borderRadius: 8,
+    overflow: 'hidden',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   gameContainer: {
-    alignItems: 'center',
+    flex: 1,
+    padding: 15,
     justifyContent: 'center',
   },
   teamContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   teamColumn: {
     flex: 1,
@@ -101,29 +143,18 @@ const styles = StyleSheet.create({
   },
   centerColumn: {
     alignItems: 'center',
-    paddingHorizontal: 5,
-  },
-  innerText: {
-    color: 'black',
-    fontSize: 14,
-    marginHorizontal: 2,
-    textAlign: 'center',
+    paddingHorizontal: 10,
   },
   scoreText: {
-    fontSize: 20, // Increase from current size
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   statusText: {
-    color: '#50775B',
-    fontSize: 14,
-    fontWeight: 'bold',
     marginTop: 8,
   },
   teamLogo: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
   },
-})
+});
 
-export default GameCard
+export default GameCard;

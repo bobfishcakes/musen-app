@@ -14,7 +14,14 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'InstrumentSans-Regular': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-Regular.ttf'),
+    'InstrumentSans-Medium': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-Medium.ttf'),
+    'InstrumentSans-SemiBold': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-SemiBold.ttf'),
+    'InstrumentSans-Bold': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-Bold.ttf'),
+    'InstrumentSans-Italic': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-Italic.ttf'),
+    'InstrumentSans-MediumItalic': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-MediumItalic.ttf'),
+    'InstrumentSans-SemiBoldItalic': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-SemiBoldItalic.ttf'),
+    'InstrumentSans-BoldItalic': require('../assets/fonts/Instrument_Sans/InstrumentSans_Condensed-BoldItalic.ttf'),
   });
 
   useEffect(() => {

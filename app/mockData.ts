@@ -1,5 +1,38 @@
 import { Game } from '../constants/Interfaces';
 
+export const teamColors: { [key: string]: string } = {
+  "Baltimore Ravens": "#ADA6CC", // 60% tinted purple
+  "Las Vegas Raiders": "#999999", // 60% tinted black
+  "Jacksonville Jaguars": "#99C6CC", // 60% tinted teal
+  "New England Patriots": "#99A6B3", // 60% tinted navy
+  "New York Giants": "#9DA6CC", // 60% tinted blue
+  "Tennessee Titans": "#9EA6B3", // 60% tinted navy
+  "Detroit Lions": "#99CCE6", // 60% tinted blue
+  "Atlanta Falcons": "#DDA6A6", // 60% tinted red
+  "Cleveland Browns": "#B39986", // 60% tinted brown
+  "Cincinnati Bengals": "#FDC0A6", // 60% tinted orange
+};
+
+// Helper function to get team color
+export const getTeamColor = (teamName: string): string => {
+  return teamColors[teamName] || '#000000';
+};
+
+export const enhanceGameWithColors = (game: Game): Game => {
+  return {
+    ...game,
+    teams: {
+      home: {
+        ...game.teams.home,
+        primaryColor: getTeamColor(game.teams.home.name)
+      },
+      away: {
+        ...game.teams.away,
+        primaryColor: getTeamColor(game.teams.away.name)
+      }
+    }
+  };
+};
 
 export const mockNcaaFootballGames: Game[] = [
   {
@@ -209,7 +242,7 @@ export const mockNflGames: Game[] = [
       away: { total: 23 }
     }
   }
-];
+].map(enhanceGameWithColors);
 
 export const mockNbaGames: Game[] = [
   {

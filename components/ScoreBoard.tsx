@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text, Image, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { statusMap } from './GameCard'
+import { ThemedText } from './ThemedText'
 
 type GameType = {
   scores?: {
@@ -29,9 +30,9 @@ const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
         <View style={styles.scoreRow}>
           <Text style={styles.score}>{game.scores?.home.total}</Text>
           <View style={styles.statusSection}>
-            <Text style={styles.gameStatus}>
-              {statusMap[game.status.short]}
-            </Text>
+          <ThemedText style={styles.gameStatus} type="default">
+            {statusMap[game.status.short]}
+          </ThemedText>
             {showControls && (
               <View style={styles.controls}>
                 <Ionicons name="volume-mute" size={24} color="#333" />
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
     marginTop: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
   },
   teamContainer: {
     alignItems: 'center',
@@ -109,13 +110,13 @@ const styles = StyleSheet.create({
   },
   teamName: {
     marginTop: 8,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '500',
     color: '#333',
     textAlign: 'center',
   },
   gameStatus: {
-    fontSize: 14,
+    fontSize: 16,
     textAlign: 'center',
   },
   controls: {
