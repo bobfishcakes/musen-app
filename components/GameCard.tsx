@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Image } from 'react-native'
 import { Game } from '../constants/Interfaces'
 import { ThemedText } from './ThemedText'
 import { LinearGradient } from 'expo-linear-gradient'
-import { getTeamColor } from '/Users/atharvsonawane/musen-app-latest/app/mockData'
+import { getTeamColor } from '../app/mockData'
 
 interface GameCardProps {
   game: Game

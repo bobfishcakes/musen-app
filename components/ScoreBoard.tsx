@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { statusMap } from './GameCard'
 import { ThemedText } from './ThemedText'
 import { LinearGradient } from 'expo-linear-gradient'
-import { getTeamColor } from '/Users/atharvsonawane/musen-app-latest/app/mockData'
+import { getTeamColor } from '../app/mockData'
 import { Svg, SvgUri } from 'react-native-svg'
 
 type GameType = {

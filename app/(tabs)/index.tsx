@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   section: {
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    backgroundColor: 'rgba(0, 0, 0, 0.00)',
     marginBottom: 16,
     padding: 16,
     width: '100%',
