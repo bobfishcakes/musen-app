@@ -50,3 +50,11 @@ export interface Score {
   quarter_4?: number
   overtime?: number
 }
+
+export interface Stream {
+  id: string
+  title: string
+  streamer: string
+  game: Game
+  listeners: number
+}

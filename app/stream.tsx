@@ -1,20 +1,30 @@
 import React from 'react'
 import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { mockNbaGames } from '../mockData'
-import ScoreBoard from '../../components/ScoreBoard'
+import { mockNbaGames } from './mockData'
+import ScoreBoard from '../components/ScoreBoard'
+import { useActiveStream } from '../hooks/useActiveStream'
 
 const Stream = () => {
-  const currentGame = mockNbaGames[0]
-  const viewerCount = 12
-  const streamTitle = 'Mavs Money Enjoyers'
+  const { activeStream } = useActiveStream()
+  
   const [isLiked, setIsLiked] = React.useState(false)
+
+  if (!activeStream) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>{streamTitle}</Text>
+          <Text style={styles.title}>{activeStream.title}</Text>
           <View style={styles.viewerCount}>
             <Ionicons
               name={isLiked ? 'heart' : 'heart-outline'}
@@ -23,7 +33,7 @@ const Stream = () => {
               onPress={() => setIsLiked(!isLiked)}
             />
             <Ionicons name="headset" size={24} color="#333" />
-            <Text style={styles.countText}>{viewerCount}</Text>
+            <Text style={styles.countText}>{activeStream.listeners}</Text>
           </View>
         </View>
 
@@ -37,7 +47,7 @@ const Stream = () => {
           <Text style={styles.username}>bobfishcakes</Text>
         </View>
 
-        <ScoreBoard game={currentGame} showControls={true} />
+        <ScoreBoard game={activeStream.game} showControls={true} />
 
         {/* Placeholder section */}
         <View style={styles.placeholderSection}>
