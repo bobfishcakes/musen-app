@@ -33,7 +33,7 @@ export function ThemedText({
 }
 const styles = StyleSheet.create({
   default: {
-    fontSize: 16,
+    fontSize: 20,
     lineHeight: 24,
     fontFamily: 'InstrumentSans-Regular',
   },
@@ -44,9 +44,9 @@ const styles = StyleSheet.create({
     fontFamily: 'InstrumentSans-SemiBold',
   },
   title: {
-    fontSize: 32,
+    fontSize: 64,
     fontWeight: 'bold',
-    lineHeight: 32,
+    lineHeight: 64,
     fontFamily: 'InstrumentSans-Bold',
   },
   subtitle: {

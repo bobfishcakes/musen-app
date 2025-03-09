@@ -9,14 +9,14 @@ import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 
 const styles = StyleSheet.create({
   header: {
-    height: Platform.OS === 'ios' ? 60 : 50, // Increased from 47/40 to 60/50
+    height: Platform.OS === 'ios' ? 60 : 50,
     width: '100%',
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     zIndex: 100,
-    backgroundColor: '#486B52', // Changed from #1C1C1E to #486B52
+    backgroundColor: '#324b39',
   },
   container: {
     flex: 1,
@@ -25,17 +25,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginVertical: 8,
-    marginTop: 24,
+    marginBottom: 16,
   },
+  section: {
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    marginBottom: 16,
+    padding: 16,
+    width: '100%',
+  },
+
+  scrollViewContent: {
+    paddingTop: Platform.OS === 'ios' ? 75 : 60, // Padding to show more background
+  },
+  
+  // Add these new styles
+  sectionTitle: {
+    marginBottom: 10, // More space between title and content
+    marginLeft: 12, // Align with cards
+  },
+  
   scoreboardScrollViewContainer: {
     alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 0,
+    paddingLeft: 8, // Match the title alignment
   },
+  
   gamesContainer: {
-    paddingVertical: 10,
     gap: 8,
+    paddingLeft: 8, // Match the title alignment
   },
 });
 
@@ -58,84 +75,81 @@ export default function HomeScreen() {
     })
     .map(convertBasketballGame) || [];
 
-  return (
-    <ThemedView style={styles.container}>
-      <Header />
-      <ScrollView
-        contentContainerStyle={{ 
-          padding: 16, 
-          paddingTop: Platform.OS === 'ios' ? 47 : 40 
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Popular</ThemedText>
-        </ThemedView>
-
+    return (
+      <ThemedView style={styles.container}>
+        <Header />
         <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          directionalLockEnabled={true}
-          alwaysBounceVertical={false}
-          contentContainerStyle={styles.scoreboardScrollViewContainer}
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}
         >
-          <ScoreBoard game={mockNflGames[0]} showControls={false}/>
-        </ScrollView>
-        
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">NFL</ThemedText>
-        </ThemedView>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          directionalLockEnabled={true}
-          alwaysBounceVertical={false}
-        >
-          <FlatList
-            contentContainerStyle={styles.gamesContainer}
-            numColumns={Math.ceil(mockNflGames.length / 2)}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            data={mockNflGames}
-            directionalLockEnabled={true}
-            alwaysBounceVertical={false}
-            renderItem={({ item }) => (
-              <GameCard key={item.id} game={item} />
-            )}
-          />
-        </ScrollView>
-
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">NBA</ThemedText>
-        </ThemedView>
-
-        {loading ? (
-          <ActivityIndicator size="large" color="#50775B" />
-        ) : error ? (
-          <ThemedText>Error loading NBA games</ThemedText>
-        ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            directionalLockEnabled={true}
-            alwaysBounceVertical={false}
-          >
-            <FlatList
-              contentContainerStyle={styles.gamesContainer}
-              numColumns={Math.ceil(nbaGames.length / 2)}
-              showsVerticalScrollIndicator={false}
+          {/* Popular Section */}
+          <ThemedView style={styles.section}>
+            <ThemedText type="subtitle" style={styles.sectionTitle}>Popular</ThemedText>
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
-              data={nbaGames}
               directionalLockEnabled={true}
               alwaysBounceVertical={false}
-              renderItem={({ item }) => (
-                <GameCard key={item.id} game={item} />
-              )}
-            />
-          </ScrollView>
-        )}
-      </ScrollView>
-    </ThemedView>
-  );
-}
+              contentContainerStyle={styles.scoreboardScrollViewContainer}
+            >
+              <ScoreBoard game={mockNflGames[2]} showControls={false}/>
+            </ScrollView>
+          </ThemedView>
+    
+          {/* NFL Section */}
+          <ThemedView style={styles.section}>
+            <ThemedText type="subtitle" style={styles.sectionTitle}>NFL</ThemedText>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              directionalLockEnabled={true}
+              alwaysBounceVertical={false}
+            >
+              <FlatList
+                contentContainerStyle={styles.gamesContainer}
+                numColumns={Math.ceil(mockNflGames.length / 2)}
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                data={mockNflGames}
+                directionalLockEnabled={true}
+                alwaysBounceVertical={false}
+                renderItem={({ item }) => (
+                  <GameCard key={item.id} game={item} />
+                )}
+              />
+            </ScrollView>
+          </ThemedView>
+    
+          {/* NBA Section */}
+          <ThemedView style={styles.section}>
+            <ThemedText type="subtitle" style={styles.sectionTitle}>NBA</ThemedText>
+            {loading ? (
+              <ActivityIndicator size="large" color="#50775B" />
+            ) : error ? (
+              <ThemedText>Error loading NBA games</ThemedText>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                directionalLockEnabled={true}
+                alwaysBounceVertical={false}
+              >
+                <FlatList
+                  contentContainerStyle={styles.gamesContainer}
+                  numColumns={Math.ceil(nbaGames.length / 2)}
+                  showsVerticalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={false}
+                  data={nbaGames}
+                  directionalLockEnabled={true}
+                  alwaysBounceVertical={false}
+                  renderItem={({ item }) => (
+                    <GameCard key={item.id} game={item} />
+                  )}
+                />
+              </ScrollView>
+            )}
+          </ThemedView>
+        </ScrollView>
+      </ThemedView>
+    );
+  }

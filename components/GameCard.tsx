@@ -42,8 +42,6 @@ const GameCard = ({ game }: GameCardProps) => {
     return brightness > 128 ? '#000000' : '#ffffff';
   };
 
-  const textColor = '#ffffff'; // Always white text for better contrast
-
   const getStatus = () => {
     if (!game.status) return 'N/A';
 
@@ -65,12 +63,14 @@ const GameCard = ({ game }: GameCardProps) => {
     <View style={styles.cardWrapper}>
       <TouchableOpacity>
         <View style={styles.card}>
-          <LinearGradient
-            colors={[awayColor, homeColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-          />
+        <>
+        <LinearGradient
+                colors={[awayColor, homeColor]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFillObject}
+              />
+      </>
           <View style={styles.gameContainer}>
             <View style={styles.teamContainer}>
               <View style={styles.teamColumn}>
@@ -89,7 +89,7 @@ const GameCard = ({ game }: GameCardProps) => {
 </ThemedText>
 <ThemedText 
   type="defaultSemiBold" 
-  style={[styles.statusText, { color: '#203024' }]} // Changed to green
+  style={[styles.statusText, { color: '#324b39' }]} // Changed to green
 >
   {getStatus()}
 </ThemedText>
