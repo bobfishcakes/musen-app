@@ -25,15 +25,9 @@ const Stream = () => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>{activeStream.title}</Text>
-          <View style={styles.viewerCount}>
-            <Ionicons
-              name={isLiked ? 'heart' : 'heart-outline'}
-              size={24}
-              color={isLiked ? '#FF4444' : '#333'}
-              onPress={() => setIsLiked(!isLiked)}
-            />
-            <Ionicons name="headset" size={24} color="#333" />
-            <Text style={styles.countText}>{activeStream.listeners}</Text>
+          <View style={styles.controls}>
+            <Ionicons name="bluetooth" size={24} color="#203024" />
+            <Ionicons name="volume-mute" size={24} color="#203024" />
           </View>
         </View>
 
@@ -46,11 +40,16 @@ const Stream = () => {
           />
           <Text style={styles.username}>bobfishcakes</Text>
          
-          <View style={styles.controls}>
-            <Ionicons name="volume-mute" size={24} color="#203024" />
-            <Ionicons name="bluetooth" size={24} color="#203024" />
+          <View style={styles.viewerCount}>
+            <Ionicons
+              name={isLiked ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isLiked ? '#FF4444' : '#333'}
+              onPress={() => setIsLiked(!isLiked)}
+            />
+            <Ionicons name="headset" size={24} color="#333" />
+            <Text style={styles.countText}>{activeStream.listeners}</Text>
           </View>
-            
         </View>
 
         <ScoreBoard game={activeStream.game}/>
@@ -95,6 +94,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 8,
+    marginLeft: 'auto', // This pushes the viewer count to the right
   },
   countText: {
     fontSize: 16,
@@ -135,7 +135,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
-    marginLeft: 'auto', // This pushes the controls to the right
   },
 })
 

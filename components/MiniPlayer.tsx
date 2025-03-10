@@ -2,6 +2,7 @@ import { useActiveStream } from '@/hooks/useActiveStream'
 import { useLastActiveStream } from '@/hooks/useLastActiveStream'
 import { useRouter } from 'expo-router'
 import { StyleSheet, TouchableOpacity, View, ViewProps, Text, Image } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 
 export const MiniPlayer = ({ style }: ViewProps) => {
     const router = useRouter()
@@ -21,12 +22,6 @@ export const MiniPlayer = ({ style }: ViewProps) => {
 
     return (
         <TouchableOpacity onPress={handlePress} activeOpacity={0.9} style={[styles.container, style]}>
-            <View style={styles.trackTitleContainer}>
-                <Text style={styles.trackTitle} numberOfLines={1}>
-                    {displayedStream.activeStream?.title}
-                </Text>
-            </View>
-
             <View style={styles.scoreContainer}>
                 <Image
                     source={{ uri: game.teams.away.logo }}
@@ -41,6 +36,16 @@ export const MiniPlayer = ({ style }: ViewProps) => {
                     style={styles.teamLogo}
                     resizeMode="contain"
                 />
+            </View>
+
+            <View style={styles.trackTitleContainer}>
+                <Text style={styles.trackTitle} numberOfLines={1}>
+                    {displayedStream.activeStream?.title}
+                </Text>
+            </View>
+
+            <View style={styles.controls}>
+                <Ionicons name="volume-mute" size={24} color="#203024" />
             </View>
         </TouchableOpacity>
     )
@@ -63,20 +68,18 @@ const styles = StyleSheet.create({
     trackTitleContainer: {
         flex: 1,
         overflow: 'hidden',
-        marginLeft: 10,
     },
     trackTitle: {
         fontSize: 18,
         fontWeight: '600',
-        paddingLeft: 10,
+        paddingLeft: 15,
         color: '#000000',
     },
     scoreContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         columnGap: 8,
-        marginRight: 16,
-        paddingLeft: 16,
+        paddingLeft: 10,
     },
     teamLogo: {
         width: 24,
@@ -87,5 +90,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: '#000000',
+    },
+    controls: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
     },
 })
