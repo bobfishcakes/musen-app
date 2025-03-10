@@ -6,11 +6,13 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { MiniPlayer } from '@/components/MiniPlayer';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    <>
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#41604a',
@@ -53,5 +55,15 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+
+    <MiniPlayer
+    style={{
+      position: 'absolute',
+      left: 8,
+      right: 8,
+      bottom: 0,
+    }}
+  />
+  </>
   );
 }

@@ -3,7 +3,7 @@ import { useLastActiveStream } from '@/hooks/useLastActiveStream'
 import { useRouter } from 'expo-router'
 import { StyleSheet, TouchableOpacity, View, ViewProps, Text, Image } from 'react-native'
 
-export const FloatingPlayer = ({ style }: ViewProps) => {
+export const MiniPlayer = ({ style }: ViewProps) => {
     const router = useRouter()
     const activeStream = useActiveStream()
     const lastActiveStream = useLastActiveStream()
@@ -51,12 +51,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#FFFFFF',
-        padding: 8,
+        padding: 10,
         borderRadius: 12,
         paddingVertical: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.5,
         shadowRadius: 4,
         elevation: 3,
     },

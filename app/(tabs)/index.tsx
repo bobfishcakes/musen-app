@@ -1,11 +1,14 @@
 import { StyleSheet, Platform, ScrollView, FlatList, ActivityIndicator } from 'react-native';
+import { router } from 'expo-router';
 import ScoreBoard from '@/components/ScoreBoard';
-import { mockNflGames } from '../mockData';
+import { mockNbaGames, mockNflGames } from '../mockData';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import GameCard from '@/components/GameCard';
 import { useBasketballGames } from '@/api/basketball/basketballHooks';
 import { convertBasketballGame } from '@/api/basketball/basketballTypes';
+import { useActiveStream } from '@/hooks/useActiveStream';
+import type { Game, Stream } from '@/constants/Interfaces';
 
 const styles = StyleSheet.create({
   header: {
@@ -36,6 +39,7 @@ const styles = StyleSheet.create({
 
   scrollViewContent: {
     paddingTop: Platform.OS === 'ios' ? 75 : 60, // Padding to show more background
+    paddingBottom: 75,
   },
   
   // Add these new styles
@@ -66,6 +70,7 @@ export default function HomeScreen() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
   const { games: basketballGames, loading, error } = useBasketballGames(formattedDate);
+  const { setActiveStream } = useActiveStream();
   
   const nbaGames = basketballGames
     ?.filter(game => {
@@ -74,6 +79,31 @@ export default function HomeScreen() {
       return liveStatuses.includes(game.status.short);
     })
     .map(convertBasketballGame) || [];
+
+    const handleGamePress = (game: Game) => {
+      const getLastWord = (teamName: string) => {
+        return teamName.split(' ').pop() || teamName;
+      };
+  
+      const newStream: Stream = {
+        id: `1`,
+        title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
+        streamer: 'bobfishcakes',
+        game: game,
+        listeners: 1
+      };
+      setActiveStream(newStream);
+      router.push('/stream');
+    };
+  
+    const renderGameCard = ({ item }: { item: any }) => (
+      <GameCard 
+        key={item.id} 
+        game={item} 
+        onPress={() => handleGamePress(item)}
+      />
+    );  
+
 
     return (
       <ThemedView style={styles.container}>
@@ -92,7 +122,7 @@ export default function HomeScreen() {
               alwaysBounceVertical={false}
               contentContainerStyle={styles.scoreboardScrollViewContainer}
             >
-              <ScoreBoard game={mockNflGames[2]} showControls={false}/>
+               <ScoreBoard game={mockNbaGames[0]} onPress={() => handleGamePress(mockNbaGames[0])} />
             </ScrollView>
           </ThemedView>
     
@@ -113,9 +143,7 @@ export default function HomeScreen() {
                 data={mockNflGames}
                 directionalLockEnabled={true}
                 alwaysBounceVertical={false}
-                renderItem={({ item }) => (
-                  <GameCard key={item.id} game={item} />
-                )}
+                renderItem={renderGameCard}
               />
             </ScrollView>
           </ThemedView>
@@ -142,9 +170,7 @@ export default function HomeScreen() {
                   data={nbaGames}
                   directionalLockEnabled={true}
                   alwaysBounceVertical={false}
-                  renderItem={({ item }) => (
-                    <GameCard key={item.id} game={item} />
-                  )}
+                  renderItem={renderGameCard}
                 />
               </ScrollView>
             )}

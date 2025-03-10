@@ -33,6 +33,8 @@ export const teamColors: { [key: string]: string } = {
   "Tampa Bay Buccaneers": "#DDA6A6", // 60% tinted red
   "Tennessee Titans": "#9EA6B3", // 60% tinted navy
   "Washington Commanders": "#B39986", // 60% tinted burgundy
+  "Los Angeles Lakers": "#B491E4", // 60% tinted purple 
+  "Dallas Mavericks": "#3B90D9", // 60% tinted blue
 };
 
 // Helper function to get team color

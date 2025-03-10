@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { mockNbaGames } from './mockData'
 import ScoreBoard from '../components/ScoreBoard'
-import { useActiveStream } from '../hooks/useActiveStream'
+import { useActiveStream } from '@/hooks/useActiveStream'
 
 const Stream = () => {
   const { activeStream } = useActiveStream()
@@ -45,9 +45,15 @@ const Stream = () => {
             style={styles.profilePic}
           />
           <Text style={styles.username}>bobfishcakes</Text>
+         
+          <View style={styles.controls}>
+            <Ionicons name="volume-mute" size={24} color="#203024" />
+            <Ionicons name="bluetooth" size={24} color="#203024" />
+          </View>
+            
         </View>
 
-        <ScoreBoard game={activeStream.game} showControls={true} />
+        <ScoreBoard game={activeStream.game}/>
 
         {/* Placeholder section */}
         <View style={styles.placeholderSection}>
@@ -100,6 +106,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     marginVertical: 8,
+    justifyContent: 'flex-start', // Add this to ensure proper alignment
   },
   profilePic: {
     width: 40,
@@ -123,6 +130,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0',
     borderRadius: 8,
     marginBottom: 16,
+  },
+  controls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginLeft: 'auto', // This pushes the controls to the right
   },
 })
 

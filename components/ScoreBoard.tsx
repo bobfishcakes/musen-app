@@ -1,36 +1,23 @@
 import React from 'react'
-import { View, Text, Image, StyleSheet } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { statusMap } from './GameCard'
 import { ThemedText } from './ThemedText'
 import { LinearGradient } from 'expo-linear-gradient'
 import { getTeamColor } from '../app/mockData'
 import { Svg, SvgUri } from 'react-native-svg'
-
-type GameType = {
-  scores?: {
-    home: { total: number }
-    away: { total: number }
-  }
-  status: {
-    short: string
-  }
-  teams: {
-    home: { logo: string; name: string; primaryColor?: string }
-    away: { logo: string; name: string; primaryColor?: string }
-  }
-}
+import { Game } from '../constants/Interfaces'
 
 interface ScoreBoardProps {
-  game: GameType
-  showControls?: boolean
+  game: Game
+  onPress?: () => void
 }
 
-const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
+const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
   const homeColor = game.teams.home.primaryColor || getTeamColor(game.teams.home.name)
   const awayColor = game.teams.away.primaryColor || getTeamColor(game.teams.away.name)
 
-  return (
+  const Content = (
     <View style={styles.scoreBoard}>
       <LinearGradient
         colors={[awayColor, homeColor]}
@@ -39,48 +26,50 @@ const ScoreBoard = ({ game, showControls }: ScoreBoardProps) => {
         style={StyleSheet.absoluteFillObject}
       />
       <View style={styles.scoreContainer}>
-      <View style={styles.scoreRow}>
-      <ThemedText type="title" style={styles.score}>
-  {game.scores?.away.total}
-</ThemedText>  <View style={styles.statusSection}>
-    <ThemedText style={[styles.gameStatus, { color: '#324b39' }]} type="defaultSemiBold">
-      {statusMap[game.status.short]}
-    </ThemedText>
-    {showControls && (
-      <View style={styles.controls}>
-        <Ionicons name="volume-mute" size={24} color="#203024" />
-        <Ionicons name="bluetooth" size={24} color="#203024" />
-      </View>
-    )}
-  </View>
-  <ThemedText type="title" style={styles.score}>
-  {game.scores?.home.total}
-</ThemedText></View>
+        <View style={styles.scoreRow}>
+          <ThemedText type="title" style={styles.score}>
+            {game.scores?.away.total}
+          </ThemedText>
+          <View style={styles.statusSection}>
+            <ThemedText style={[styles.gameStatus, { color: '#324b39' }]} type="defaultSemiBold">
+              {statusMap[game.status.short]}
+            </ThemedText>
+          </View>
+          <ThemedText type="title" style={styles.score}>
+            {game.scores?.home.total}
+          </ThemedText>
+        </View>
       </View>
 
       <View style={styles.teamsRow}>
-  <View style={styles.teamContainer}>
-    <Image
-      source={{ uri: game.teams.away.logo }}
-      style={styles.teamLogo}
-    />
-    <ThemedText type="default" style={styles.teamName}>
-      {game.teams.away.name}
-    </ThemedText>
-  </View>
+        <View style={styles.teamContainer}>
+          <Image
+            source={{ uri: game.teams.away.logo }}
+            style={styles.teamLogo}
+          />
+          <ThemedText type="default" style={styles.teamName}>
+            {game.teams.away.name}
+          </ThemedText>
+        </View>
 
-  <View style={styles.teamContainer}>
-    <Image
-      source={{ uri: game.teams.home.logo }}
-      style={styles.teamLogo}
-    />
-    <ThemedText type="default" style={styles.teamName}>
-      {game.teams.home.name}
-    </ThemedText>
-  </View>
-</View>
+        <View style={styles.teamContainer}>
+          <Image
+            source={{ uri: game.teams.home.logo }}
+            style={styles.teamLogo}
+          />
+          <ThemedText type="default" style={styles.teamName}>
+            {game.teams.home.name}
+          </ThemedText>
+        </View>
+      </View>
     </View>
   )
+
+  return onPress ? (
+    <TouchableOpacity onPress={onPress} style={styles.touchable}>
+      {Content}
+    </TouchableOpacity>
+  ) : Content
 }
 
 const styles = StyleSheet.create({
@@ -98,15 +87,15 @@ const styles = StyleSheet.create({
   },
   scoreContainer: {
     alignItems: 'center',
-    paddingTop: 5, // Add this line to create more space at the top
+    paddingTop: 5,
   },
   scoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Changed from center to space-between
-    gap: 22, // Increased from 12 to 32
+    justifyContent: 'space-between',
+    gap: 22,
   },
-  
+
   score: {
     fontSize: 64,
     fontWeight: '800',
@@ -138,14 +127,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  controls: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 8,
-  },
   statusSection: {
     alignItems: 'center',
     minWidth: 100,
+  },
+  touchable: {
+    width: '100%',
   },
 })
 

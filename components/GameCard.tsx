@@ -7,6 +7,7 @@ import { getTeamColor } from '../app/mockData'
 
 interface GameCardProps {
   game: Game
+  onPress?: () => void 
 }
 
 export const statusMap: { [key: string]: string } = {
@@ -26,13 +27,13 @@ export const statusMap: { [key: string]: string } = {
   ABD: "Game Abandoned"
 };
 
-const GameCard = ({ game }: GameCardProps) => {
+const GameCard = ({ game, onPress }: GameCardProps) => {
   const homeScore = game.scores?.home.total ?? '0';
   const awayScore = game.scores?.away.total ?? '0';
-  
+
   const homeColor = game.teams.home.primaryColor || getTeamColor(game.teams.home.name);
   const awayColor = game.teams.away.primaryColor || getTeamColor(game.teams.away.name);
-  
+
   const getContrastColor = (backgroundColor: string) => {
     const hex = backgroundColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
@@ -61,16 +62,16 @@ const GameCard = ({ game }: GameCardProps) => {
 
   return (
     <View style={styles.cardWrapper}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={onPress} style={styles.touchable}>
         <View style={styles.card}>
-        <>
-        <LinearGradient
-                colors={[awayColor, homeColor]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFillObject}
-              />
-      </>
+          <>
+            <LinearGradient
+              colors={[awayColor, homeColor]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+            />
+          </>
           <View style={styles.gameContainer}>
             <View style={styles.teamContainer}>
               <View style={styles.teamColumn}>
@@ -81,18 +82,18 @@ const GameCard = ({ game }: GameCardProps) => {
                 />
               </View>
               <View style={styles.centerColumn}>
-              <ThemedText 
-  type="subtitle" 
-  style={[styles.scoreText, { color: '#000000' }]} // Changed to black
->
-  {`${awayScore} - ${homeScore}`}
-</ThemedText>
-<ThemedText 
-  type="defaultSemiBold" 
-  style={[styles.statusText, { color: '#324b39' }]} // Changed to green
->
-  {getStatus()}
-</ThemedText>
+                <ThemedText
+                  type="subtitle"
+                  style={[styles.scoreText, { color: '#000000' }]}
+                >
+                  {`${awayScore} - ${homeScore}`}
+                </ThemedText>
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={[styles.statusText, { color: '#324b39' }]}
+                >
+                  {getStatus()}
+                </ThemedText>
               </View>
               <View style={styles.teamColumn}>
                 <Image
@@ -155,6 +156,9 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
   },
+  touchable: {
+    width: '100%',
+  }
 });
 
 export default GameCard;

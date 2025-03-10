@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { ActiveStreamContext } from '../contexts/ActiveStreamContext';
+import { ActiveStreamContext } from '@/contexts/ActiveStreamContext';
 import type { Stream } from '../constants/Interfaces';
 import { mockNbaGames } from '@/app/mockData';
 
@@ -8,7 +8,7 @@ const DEFAULT_STREAM: Stream = {
   title: "Mavs Moneyline",
   streamer: 'bobfishcakes',
   game: mockNbaGames[0],
-  listeners: 0
+  listeners: 1
 };
 
 export function useActiveStream(): {
