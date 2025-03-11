@@ -1,4 +1,4 @@
-import { Text, type TextProps, StyleSheet } from 'react-native';
+import { Text, type TextProps, StyleSheet, Platform } from 'react-native';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export type ThemedTextProps = TextProps & {
@@ -33,30 +33,57 @@ export function ThemedText({
 }
 const styles = StyleSheet.create({
   default: {
-    fontSize: 20,
-    lineHeight: 24,
+    fontSize: Platform.select({
+      web: 32, // 60% larger on web
+      default: 20,
+    }),
+    lineHeight: Platform.select({
+      web: 38,
+      default: 24,
+    }),
     fontFamily: 'InstrumentSans-Regular',
   },
   defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: Platform.select({
+      web: 24, // 50% larger on web
+      default: 16,
+    }),
+    lineHeight: Platform.select({
+      web: 36,
+      default: 24,
+    }),
     fontWeight: '600',
     fontFamily: 'InstrumentSans-SemiBold',
   },
   title: {
-    fontSize: 64,
+    fontSize: Platform.select({
+      web: 96, // 50% larger on web
+      default: 64,
+    }),
     fontWeight: 'bold',
-    lineHeight: 64,
+    lineHeight: Platform.select({
+      web: 96,
+      default: 64,
+    }),
     fontFamily: 'InstrumentSans-Bold',
   },
   subtitle: {
-    fontSize: 32,
+    fontSize: Platform.select({
+      web: 45, // 50% larger on web
+      default: 32,
+    }),
     fontWeight: 'bold',
     fontFamily: 'InstrumentSans-Bold',
   },
   link: {
-    lineHeight: 30,
-    fontSize: 16,
+    fontSize: Platform.select({
+      web: 24, // 50% larger on web
+      default: 16,
+    }),
+    lineHeight: Platform.select({
+      web: 45,
+      default: 30,
+    }),
     color: '#0a7ea4',
     fontFamily: 'InstrumentSans-Regular',
   },

@@ -1,13 +1,13 @@
-import React from 'react'
-import { View, TouchableOpacity, StyleSheet, Image } from 'react-native'
-import { Game } from '../constants/Interfaces'
-import { ThemedText } from './ThemedText'
-import { LinearGradient } from 'expo-linear-gradient'
-import { getTeamColor } from '../app/mockData'
+import React from 'react';
+import { View, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
+import { Game } from '../constants/Interfaces';
+import { ThemedText } from './ThemedText';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getTeamColor } from '../app/mockData';
 
 interface GameCardProps {
-  game: Game
-  onPress?: () => void 
+  game: Game;
+  onPress?: () => void;
 }
 
 export const statusMap: { [key: string]: string } = {
@@ -30,18 +30,10 @@ export const statusMap: { [key: string]: string } = {
 const GameCard = ({ game, onPress }: GameCardProps) => {
   const homeScore = game.scores?.home.total ?? '0';
   const awayScore = game.scores?.away.total ?? '0';
+  const isWeb = Platform.OS === 'web';
 
   const homeColor = game.teams.home.primaryColor || getTeamColor(game.teams.home.name);
   const awayColor = game.teams.away.primaryColor || getTeamColor(game.teams.away.name);
-
-  const getContrastColor = (backgroundColor: string) => {
-    const hex = backgroundColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    return brightness > 128 ? '#000000' : '#ffffff';
-  };
 
   const getStatus = () => {
     if (!game.status) return 'N/A';
@@ -63,52 +55,108 @@ const GameCard = ({ game, onPress }: GameCardProps) => {
   return (
     <View style={styles.cardWrapper}>
       <TouchableOpacity onPress={onPress} style={styles.touchable}>
-        <View style={styles.card}>
-          <>
-            <LinearGradient
-              colors={[awayColor, homeColor]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
-            />
-          </>
-          <View style={styles.gameContainer}>
-            <View style={styles.teamContainer}>
-              <View style={styles.teamColumn}>
-                <Image
-                  source={{ uri: game.teams.away.logo }}
-                  style={styles.teamLogo}
-                  resizeMode="contain"
-                />
+        <View style={[styles.card, isWeb && styles.webCard]}>
+          <LinearGradient
+            colors={[awayColor, homeColor]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={[styles.gameContainer, isWeb && styles.webGameContainer]}>
+            {isWeb ? (
+              <>
+<View style={styles.webTeamContainer}>
+  <View style={styles.webStatusSection}>
+    <ThemedText
+      type="defaultSemiBold"
+      style={[{ color: '#324b39' }]}
+    >
+      {getStatus()}
+    </ThemedText>
+  </View>
+  
+  <View style={styles.webMainContent}>
+    <View style={styles.webTeamSection}>
+      <Image
+        source={{ uri: game.teams.home.logo }}
+        style={styles.webTeamLogo}
+        resizeMode="contain"
+      />
+      <ThemedText
+        type="subtitle"
+        style={[styles.webScore, { color: '#000000' }]}
+      >
+        {homeScore}
+      </ThemedText>
+    </View>
+
+    <ThemedText
+      type="subtitle"
+      style={[{ color: '#000000', paddingHorizontal: 8 }]} // Added padding
+    >
+      -
+    </ThemedText>
+
+    <View style={styles.webTeamSection}>
+      <ThemedText
+        type="subtitle"
+        style={[styles.webScore, { color: '#000000' }]}
+      >
+        {awayScore}
+      </ThemedText>
+      <Image
+        source={{ uri: game.teams.away.logo }}
+        style={styles.webTeamLogo}
+        resizeMode="contain"
+      />
+    </View>
+  </View>
+</View>
+
+                <View style={styles.webStreamInfo}>
+                  <ThemedText type="defaultSemiBold" style={{ color: '#324b39' }}>
+                    Stream Info
+                  </ThemedText>
+                </View>
+              </>
+            ) : (
+              <View style={styles.teamContainer}>
+                <View style={styles.teamColumn}>
+                  <Image
+                    source={{ uri: game.teams.away.logo }}
+                    style={styles.teamLogo}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.centerColumn}>
+                  <ThemedText
+                    type="subtitle"
+                    style={[styles.scoreText, { color: '#000000' }]}
+                  >
+                    {`${awayScore} - ${homeScore}`}
+                  </ThemedText>
+                  <ThemedText
+                    type="defaultSemiBold"
+                    style={[styles.statusText, { color: '#324b39' }]}
+                  >
+                    {getStatus()}
+                  </ThemedText>
+                </View>
+                <View style={styles.teamColumn}>
+                  <Image
+                    source={{ uri: game.teams.home.logo }}
+                    style={styles.teamLogo}
+                    resizeMode="contain"
+                  />
+                </View>
               </View>
-              <View style={styles.centerColumn}>
-                <ThemedText
-                  type="subtitle"
-                  style={[styles.scoreText, { color: '#000000' }]}
-                >
-                  {`${awayScore} - ${homeScore}`}
-                </ThemedText>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.statusText, { color: '#324b39' }]}
-                >
-                  {getStatus()}
-                </ThemedText>
-              </View>
-              <View style={styles.teamColumn}>
-                <Image
-                  source={{ uri: game.teams.home.logo }}
-                  style={styles.teamLogo}
-                  resizeMode="contain"
-                />
-              </View>
-            </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   cardWrapper: {
@@ -128,10 +176,41 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  webCard: {
+    height: 152,
+    width: '100%',
+  },
   gameContainer: {
     flex: 1,
     padding: 15,
     justifyContent: 'center',
+  },
+  webGameContainer: {
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  webTeamContainer: {
+    flex: 0.8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Changed from space-between
+    paddingRight: 24,
+    gap: 20, // Add gap between status and main content
+  },
+  webMainContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 50, // Reduced gap between score and separator
+  },
+  webStatusSection: {
+    width: 160,
+    marginLeft: 30, // Add margin to move status right
+  },
+  webTeamSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 69, // Increased gap between logo and score
   },
   teamContainer: {
     flexDirection: 'row',
@@ -146,19 +225,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
   },
+  statusText: {
+    marginTop: 8,
+  },
   scoreText: {
     textAlign: 'center',
   },
-  statusText: {
-    marginTop: 8,
+  webScore: {
+    textAlign: 'center',
+    width: 60,
   },
   teamLogo: {
     width: 60,
     height: 60,
   },
+  webTeamLogo: {
+    width: 90,
+    height: 90,
+  },
   touchable: {
     width: '100%',
-  }
+  },
+  webStreamInfo: {
+    flex: 0.2,
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(0,0,0,0.1)',
+    paddingLeft: 24,
+  },
 });
 
 export default GameCard;

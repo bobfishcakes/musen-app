@@ -1,11 +1,9 @@
 import React from 'react'
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { View, Image, StyleSheet, TouchableOpacity, Platform } from 'react-native'
 import { statusMap } from './GameCard'
 import { ThemedText } from './ThemedText'
 import { LinearGradient } from 'expo-linear-gradient'
 import { getTeamColor } from '../app/mockData'
-import { Svg, SvgUri } from 'react-native-svg'
 import { Game } from '../constants/Interfaces'
 
 interface ScoreBoardProps {
@@ -25,24 +23,14 @@ const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
-      <View style={styles.scoreContainer}>
-        <View style={styles.scoreRow}>
-          <ThemedText type="title" style={styles.score}>
-            {game.scores?.away.total}
-          </ThemedText>
-          <View style={styles.statusSection}>
-            <ThemedText style={[styles.gameStatus, { color: '#324b39' }]} type="defaultSemiBold">
-              {statusMap[game.status.short]}
+
+      <View style={styles.teamsContainer}>
+        <View style={styles.teamSection}>
+          <View style={styles.scoreContainer}>
+            <ThemedText type="title" style={styles.score}>
+              {game.scores?.away.total}
             </ThemedText>
           </View>
-          <ThemedText type="title" style={styles.score}>
-            {game.scores?.home.total}
-          </ThemedText>
-        </View>
-      </View>
-
-      <View style={styles.teamsRow}>
-        <View style={styles.teamContainer}>
           <Image
             source={{ uri: game.teams.away.logo }}
             style={styles.teamLogo}
@@ -52,7 +40,20 @@ const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
           </ThemedText>
         </View>
 
-        <View style={styles.teamContainer}>
+        <View style={styles.centerSection}>
+          <View style={styles.scoreStatusContainer}>
+            <ThemedText type="defaultSemiBold" style={styles.gameStatus}>
+              {statusMap[game.status.short]}
+            </ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.teamSection}>
+          <View style={styles.scoreContainer}>
+            <ThemedText type="title" style={styles.score}>
+              {game.scores?.home.total}
+            </ThemedText>
+          </View>
           <Image
             source={{ uri: game.teams.home.logo }}
             style={styles.teamLogo}
@@ -84,52 +85,70 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
     overflow: 'hidden',
+    width: Platform.OS === 'web' ? 1070 : '100%',
+    ...(Platform.OS === 'web' && {
+      height: 400,
+      position: 'relative'
+    })
   },
-  scoreContainer: {
-    alignItems: 'center',
-    paddingTop: 5,
-  },
-  scoreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 22,
-  },
-
-  score: {
-    fontSize: 64,
-    fontWeight: '800',
-    color: '#000000',
-  },
-  teamsRow: {
+  teamsContainer: {
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
-    marginTop: 10,
-    paddingHorizontal: 0,
+    alignItems: 'flex-start',
+    paddingHorizontal: Platform.OS === 'web' ? 40 : 20,
+    ...(Platform.OS === 'web' && {
+      marginTop: 40 // Only push down content on web
+    })
   },
-  teamContainer: {
+  teamSection: {
+    flex: 1,
     alignItems: 'center',
-    width: '40%',
+    gap: Platform.OS === 'web' ? 32 : 8,
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...(Platform.OS === 'web' && {
+      position: 'absolute',
+      top: 20,
+      left: 0,
+      right: 0
+    })
+  },
+  scoreStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Platform.OS === 'web' ? -15 : 15,
+  },
+  scoreContainer: {
+    height: Platform.OS === 'web' ? 40 : 70,
+    justifyContent: 'center',
   },
   teamLogo: {
-    width: 60,
-    height: 60,
+    width: Platform.select({
+      web: 110,
+      default: 60
+    }),
+    height: Platform.select({
+      web: 110,
+      default: 60
+    }),
     resizeMode: 'contain',
+    marginTop: Platform.OS == 'web' ? 45 : 0,
+  },
+  score: {
+    color: '#000000',
   },
   teamName: {
-    marginTop: 8,
-    fontWeight: '500',
     color: '#000000',
     textAlign: 'center',
   },
   gameStatus: {
-    fontSize: 16,
+    color: '#324b39',
     textAlign: 'center',
-  },
-  statusSection: {
-    alignItems: 'center',
-    minWidth: 100,
   },
   touchable: {
     width: '100%',
