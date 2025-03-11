@@ -57,7 +57,7 @@ const GameCard = ({ game, onPress }: GameCardProps) => {
       <TouchableOpacity onPress={onPress} style={styles.touchable}>
         <View style={[styles.card, isWeb && styles.webCard]}>
           <LinearGradient
-            colors={[awayColor, homeColor]}
+            colors={[homeColor, awayColor]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFillObject}
@@ -123,7 +123,7 @@ const GameCard = ({ game, onPress }: GameCardProps) => {
               <View style={styles.teamContainer}>
                 <View style={styles.teamColumn}>
                   <Image
-                    source={{ uri: game.teams.away.logo }}
+                    source={{ uri: game.teams.home.logo }}
                     style={styles.teamLogo}
                     resizeMode="contain"
                   />
@@ -144,7 +144,7 @@ const GameCard = ({ game, onPress }: GameCardProps) => {
                 </View>
                 <View style={styles.teamColumn}>
                   <Image
-                    source={{ uri: game.teams.home.logo }}
+                    source={{ uri: game.teams.away.logo }}
                     style={styles.teamLogo}
                     resizeMode="contain"
                   />
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   webCard: {
-    height: 152,
+    height: 120, // Reduced from 152
     width: '100%',
   },
   gameContainer: {
@@ -196,21 +196,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start', // Changed from space-between
     paddingRight: 24,
-    gap: 20, // Add gap between status and main content
+    gap: 0, // Add gap between status and main content
   },
   webMainContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 50, // Reduced gap between score and separator
+    gap: 35, // Reduced from 50
   },
   webStatusSection: {
-    width: 160,
-    marginLeft: 30, // Add margin to move status right
+    width: 112, // Reduced from 160
+    marginLeft: 21, // Reduced from 30
   },
   webTeamSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 69, // Increased gap between logo and score
+    gap: 28, // Reduced from 69
   },
   teamContainer: {
     flexDirection: 'row',
@@ -240,8 +240,8 @@ const styles = StyleSheet.create({
     height: 60,
   },
   webTeamLogo: {
-    width: 90,
-    height: 90,
+    width: 63, // Reduced from 90
+    height: 63, // Reduced from 90
   },
   touchable: {
     width: '100%',

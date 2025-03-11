@@ -34,22 +34,22 @@ export function ThemedText({
 const styles = StyleSheet.create({
   default: {
     fontSize: Platform.select({
-      web: 32, // 60% larger on web
+      web: 22, // Reduced from 32
       default: 20,
     }),
     lineHeight: Platform.select({
-      web: 38,
+      web: 27, // Reduced from 38
       default: 24,
     }),
     fontFamily: 'InstrumentSans-Regular',
   },
   defaultSemiBold: {
     fontSize: Platform.select({
-      web: 24, // 50% larger on web
+      web: 17, // Reduced from 24
       default: 16,
     }),
     lineHeight: Platform.select({
-      web: 36,
+      web: 25, // Reduced from 36
       default: 24,
     }),
     fontWeight: '600',
@@ -57,19 +57,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: Platform.select({
-      web: 96, // 50% larger on web
+      web: 67, // Reduced from 96
       default: 64,
     }),
     fontWeight: 'bold',
     lineHeight: Platform.select({
-      web: 96,
+      web: 67, // Reduced from 96
       default: 64,
     }),
     fontFamily: 'InstrumentSans-Bold',
   },
   subtitle: {
     fontSize: Platform.select({
-      web: 45, // 50% larger on web
+      web: 42, // Reduced from 45
       default: 32,
     }),
     fontWeight: 'bold',
@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: Platform.select({
-      web: 24, // 50% larger on web
+      web: 17, // Reduced from 24
       default: 16,
     }),
     lineHeight: Platform.select({
-      web: 45,
+      web: 32, // Reduced from 45
       default: 30,
     }),
     color: '#0a7ea4',

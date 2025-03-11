@@ -76,18 +76,18 @@ const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
 const styles = StyleSheet.create({
   scoreBoard: {
     alignItems: 'center',
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 8,
+    borderRadius: 11, // Reduced from 16
+    padding: 14, // Reduced from 20
+    marginTop: 6, // Reduced from 8
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 2 }, // Reduced from 3
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3, // Reduced from 4
     elevation: 4,
     overflow: 'hidden',
-    width: Platform.OS === 'web' ? 1070 : '100%',
+    width: Platform.OS === 'web' ? 749 : '100%', // Reduced from 1070
     ...(Platform.OS === 'web' && {
-      height: 400,
+      height: 280, // Reduced from 400
       position: 'relative'
     })
   },
@@ -96,15 +96,15 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingHorizontal: Platform.OS === 'web' ? 40 : 20,
+    paddingHorizontal: Platform.OS === 'web' ? 28 : 20, // Reduced from 40
     ...(Platform.OS === 'web' && {
-      marginTop: 40 // Only push down content on web
+      marginTop: 28 // Reduced from 40
     })
   },
   teamSection: {
     flex: 1,
     alignItems: 'center',
-    gap: Platform.OS === 'web' ? 32 : 8,
+    gap: Platform.OS === 'web' ? 22 : 8, // Reduced from 32
   },
   centerSection: {
     flex: 1,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     ...(Platform.OS === 'web' && {
       position: 'absolute',
-      top: 20,
+      top: 14, // Reduced from 20
       left: 0,
       right: 0
     })
@@ -121,23 +121,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Platform.OS === 'web' ? -15 : 15,
+    marginTop: Platform.OS === 'web' ? -11 : 15, // Reduced from -15
   },
   scoreContainer: {
-    height: Platform.OS === 'web' ? 40 : 70,
+    height: Platform.OS === 'web' ? 28 : 70, // Reduced from 40
     justifyContent: 'center',
   },
   teamLogo: {
     width: Platform.select({
-      web: 110,
+      web: 77, // Reduced from 110
       default: 60
     }),
     height: Platform.select({
-      web: 110,
+      web: 77, // Reduced from 110
       default: 60
     }),
     resizeMode: 'contain',
-    marginTop: Platform.OS == 'web' ? 45 : 0,
+    marginTop: Platform.OS == 'web' ? 32 : 0, // Reduced from 45
   },
   score: {
     color: '#000000',

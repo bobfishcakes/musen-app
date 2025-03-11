@@ -1,7 +1,7 @@
 import { useActiveStream } from '@/hooks/useActiveStream'
 import { useLastActiveStream } from '@/hooks/useLastActiveStream'
 import { useRouter } from 'expo-router'
-import { StyleSheet, TouchableOpacity, View, ViewProps, Text, Image } from 'react-native'
+import { StyleSheet, TouchableOpacity, View, ViewProps, Text, Image, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
 export const MiniPlayer = ({ style }: ViewProps) => {
@@ -9,6 +9,7 @@ export const MiniPlayer = ({ style }: ViewProps) => {
     const activeStream = useActiveStream()
     const lastActiveStream = useLastActiveStream()
     const displayedStream = activeStream ?? lastActiveStream
+    const isWeb = Platform.OS === 'web'
 
     const handlePress = () => {
         router.navigate('/stream')
@@ -21,37 +22,56 @@ export const MiniPlayer = ({ style }: ViewProps) => {
     const awayScore = game.scores?.away.total ?? '0';
 
     return (
-        <TouchableOpacity onPress={handlePress} activeOpacity={0.9} style={[styles.container, style]}>
-            <View style={styles.scoreContainer}>
-                <Image
-                    source={{ uri: game.teams.away.logo }}
-                    style={styles.teamLogo}
-                    resizeMode="contain"
-                />
-                <Text style={styles.scoreText}>
-                    {`${awayScore} - ${homeScore}`}
-                </Text>
-                <Image
-                    source={{ uri: game.teams.home.logo }}
-                    style={styles.teamLogo}
-                    resizeMode="contain"
-                />
-            </View>
+        <View style={[styles.wrapper, isWeb && styles.webWrapper, style]}>
+            <TouchableOpacity 
+                onPress={handlePress} 
+                activeOpacity={0.9} 
+                style={[styles.container, isWeb && styles.webContainer]}
+            >
+                <View style={styles.scoreContainer}>
+                    <Image
+                        source={{ uri: game.teams.away.logo }}
+                        style={styles.teamLogo}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.scoreText}>
+                        {`${awayScore} - ${homeScore}`}
+                    </Text>
+                    <Image
+                        source={{ uri: game.teams.home.logo }}
+                        style={styles.teamLogo}
+                        resizeMode="contain"
+                    />
+                </View>
 
-            <View style={styles.trackTitleContainer}>
-                <Text style={styles.trackTitle} numberOfLines={1}>
-                    {displayedStream.activeStream?.title}
-                </Text>
-            </View>
+                <View style={styles.trackTitleContainer}>
+                    <Text style={styles.trackTitle} numberOfLines={1}>
+                        {displayedStream.activeStream?.title}
+                    </Text>
+                </View>
 
-            <View style={styles.controls}>
-                <Ionicons name="volume-mute" size={24} color="#203024" />
-            </View>
-        </TouchableOpacity>
+                <View style={styles.controls}>
+                    <Ionicons name="volume-mute" size={24} color="#203024" />
+                </View>
+            </TouchableOpacity>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
+    wrapper: {
+        width: '100%',
+        position: 'absolute',
+        left: 8,
+        right: 8,
+        bottom: 0,
+    },
+    webWrapper: {
+        alignItems: 'center',
+        left: 0,
+        right: 0,
+        paddingHorizontal: 8,
+    },
     container: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -64,6 +84,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5,
         shadowRadius: 4,
         elevation: 3,
+        width: '100%',
+    },
+    webContainer: {
+        maxWidth: 850,
+        width: '100%',
     },
     trackTitleContainer: {
         flex: 1,
