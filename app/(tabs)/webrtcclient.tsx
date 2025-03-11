@@ -36,14 +36,14 @@ const WebRTCClient: React.FC = () => {
           video: false,
         });
         setLocalStream(stream);
+        console.log('GETTING STREAM:', stream.getAudioTracks());
         console.log('Local audio stream acquired');
       } catch (error) {
-        console.error('getUserMedia error: ', error);
+        //console.error('getUserMedia error: ', error);
         Alert.alert('Error', 'Failed to get local audio stream.');
       }
     };
     getLocalStream();
-
     // Cleanup on unmount
     return () => {
       localStream?.getTracks().forEach((track: any) => track.stop());
@@ -61,12 +61,12 @@ const WebRTCClient: React.FC = () => {
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         console.log('New ICE candidate:', event.candidate);
-        // In a real app, send this candidate to the remote peer.
       }
     };
     peerConnection.ontrack = (event) => {
       console.log('Remote track received:', event);
       if (event.streams && event.streams[0]) {
+        //console.log("COMMENTS HERE", event.streams[0]);
         setRemoteStream(event.streams[0]);
       }
     };
@@ -74,11 +74,19 @@ const WebRTCClient: React.FC = () => {
     return peerConnection;
   };
 
+  let sessionConstraints = {
+    mandatory: {
+            OfferToReceiveAudio: true,
+            OfferToReceiveVideo: false,
+            VoiceActivityDetection: true
+        }
+    };
+
   // Caller: Create an SDP offer
   const startCall = async () => {
     const peerConnection = pc || createPeerConnection();
     try {
-      const offer = await peerConnection.createOffer();
+      const offer = await peerConnection.createOffer(sessionConstraints);
       await peerConnection.setLocalDescription(offer);
       console.log('Offer created:', offer);
       setOfferSDP(offer);
@@ -99,6 +107,7 @@ const WebRTCClient: React.FC = () => {
     }
     try {
       const parsedOffer = JSON.parse(remoteOfferText);
+      console.log('Signaling state:', pc.signalingState);
       await pc!.setRemoteDescription(parsedOffer);
       const answer = await pc!.createAnswer();
       await pc!.setLocalDescription(answer);
@@ -117,6 +126,25 @@ const WebRTCClient: React.FC = () => {
     Clipboard.setString(sdpString);
     Alert.alert(label, `${label} copied to clipboard.`);
   };
+
+  // useEffect(() => {
+  //   if (!pc) return;
+  //   const interval = setInterval(async () => {
+  //     try {
+  //       const stats = await pc.getStats();
+  //       stats.forEach(report => {
+  //         if (report.type === 'inbound-rtp' && report.kind === 'audio') {
+  //           console.log('Audio stats:', report);
+  //         }
+  //       });
+  //     } catch (error) {
+  //       console.error('Error fetching stats:', error);
+  //     }
+  //   }, 5000);
+  
+  //   // Cleanup interval when pc changes or component unmounts
+  //   return () => clearInterval(interval);
+  // }, [pc]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
