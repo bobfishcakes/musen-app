@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Image, StyleSheet, SafeAreaView, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import ScoreBoard from '../components/ScoreBoard'
@@ -6,6 +6,8 @@ import { useActiveStream } from '@/hooks/useActiveStream'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { router } from 'expo-router'
+import { syncService } from '@/api/sync/syncService'
+import { GameClock, StoppageEvent } from '@/api/sync/syncTypes'
 
 const Header = () => {
   return (
@@ -36,6 +38,50 @@ const Header = () => {
     </ThemedView>
   )
 }
+
+const SyncDebugPanel = ({ gameId }: { gameId: string }) => {
+  const [clock, setClock] = useState<GameClock>();
+  const [stoppage, setStoppage] = useState<StoppageEvent>();
+
+  useEffect(() => {
+    syncService.startDebugPolling(gameId, (newClock, newStoppage) => {
+      setClock(newClock);
+      setStoppage(newStoppage);
+    });
+
+    return () => syncService.stopDebugPolling(gameId);
+  }, [gameId]);
+
+  return (
+    <View style={styles.debugPanel}>
+      <ThemedText style={styles.debugTitle}>Sync Debug Panel</ThemedText>
+      
+      <View style={styles.debugSection}>
+        <ThemedText style={styles.debugLabel}>Game Clock:</ThemedText>
+        <ThemedText>
+          Period: {clock?.period || '-'} | 
+          Time: {clock?.minutes || '--'}:{clock?.seconds.toString().padStart(2, '0') || '--'}
+        </ThemedText>
+        <ThemedText>Status: {clock?.isRunning ? 'Running' : 'Stopped'}</ThemedText>
+        <ThemedText style={styles.debugTimestamp}>
+          Last Update: {clock?.lastUpdated?.toLocaleTimeString() || '-'}
+        </ThemedText>
+      </View>
+
+      <View style={styles.debugSection}>
+        <ThemedText style={styles.debugLabel}>Stoppage Status:</ThemedText>
+        {stoppage ? (
+          <>
+            <ThemedText>Type: {stoppage.type}</ThemedText>
+            <ThemedText>Started: {stoppage.startTime.toLocaleTimeString()}</ThemedText>
+          </>
+        ) : (
+          <ThemedText>No active stoppage</ThemedText>
+        )}
+      </View>
+    </View>
+  );
+};
 
 const Stream = () => {
   const { activeStream } = useActiveStream()
@@ -89,6 +135,8 @@ const Stream = () => {
           <View style={[styles.scoreBoardWrapper, isWeb && styles.webScoreBoardWrapper]}>
             <ScoreBoard game={activeStream.game}/>
           </View>
+
+          {isWeb && <SyncDebugPanel gameId={activeStream.game.id} />}
 
           <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
             <View style={styles.placeholder} />
@@ -225,6 +273,39 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 8,
+  },
+  debugPanel: {
+    backgroundColor: '#F8F9FA',
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  debugTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#212529',
+  },
+  debugSection: {
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
+  },
+  debugLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#495057',
+  },
+  debugTimestamp: {
+    fontSize: 12,
+    color: '#6C757D',
+    marginTop: 4,
   },
 })
 

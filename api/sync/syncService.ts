@@ -1,12 +1,15 @@
+// api/sync/syncService.ts
 import { GameClock, SyncOffset, StoppageEvent } from './syncTypes';
 
 class SyncService {
   private activeSyncs: Map<string, GameClock>;
   private stoppages: Map<string, StoppageEvent>;
+  private debugPollers: Map<string, NodeJS.Timeout>;
 
   constructor() {
     this.activeSyncs = new Map();
     this.stoppages = new Map();
+    this.debugPollers = new Map();
   }
 
   updateGameClock(gameId: string, clock: Partial<GameClock>): void {
@@ -44,6 +47,27 @@ class SyncService {
       this.stoppages.delete(gameId);
     }
     return stoppage;
+  }
+
+  // Debug methods for web
+  startDebugPolling(gameId: string, onUpdate: (clock: GameClock | undefined, stoppage: StoppageEvent | undefined) => void) {
+    if (this.debugPollers.has(gameId)) return;
+
+    const poller = setInterval(() => {
+      const clock = this.getGameClock(gameId);
+      const stoppage = this.stoppages.get(gameId);
+      onUpdate(clock, stoppage);
+    }, 1000);
+
+    this.debugPollers.set(gameId, poller);
+  }
+
+  stopDebugPolling(gameId: string) {
+    const poller = this.debugPollers.get(gameId);
+    if (poller) {
+      clearInterval(poller);
+      this.debugPollers.delete(gameId);
+    }
   }
 }
 
