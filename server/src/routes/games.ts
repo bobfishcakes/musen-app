@@ -27,3 +27,15 @@ gamesRouter.get('/:date', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch games' });
   }
 });
+
+// Add this new route
+gamesRouter.get('/find/:date/:homeTeam/:awayTeam', async (req, res) => {
+  try {
+    const { date, homeTeam, awayTeam } = req.params;
+    const gameId = await sportRadarService.findGameByTeamsAndDate(date, homeTeam, awayTeam);
+    res.json({ gameId });
+  } catch (error) {
+    console.error('Error finding game:', error);
+    res.status(500).json({ error: 'Failed to find game' });
+  }
+});
