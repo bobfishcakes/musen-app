@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { WebSocketServer } from 'ws';
 import { gamesRouter } from './routes/games';
 import { setupWebSocket } from './websocket';
 
