@@ -1,41 +1,43 @@
+// /server/src/routes/games.ts
 import { Router } from 'express';
 import { sportRadarService } from '../services/sportRadarService';
+import { gameMapperService } from '../services/gameMapperService';
+import { SportRadarGame } from '../api/sportRadar/sportRadarTypes'; // Add this import
 
-export const gamesRouter = Router();
+const gamesRouter = Router();
 
-// Route for game details
 gamesRouter.get('/details/:gameId', async (req, res) => {
   try {
     const gameId = req.params.gameId;
     console.log('Fetching details for game:', gameId);
     
-    const gameDetails = await sportRadarService.getGameDetails(gameId);
-    res.json(gameDetails);
+    const gameDetails: SportRadarGame = await sportRadarService.getGameDetails(gameId);
+    
+    // Transform the response to include the needed properties
+    const response = {
+      radarGameId: gameDetails.id,
+      clock: gameDetails.status.clock,
+      period: gameDetails.status.period,
+      status: gameDetails.status.type
+    };
+
+    res.json(response);
   } catch (error) {
     console.error('Error fetching game details:', error);
     res.status(500).json({ error: 'Failed to fetch game details' });
   }
 });
 
-// Route for games by date
-gamesRouter.get('/:date', async (req, res) => {
+// Add endpoint to trigger daily mapping updates
+gamesRouter.post('/update-mappings', async (req, res) => {
   try {
-    const games = await sportRadarService.getGames(req.params.date);
-    res.json(games);
+    const date = new Date().toISOString().split('T')[0];
+    await gameMapperService.updateDailyMappings(date);
+    res.json({ message: 'Mappings updated successfully' });
   } catch (error) {
-    console.error('Error fetching games:', error);
-    res.status(500).json({ error: 'Failed to fetch games' });
+    console.error('Error updating mappings:', error);
+    res.status(500).json({ error: 'Failed to update mappings' });
   }
 });
 
-// Add this new route
-gamesRouter.get('/find/:date/:homeTeam/:awayTeam', async (req, res) => {
-  try {
-    const { date, homeTeam, awayTeam } = req.params;
-    const gameId = await sportRadarService.findGameByTeamsAndDate(date, homeTeam, awayTeam);
-    res.json({ gameId });
-  } catch (error) {
-    console.error('Error finding game:', error);
-    res.status(500).json({ error: 'Failed to find game' });
-  }
-});
+export { gamesRouter };

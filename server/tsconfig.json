@@ -1,18 +1,25 @@
 {
-    "compilerOptions": {
-      "target": "es2020",
-      "module": "commonjs",
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "baseUrl": ".",
-      "paths": {
-        "*": ["node_modules/*"]
-      }
-    },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules"]
-  }
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "../../",  // Change this to point to the root of your project
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "../../",  // Change this to point to the root of your project
+    "paths": {
+      "*": ["node_modules/*"],
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "../../redis/**/*",
+    "../../api/**/*",
+    "./src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

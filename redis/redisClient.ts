@@ -6,11 +6,16 @@ class RedisClient {
 
   constructor() {
     this.client = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
+      username: 'default',
+      password: '5mb06xOA9wuL02Olax1VbUikhbgBYxxy',
+      host: 'redis-13344.c232.us-east-1-2.ec2.redns.redis-cloud.com',
+      port: 13344
     });
+
+    this.client.on('error', (err: Error) => console.log('Redis Client Error', err));
   }
+
+  // Note: No need for explicit connect() with ioredis as it handles connection automatically
 
   async setClock(gameId: string, clockData: any): Promise<void> {
     await this.client.set(
@@ -24,6 +29,17 @@ class RedisClient {
   async getClock(gameId: string): Promise<any> {
     const data = await this.client.get(`${REDIS_KEYS.GAME_CLOCK}:${gameId}`);
     return data ? JSON.parse(data) : null;
+  }
+
+  async setGameIdMapping(sportApiGameId: string, radarGameId: string, date: string): Promise<void> {
+    const mappingKey = `${REDIS_KEYS.GAME_MAPPING}:${date}`;
+    await this.client.hset(mappingKey, sportApiGameId, radarGameId);
+    await this.client.expire(mappingKey, 48 * 60 * 60);
+  }
+
+  async getGameIdMapping(sportApiGameId: string, date: string): Promise<string | null> {
+    const mappingKey = `${REDIS_KEYS.GAME_MAPPING}:${date}`;
+    return await this.client.hget(mappingKey, sportApiGameId);
   }
 }
 

@@ -10,6 +10,10 @@ import { useBasketballGames } from '@/api/basketball/basketballHooks';
 import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
+import { syncService } from '/Users/atharvsonawane/musen-app-sync/api/sync/syncService';
+import { gameMapperService } from '@/server/src/services/gameMapperService';
+
+const BACKEND_URL = 'http://localhost:3000';
 
 const styles = StyleSheet.create({
   contentContainer: {
@@ -172,21 +176,51 @@ export default function HomeScreen() {
     })
     .map(convertBasketballGame) || [];
 
-  const handleGamePress = (game: Game) => {
-    const getLastWord = (teamName: string) => {
-      return teamName.split(' ').pop() || teamName;
+    const handleGamePress = async (game: Game) => {
+      try {
+        // Format the date from the basketball API game
+        const gameDate = game.date;
+    
+        if (!gameDate) {
+          throw new Error('Game date is undefined');
+        }
+    
+        // Find the corresponding SportRadar game ID using the mapping endpoint
+        const findGameResponse = await fetch(
+          `${BACKEND_URL}/api/games/find/${gameDate}/${game.teams.home.name}/${game.teams.away.name}`
+        );
+    
+        if (!findGameResponse.ok) {
+          throw new Error(`HTTP error! status: ${findGameResponse.status}`);
+        }
+    
+        const { gameId: radarGameId } = await findGameResponse.json();
+    
+        if (!radarGameId) {
+          throw new Error('Could not find corresponding SportRadar game');
+        }
+    
+        const getLastWord = (teamName: string) => {
+          return teamName.split(' ').pop() || teamName;
+        };
+    
+        const newStream: Stream = {
+          id: `1`,
+          title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
+          streamer: 'bobfishcakes',
+          game: {
+            ...game,
+            radarGameId // Add the mapped SportRadar ID
+          },
+          listeners: 1
+        };
+    
+        setActiveStream(newStream);
+        router.push('/stream');
+      } catch (error) {
+        console.error('Error setting up stream:', error);
+      }
     };
-
-    const newStream: Stream = {
-      id: `1`,
-      title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
-      streamer: 'bobfishcakes',
-      game: game,
-      listeners: 1
-    };
-    setActiveStream(newStream);
-    router.push('/stream');
-  };
 
   const renderGameCard = ({ item }: { item: Game }) => (
     <GameCard 
@@ -274,7 +308,7 @@ export default function HomeScreen() {
         ) : (
           <>
             <ThemedText type="subtitle" style={styles.sectionTitle}>NBA</ThemedText>
-            {isWeb ? (
+            {isWeb ? (  
               <>
                 <View style={styles.webGamesContainer}>
                   {nbaGames
