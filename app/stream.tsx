@@ -6,6 +6,7 @@ import { useActiveStream } from '@/hooks/useActiveStream'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { router } from 'expo-router'
+import { GameSyncControl } from '@/components/GameSyncControl'
 
 const Header = () => {
   return (
@@ -88,6 +89,10 @@ const Stream = () => {
 
           <View style={[styles.scoreBoardWrapper, isWeb && styles.webScoreBoardWrapper]}>
             <ScoreBoard game={activeStream.game}/>
+          </View>
+
+          <View style={[styles.gameSyncWrapper, isWeb && styles.webGameSyncWrapper]}>
+            <GameSyncControl />
           </View>
 
           <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
@@ -202,6 +207,14 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   webScoreBoardWrapper: {
+    alignItems: 'center',
+  },
+  gameSyncWrapper: {
+    width: '100%',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  webGameSyncWrapper: {
     alignItems: 'center',
   },
   placeholderSection: {
