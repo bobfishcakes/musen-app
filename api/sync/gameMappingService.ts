@@ -1,5 +1,6 @@
 import { basketballService } from '../basketball/basketballService';
 import { sportRadarService } from '../sportradar/sportRadarService';
+import { SportRadarGame } from '/Users/atharvsonawane/musen-app-sync/server/src/api/sportRadar/sportRadarTypes';
 
 interface GameIdMapping {
   basketballApiId: string;
@@ -12,6 +13,10 @@ interface GameIdMapping {
 class GameMappingService {
   private mappings: Map<string, GameIdMapping> = new Map();
 
+  getMappings(): Map<string, GameIdMapping> {
+    return this.mappings;
+  }
+
   async updateMappings(date: string) {
     try {
       // Get games from both APIs
@@ -20,7 +25,7 @@ class GameMappingService {
 
       // Create mappings by matching team names
       basketballGames.forEach(bGame => {
-        const matchingSRGame = sportRadarGames.find(srGame => 
+        const matchingSRGame = sportRadarGames.find((srGame: SportRadarGame) => // Add type here
           srGame.home.name === bGame.teams.home.name && 
           srGame.away.name === bGame.teams.away.name
         );

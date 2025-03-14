@@ -11,7 +11,9 @@ import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
 import { syncService } from '/Users/atharvsonawane/musen-app-sync/api/sync/syncService';
+import { sportRadarService } from '@/api/sportradar/sportRadarService';
 import { gameMapperService } from '@/server/src/services/gameMapperService';
+import { gameMappingService } from '@/api/sync/gameMappingService';
 
 const BACKEND_URL = 'http://localhost:3000';
 
@@ -178,14 +180,13 @@ export default function HomeScreen() {
 
     const handleGamePress = async (game: Game) => {
       try {
-        // Format the date from the basketball API game
         const gameDate = game.date;
     
         if (!gameDate) {
           throw new Error('Game date is undefined');
         }
     
-        // Find the corresponding SportRadar game ID using the mapping endpoint
+        // Find the corresponding SportRadar game ID using the backend endpoint
         const findGameResponse = await fetch(
           `${BACKEND_URL}/api/games/find/${gameDate}/${game.teams.home.name}/${game.teams.away.name}`
         );
@@ -200,6 +201,15 @@ export default function HomeScreen() {
           throw new Error('Could not find corresponding SportRadar game');
         }
     
+        // Get game details from the backend
+        const gameDetailsResponse = await fetch(`${BACKEND_URL}/api/games/details/${radarGameId}`);
+    
+        if (!gameDetailsResponse.ok) {
+          throw new Error(`HTTP error! status: ${gameDetailsResponse.status}`);
+        }
+    
+        const gameDetails = await gameDetailsResponse.json();
+    
         const getLastWord = (teamName: string) => {
           return teamName.split(' ').pop() || teamName;
         };
@@ -210,7 +220,11 @@ export default function HomeScreen() {
           streamer: 'bobfishcakes',
           game: {
             ...game,
-            radarGameId // Add the mapped SportRadar ID
+            radarGameId,
+            clock: gameDetails?.status?.clock ? {
+              minutes: gameDetails.status.clock.minutes,
+              seconds: gameDetails.status.clock.seconds
+            } : undefined
           },
           listeners: 1
         };
