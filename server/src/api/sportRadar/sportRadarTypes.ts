@@ -34,6 +34,13 @@ export interface SportRadarGame {
   venue: SportRadarVenue;
 }
 
+export interface GameDetailsResponse {
+  radarGameId: string;
+  clock: SportRadarGameClock;  // Using default values
+  period: number;              // Using default value
+  status: string;             // This matches what's in the JSON
+}
+
 export interface SportRadarApiResponse<T> {
   status: string;
   data: T;

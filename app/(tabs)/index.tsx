@@ -10,6 +10,7 @@ import { useBasketballGames } from '@/api/basketball/basketballHooks';
 import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
+import { sportRadarService } from '@/api/sportradar/sportRadarService';
 
 const BACKEND_URL = 'http://localhost:3000';
 
@@ -176,59 +177,51 @@ export default function HomeScreen() {
 
     const handleGamePress = async (game: Game) => {
       try {
-        const gameDate = game.date;
-    
-        if (!gameDate) {
+        if (!game.date) {
           throw new Error('Game date is undefined');
         }
     
-        // Find the corresponding SportRadar game ID using the backend endpoint
-        const findGameResponse = await fetch(
-          `${BACKEND_URL}/api/games/find/${gameDate}/${game.teams.home.name}/${game.teams.away.name}`
+        // Get the date in YYYY-MM-DD format
+        const gameDate = new Date(game.date).toISOString().split('T')[0];
+        
+        // Use the service method to find the SportRadar game ID
+        const sportRadarGameId = await sportRadarService.findGameByTeamsAndDate(
+          game.teams.home.name,
+          game.teams.away.name,
+          gameDate
         );
     
-        if (!findGameResponse.ok) {
-          throw new Error(`HTTP error! status: ${findGameResponse.status}`);
+        if (!sportRadarGameId) {
+          console.error('SportRadar game ID not found');
+          return;
         }
     
-        const { gameId: radarGameId } = await findGameResponse.json();
-    
-        if (!radarGameId) {
-          throw new Error('Could not find corresponding SportRadar game');
-        }
-    
-        // Get game details from the backend
-        const gameDetailsResponse = await fetch(`${BACKEND_URL}/api/games/details/${radarGameId}`);
-    
-        if (!gameDetailsResponse.ok) {
-          throw new Error(`HTTP error! status: ${gameDetailsResponse.status}`);
-        }
-    
-        const gameDetails = await gameDetailsResponse.json();
+        // Get game details using the found ID
+        const gameDetails = await sportRadarService.getGameDetails(sportRadarGameId);
     
         const getLastWord = (teamName: string) => {
           return teamName.split(' ').pop() || teamName;
         };
     
+        // Create the stream object
         const newStream: Stream = {
           id: `1`,
           title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
           streamer: 'bobfishcakes',
           game: {
             ...game,
-            radarGameId,
-            clock: gameDetails?.status?.clock ? {
-              minutes: gameDetails.status.clock.minutes,
-              seconds: gameDetails.status.clock.seconds
-            } : undefined
+            radarGameId: sportRadarGameId,
+            clock: gameDetails.clock
           },
           listeners: 1
         };
     
+        // Set the active stream and navigate
         setActiveStream(newStream);
         router.push('/stream');
+    
       } catch (error) {
-        console.error('Error setting up stream:', error);
+        console.error('Error handling game press:', error);
       }
     };
 
