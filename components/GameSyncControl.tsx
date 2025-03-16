@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Platform, Pressable, TextInput } from 'react-native';
+import { View, StyleSheet, Pressable, Platform } from 'react-native';
 import { ThemedText } from './ThemedText';
 
 interface GameSyncControlProps {
@@ -7,202 +7,157 @@ interface GameSyncControlProps {
 }
 
 export const GameSyncControl = ({ initialMinutes = 10 }: GameSyncControlProps) => {
-  const [minutes, setMinutes] = useState(initialMinutes.toString());
-  const [seconds, setSeconds] = useState('54');
-  const [isEditing, setIsEditing] = useState(false);
   const [currentTime, setCurrentTime] = useState(initialMinutes * 60 + 54);
-
-  const handleMinutesInput = (text: string) => {
-    const numbers = text.replace(/[^0-9]/g, '');
-    const parsed = parseInt(numbers);
-    if (parsed > 99) return;
-    setMinutes(numbers);
-  };
-
-  const handleSecondsInput = (text: string) => {
-    const numbers = text.replace(/[^0-9]/g, '');
-    const parsed = parseInt(numbers || '0');
-    if (parsed > 59) return;
-    setSeconds(numbers);
-  };
-
-  const adjustMinutes = (amount: number) => {
-    const newMinutes = Math.max(0, Math.min(99, parseInt(minutes || '0') + amount));
-    setMinutes(newMinutes.toString());
-  };
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [tempTime, setTempTime] = useState(currentTime);
 
   const adjustSeconds = (amount: number) => {
-    const currentSecs = parseInt(seconds || '0');
-    const newSeconds = Math.max(0, Math.min(59, currentSecs + amount));
-    setSeconds(newSeconds.toString().padStart(2, '0'));
+    setTempTime(prev => Math.max(0, prev + amount));
+    setShowConfirm(true);
   };
 
-  const confirmTime = () => {
-    const totalSeconds = (parseInt(minutes || '0') * 60) + parseInt(seconds || '0');
-    setCurrentTime(totalSeconds);
-    setIsEditing(false);
+  const handleConfirm = () => {
+    setCurrentTime(tempTime);
+    setShowConfirm(false);
   };
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(prev => Math.max(0, prev - 1));
+      setTempTime(prev => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const displayTime = `${Math.floor(currentTime / 60).toString().padStart(2, '0')}:${(currentTime % 60).toString().padStart(2, '0')}`;
+  const displayTime = `${Math.floor(tempTime / 60).toString().padStart(2, '0')}:${(tempTime % 60).toString().padStart(2, '0')}`;
 
   return (
     <View style={styles.container}>
-      <ThemedText type="title" style={styles.countdown}>
-        {displayTime}
-      </ThemedText>
+      <View style={styles.timerContainer}>
+        <ThemedText type="title" style={styles.countdown}>
+          {displayTime}
+        </ThemedText>
+      </View>
 
-      {isEditing ? (
-        <>
-          <View style={styles.inputContainer}>
-            <View style={styles.timeInputGroup}>
-              <TextInput
-                style={styles.timeInput}
-                value={minutes}
-                onChangeText={handleMinutesInput}
-                keyboardType="number-pad"
-                maxLength={2}
-                placeholder="10"
-                placeholderTextColor="#999"
-              />
-              <ThemedText style={styles.timeLabel}>min</ThemedText>
-            </View>
+      <ThemedText style={styles.notYourTimeText}>Not your game time?</ThemedText>
+      
+      <View style={styles.adjustButtons}>
+        <Pressable onPress={() => adjustSeconds(-10)} style={styles.negativeTimeButton}>
+          <ThemedText style={styles.buttonText}>-10s</ThemedText>
+        </Pressable>
+        <Pressable onPress={() => adjustSeconds(-5)} style={styles.negativeTimeButton}>
+          <ThemedText style={styles.buttonText}>-5s</ThemedText>
+        </Pressable>
+        <Pressable onPress={() => adjustSeconds(-1)} style={styles.negativeTimeButton}>
+          <ThemedText style={styles.buttonText}>-1s</ThemedText>
+        </Pressable>
+        <Pressable onPress={() => adjustSeconds(1)} style={styles.positiveTimeButton}>
+          <ThemedText style={styles.buttonText}>+1s</ThemedText>
+        </Pressable>
+        <Pressable onPress={() => adjustSeconds(5)} style={styles.positiveTimeButton}>
+          <ThemedText style={styles.buttonText}>+5s</ThemedText>
+        </Pressable>
+        <Pressable onPress={() => adjustSeconds(10)} style={styles.positiveTimeButton}>
+          <ThemedText style={styles.buttonText}>+10s</ThemedText>
+        </Pressable>
+      </View>
 
-            <ThemedText style={styles.timeSeparator}>:</ThemedText>
-
-            <View style={styles.timeInputGroup}>
-              <TextInput
-                style={styles.timeInput}
-                value={seconds}
-                onChangeText={handleSecondsInput}
-                keyboardType="number-pad"
-                maxLength={2}
-                placeholder="00"
-                placeholderTextColor="#999"
-              />
-              <ThemedText style={styles.timeLabel}>sec</ThemedText>
-            </View>
-          </View>
-
-          <View style={styles.adjustButtons}>
-            <Pressable onPress={() => adjustSeconds(-5)} style={styles.timeButton}>
-              <ThemedText style={styles.buttonText}>-5</ThemedText>
-            </Pressable>
-            <Pressable onPress={() => adjustSeconds(-1)} style={styles.timeButton}>
-              <ThemedText style={styles.buttonText}>-1</ThemedText>
-            </Pressable>
-            <Pressable onPress={() => adjustSeconds(1)} style={styles.timeButton}>
-              <ThemedText style={styles.buttonText}>+1</ThemedText>
-            </Pressable>
-            <Pressable onPress={() => adjustSeconds(5)} style={styles.timeButton}>
-              <ThemedText style={styles.buttonText}>+5</ThemedText>
-            </Pressable>
-          </View>
-
-          <Pressable onPress={confirmTime} style={styles.startButton}>
-            <ThemedText style={styles.startButtonText}>Confirm Time</ThemedText>
-          </Pressable>
-        </>
-      ) : (
-        <Pressable onPress={() => setIsEditing(true)} style={styles.editButton}>
-          <ThemedText style={styles.startButtonText}>Edit Time</ThemedText>
+      {showConfirm && (
+        <Pressable onPress={handleConfirm} style={styles.confirmButton}>
+          <ThemedText style={styles.confirmButtonText} type="defaultSemiBold">Confirm</ThemedText>
         </Pressable>
       )}
-
-      <ThemedText style={styles.liveText}>LIVE</ThemedText>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(232, 232, 232, 0.03)',
     padding: 20,
     alignItems: 'center',
-    width: '100%',
+    width: Platform.OS === 'web' ? '100%' : '100%',
+    maxWidth: Platform.OS === 'web' ? 850 : undefined, // Match content wrapper width
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: .5,
+    borderColor: '#CCCCCC',
+    justifyContent: 'center',
+  },
+  timerContainer: {
+    backgroundColor: 'rgba(232, 232, 232, 0.0)',
+    padding: 2,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginTop: 3,
+    width: '60%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    minWidth: 200,
   },
   countdown: {
     fontSize: 64,
     color: '#000000',
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    gap: 8,
-  },
-  timeInputGroup: {
-    alignItems: 'center',
-  },
-  timeInput: {
-    fontSize: 24,
-    borderWidth: 2,
-    borderColor: '#486B52',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    width: 70,
     textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+    lineHeight: 74,
+  },
+  notYourTimeText: {
     color: '#000000',
-  },
-  timeSeparator: {
-    fontSize: 24,
-    color: '#486B52',
-    fontWeight: 'bold',
-    marginHorizontal: 4,
-  },
-  timeLabel: {
-    fontSize: 14,
-    color: '#486B52',
-    marginTop: 4,
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 16,
   },
   adjustButtons: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 24,
+    gap: 10,
+    marginBottom: 20,
+    marginTop: 10,
   },
-  timeButton: {
-    backgroundColor: '#E8F0EA',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+  negativeTimeButton: {
+    backgroundColor: '#FF8B8B',
+    width: 45,
+    height: 40,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  positiveTimeButton: {
+    backgroundColor: '#486B52',
+    width: 45,
+    height: 40,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
-    color: '#486B52',
+    color: '#000000',
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
-  startButton: {
-    backgroundColor: '#486B52',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  startButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  liveText: {
-    color: '#486B52',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  editButton: {
-    backgroundColor: '#486B52',
+  confirmButton: {
+    backgroundColor: 'rgba(233, 233, 233, 0.99)',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
-    marginVertical: 20,
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
-
-export default GameSyncControl;

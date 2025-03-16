@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, Image, StyleSheet, SafeAreaView, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import ScoreBoard from '../components/ScoreBoard'
@@ -7,32 +7,19 @@ import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { router } from 'expo-router'
 import { GameSyncControl } from '@/components/GameSyncControl'
+import { GameTabs } from '@/components/gameTabs'
 
 const Header = () => {
   return (
     <ThemedView style={styles.header}>
       <View style={styles.webHeaderContent}>
-        <View style={styles.headerLeft}>
-          <Ionicons 
-            name="arrow-back" 
-            size={32} 
-            color="#000" 
-            style={styles.backButton}
-            onPress={() => router.push('/')}
-          />
-          <Image 
-            source={{
-              uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
-            }}
-            style={styles.webLogo}
-          />
-          <ThemedText 
-            type="default" 
-            style={styles.headerText}
-          >
-            musen
-          </ThemedText>
-        </View>
+        <Ionicons 
+          name="arrow-back" 
+          size={32} 
+          color="#000" 
+          style={styles.backButton}
+          onPress={() => router.push('/')}
+        />
       </View>
     </ThemedView>
   )
@@ -41,7 +28,8 @@ const Header = () => {
 const Stream = () => {
   const { activeStream } = useActiveStream()
   const isWeb = Platform.OS === 'web'
-  const [isLiked, setIsLiked] = React.useState(false)
+  const [isLiked, setIsLiked] = useState(false)
+  const [activeTab, setActiveTab] = useState('game time')
 
   if (!activeStream) {
     return (
@@ -56,6 +44,9 @@ const Stream = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       {isWeb && <Header />}
+      {Platform.OS === 'ios' && (
+        <View style={styles.pullDownIndicator} />
+      )}
       <View style={[styles.container, isWeb && styles.webContainer]}>
         <View style={[styles.contentWrapper, isWeb && styles.webContentWrapper]}>
           <View style={[styles.streamHeader, isWeb && styles.webStreamHeader]}>
@@ -65,7 +56,12 @@ const Stream = () => {
               <Ionicons name="volume-mute" size={24} color="#203024" />
             </View>
           </View>
-
+          
+          {/* Separator added here */}
+          {isWeb && (
+            <View style={styles.separator} />
+          )}
+  
           <View style={[styles.profile, isWeb && styles.webProfile]}>
             <Image
               source={{
@@ -78,23 +74,31 @@ const Stream = () => {
             <View style={styles.viewerCount}>
               <Ionicons
                 name={isLiked ? 'heart' : 'heart-outline'}
-                size={24}
+                size={Platform.OS === 'web' ? 32 : 24}
                 color={isLiked ? '#FF4444' : '#333'}
                 onPress={() => setIsLiked(!isLiked)}
               />
-              <Ionicons name="headset" size={24} color="#333" />
+              <Ionicons 
+                name="headset" 
+                size={Platform.OS === 'web' ? 32 : 24}
+                color="#333" 
+              />
               <ThemedText style={styles.countText}>{activeStream.listeners}</ThemedText>
             </View>
           </View>
-
+  
           <View style={[styles.scoreBoardWrapper, isWeb && styles.webScoreBoardWrapper]}>
             <ScoreBoard game={activeStream.game}/>
           </View>
-
+  
+          <View style={[styles.tabsWrapper, isWeb && styles.webTabsWrapper]}>
+            <GameTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          </View>
+  
           <View style={[styles.gameSyncWrapper, isWeb && styles.webGameSyncWrapper]}>
             <GameSyncControl />
           </View>
-
+  
           <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
             <View style={styles.placeholder} />
             <View style={styles.placeholder} />
@@ -115,35 +119,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
     padding: 16,
+    marginTop: Platform.OS === 'web' ? 20 : 0, // Add top margin on web to account for header height
   },
   webContainer: {
     alignItems: 'center',
   },
   contentWrapper: {
     width: '100%',
+    marginTop: 20, // Add some margin to the content wrapper
   },
   webContentWrapper: {
     maxWidth: 850,
     width: '100%',
   },
   header: {
-    height: 80,
+    height: Platform.select({
+      web: 40,
+      ios: 60,
+      default: 80,
+    }),
     width: '100%',
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     zIndex: 100,
-    backgroundColor: '#486B52',
+    backgroundColor: '#64a675',
   },
   webHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center', // Center the content
     height: '100%',
     maxWidth: 850,
     width: '100%',
     marginHorizontal: 'auto',
-    paddingLeft: 40,
+  },
+  backButton: {
+    padding: 8,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -165,7 +178,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingHorizontal: Platform.OS === 'web' ? 16 : 0,
+    borderBottomWidth: Platform.OS === 'ios' ? 1 : 0,
     borderBottomColor: '#E0E0E0',
   },
   webStreamHeader: {
@@ -175,32 +189,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    marginVertical: 8,
+    marginVertical: 4, // Reduced from 8
     justifyContent: 'flex-start',
   },
   webProfile: {
     width: '100%',
+    padding: 16, // Reduced padding if needed
   },
   profilePic: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: Platform.OS === 'web' ? 56 : 40,
+    height: Platform.OS === 'web' ? 56 : 40,
+    borderRadius: Platform.OS === 'web' ? 28 : 20,
     backgroundColor: '#E0E0E0',
   },
   username: {
-    marginLeft: 12,
-    fontSize: 16,
+    marginLeft: Platform.OS === 'web' ? 16 : 12,
+    fontSize: Platform.OS === 'web' ? 20 : 16,
     color: '#333',
   },
   viewerCount: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 8,
+    gap: Platform.OS === 'web' ? 12 : 8,
+    padding: Platform.OS === 'web' ? 12 : 8,
     marginLeft: 'auto',
+    ...(Platform.OS === 'web' && {
+      paddingRight: 16, // Add padding to align with card edges
+    }),
   },
   countText: {
-    fontSize: 16,
+    fontSize: Platform.OS === 'web' ? 20 : 16,
     color: '#333333',
   },
   scoreBoardWrapper: {
@@ -211,11 +229,13 @@ const styles = StyleSheet.create({
   },
   gameSyncWrapper: {
     width: '100%',
-    marginTop: 20,
+    marginTop: 0,
     marginBottom: 20,
   },
   webGameSyncWrapper: {
     alignItems: 'center',
+    width: '100%', // Ensure full width
+    maxWidth: 850, // Match the content wrapper width instead of 749
   },
   placeholderSection: {
     flex: 1,
@@ -235,9 +255,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    ...(Platform.OS === 'web' && {
+      paddingRight: 16, // Add padding to align with card edges
+    }),
   },
-  backButton: {
-    padding: 8,
+  pullDownIndicator: {
+    width: 36,
+    height: 5,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 2.5,
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  tabsWrapper: {
+    width: '100%',
+    marginVertical: 8,
+    marginTop: 20,
+  },
+  webTabsWrapper: {
+    alignItems: 'center',
+    maxWidth: 850,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    width: '100%',
+    marginTop: 8,
+    marginBottom: 8,
   },
 })
 
