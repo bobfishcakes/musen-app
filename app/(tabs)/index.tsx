@@ -10,10 +10,6 @@ import { useBasketballGames } from '@/api/basketball/basketballHooks';
 import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
-import { syncService } from '/Users/atharvsonawane/musen-app-sync/api/sync/syncService';
-import { sportRadarService } from '@/api/sportradar/sportRadarService';
-import { gameMapperService } from '@/server/src/services/gameMapperService';
-import { gameMappingService } from '@/api/sync/gameMappingService';
 
 const BACKEND_URL = 'http://localhost:3000';
 
