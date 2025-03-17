@@ -6,7 +6,7 @@ import { ThemedText } from '/Users/atharvsonawane/musen-app/components/ThemedTex
 import { ListenerSyncControl } from './ListenerSyncControl';
 import { StoppageTimer } from './StoppageTimer';
 import { GameClock, StoppageEvent } from '../../api/sync/syncTypes';
-import { sportRadarService } from '../../api/sportradar/sportRadarService';
+import { sportRadarLocalService } from '../../api/sportradar/sportRadarLocalService';
 import { syncService } from '../../api/sync/syncService';
 
 interface SyncTestPanelProps {
@@ -22,7 +22,7 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId }) => {
   useEffect(() => {
     const pollGameData = async () => {
       try {
-        const gameDetails = await sportRadarService.getGameDetails(gameId);
+        const gameDetails = await sportRadarLocalService.getGameDetails(gameId);
         
         // Update game clock based on SportRadar data
         if (gameDetails) {

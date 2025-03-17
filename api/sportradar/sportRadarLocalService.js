@@ -61,4 +61,4 @@ class SportRadarService {
     }
 
 }
-exports.sportRadarService = new SportRadarService();
+exports.sportRadarLocalService = new SportRadarService();

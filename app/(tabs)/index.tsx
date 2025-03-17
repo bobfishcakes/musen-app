@@ -10,7 +10,8 @@ import { useBasketballGames } from '@/api/basketball/basketballHooks';
 import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
-import { sportRadarService } from '@/api/sportradar/sportRadarService';
+import { sportRadarHTTPService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/sportRadarHTTPService';
+import { sportRadarLocalService } from '/Users/atharvsonawane/musen-app/api/sportradar/sportRadarLocalService';
 
 const BACKEND_URL = 'http://localhost:3000';
 
@@ -185,7 +186,7 @@ export default function HomeScreen() {
         const gameDate = new Date(game.date).toISOString().split('T')[0];
         
         // Use the service method to find the SportRadar game ID
-        const sportRadarGameId = await sportRadarService.findGameByTeamsAndDate(
+        const sportRadarGameId = await sportRadarLocalService.findGameByTeamsAndDate(
           game.teams.home.name,
           game.teams.away.name,
           gameDate
@@ -197,7 +198,7 @@ export default function HomeScreen() {
         }
     
         // Get game details using the found ID
-        const gameDetails = await sportRadarService.getGameDetails(sportRadarGameId);
+        const gameDetails = await sportRadarHTTPService.getGameDetails(sportRadarGameId);
     
         const getLastWord = (teamName: string) => {
           return teamName.split(' ').pop() || teamName;

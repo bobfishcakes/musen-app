@@ -131,4 +131,4 @@ class SportRadarService {
   }
 }
 
-export const sportRadarService = new SportRadarService();
+export const sportRadarHTTPService = new SportRadarService();
