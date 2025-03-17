@@ -1,12 +1,11 @@
-// components/sync/SyncTestPanel.tsx
-
+// SyncTestPanel.tsx
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '/Users/atharvsonawane/musen-app/components/ThemedText';
 import { ListenerSyncControl } from './ListenerSyncControl';
 import { StoppageTimer } from './StoppageTimer';
 import { GameClock, StoppageEvent } from '../../api/sync/syncTypes';
-import { sportRadarLocalService } from '../../api/sportradar/sportRadarLocalService';
+import { sportRadarHTTPService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/sportRadarHTTPService';
 import { syncService } from '../../api/sync/syncService';
 
 interface SyncTestPanelProps {
@@ -18,20 +17,23 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId }) => {
   const [stoppage, setStoppage] = useState<StoppageEvent>();
   const [lastUpdate, setLastUpdate] = useState<Date>();
 
-  // Poll SportRadar for updates
   useEffect(() => {
     const pollGameData = async () => {
       try {
-        const gameDetails = await sportRadarLocalService.getGameDetails(gameId);
+        const gameDetails = await sportRadarHTTPService.getGameDetails(gameId);
         
-        // Update game clock based on SportRadar data
         if (gameDetails) {
-          syncService.updateGameClock(gameId, {
-            period: gameDetails.status.period,
-            minutes: gameDetails.status.clock?.minutes || 0,
-            seconds: gameDetails.status.clock?.seconds || 0,
-            isRunning: gameDetails.status.type === 'inprogress'
-          });
+          // Create properly typed GameClock object using the GameDetailsResponse
+          const newClock: GameClock = {
+            gameId,
+            period: gameDetails.period,
+            minutes: gameDetails.clock?.minutes || 0,
+            seconds: gameDetails.clock?.seconds || 0,
+            isRunning: gameDetails.status === 'inprogress',
+            lastUpdated: new Date()
+          };
+
+          syncService.updateGameClock(gameId, newClock);
           setLastUpdate(new Date());
         }
       } catch (error) {
@@ -39,21 +41,19 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId }) => {
       }
     };
 
-    // Poll every 5 seconds
     const interval = setInterval(pollGameData, 5000);
-    pollGameData(); // Initial poll
+    pollGameData();
 
     return () => clearInterval(interval);
   }, [gameId]);
 
   return (
     <View style={styles.container}>
-      {/* Game Clock Display */}
       <View style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Game Clock</ThemedText>
         <ThemedText>
           Period: {gameClock?.period || '-'} | 
-          Time: {gameClock?.minutes || '--'}:{gameClock?.seconds.toString().padStart(2, '0') || '--'}
+          Time: {gameClock?.minutes || '--'}:{(gameClock?.seconds || 0).toString().padStart(2, '0')}
         </ThemedText>
         <ThemedText>
           Status: {gameClock?.isRunning ? 'Running' : 'Stopped'}
@@ -65,7 +65,6 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId }) => {
         )}
       </View>
 
-      {/* Stoppage Display */}
       <View style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Stoppage</ThemedText>
         {stoppage ? (
@@ -78,7 +77,6 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId }) => {
         )}
       </View>
 
-      {/* Sync Control */}
       <ListenerSyncControl
         gameId={gameId}
         onClockUpdate={setGameClock}

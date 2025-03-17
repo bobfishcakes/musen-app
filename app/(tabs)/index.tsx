@@ -11,7 +11,7 @@ import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
 import { sportRadarHTTPService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/sportRadarHTTPService';
-import { sportRadarLocalService } from '/Users/atharvsonawane/musen-app/api/sportradar/sportRadarLocalService';
+import { sportRadarLocalService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/sportRadarLocalService';
 
 const BACKEND_URL = 'http://localhost:3000';
 
@@ -185,7 +185,7 @@ export default function HomeScreen() {
         // Get the date in YYYY-MM-DD format
         const gameDate = new Date(game.date).toISOString().split('T')[0];
         
-        // Use the service method to find the SportRadar game ID
+        // Find the SportRadar game ID from local JSON
         const sportRadarGameId = await sportRadarLocalService.findGameByTeamsAndDate(
           game.teams.home.name,
           game.teams.away.name,
@@ -197,7 +197,7 @@ export default function HomeScreen() {
           return;
         }
     
-        // Get game details using the found ID
+        // Get game details from backend using the found ID
         const gameDetails = await sportRadarHTTPService.getGameDetails(sportRadarGameId);
     
         const getLastWord = (teamName: string) => {
@@ -217,7 +217,6 @@ export default function HomeScreen() {
           listeners: 1
         };
     
-        // Set the active stream and navigate
         setActiveStream(newStream);
         router.push('/stream');
     
