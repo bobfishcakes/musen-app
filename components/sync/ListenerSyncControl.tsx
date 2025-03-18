@@ -25,25 +25,31 @@ export const ListenerSyncControl: React.FC<ListenerSyncControlProps> = ({
   useEffect(() => {
     // Initial clock state
     const initialClock = syncService.getGameClock(gameId);
+    console.log("Initial clock from syncService:", initialClock);
+    
     if (initialClock) {
       setClock(initialClock);
       onClockUpdate?.(initialClock);
+      console.log("Set initial clock state:", initialClock);
     }
-
+  
     // Set up listeners for clock updates
     const clockInterval = setInterval(() => {
       const currentClock = syncService.getGameClock(gameId);
+      console.log("Clock update from interval:", currentClock);
+      
       if (currentClock) {
         setClock(currentClock);
         onClockUpdate?.(currentClock);
+        console.log("Updated clock state:", currentClock);
       }
     }, 1000);
-
+  
     return () => {
       clearInterval(clockInterval);
     };
   }, [gameId]);
-
+  
   const handleStoppageStart = (type: StoppageEvent['type']) => {
     syncService.startStoppage(gameId, type);
     const newStoppage = {

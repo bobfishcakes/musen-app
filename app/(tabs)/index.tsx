@@ -221,7 +221,6 @@ export default function HomeScreen() {
           return teamName.split(' ').pop() || teamName;
         };
     
-        // Create the stream object
         const newStream: Stream = {
           id: `1`,
           title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
@@ -229,7 +228,14 @@ export default function HomeScreen() {
           game: {
             ...game,
             radarGameId: sportRadarGameId,
-            clock: gameDetails.clock
+            clock: (() => {
+              // Parse the clock string (e.g., "3:40" into minutes and seconds)
+              const [minutesStr, secondsStr] = (gameDetails.status.clock || "0:00").split(':');
+              return {
+                minutes: parseInt(minutesStr) || 0,
+                seconds: parseInt(secondsStr) || 0
+              };
+            })()
           },
           listeners: 1
         };

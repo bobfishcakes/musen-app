@@ -12,22 +12,29 @@ class SyncService {
     this.debugPollers = new Map();
   }
 
-  updateGameClock(gameId: string, clock: Partial<GameClock>): void {
-    const existing = this.activeSyncs.get(gameId) || {
-      gameId,
-      period: 1,
-      minutes: 12,
-      seconds: 0,
-      isRunning: false,
-      lastUpdated: new Date()
-    };
+// syncService.ts
+updateGameClock(gameId: string, clock: Partial<GameClock>): void {
+  const existing = this.activeSyncs.get(gameId) || {
+    gameId,
+    period: 1,
+    minutes: 12,
+    seconds: 0,
+    isRunning: false,
+    lastUpdated: new Date()
+  };
 
-    this.activeSyncs.set(gameId, {
-      ...existing,
-      ...clock,
-      lastUpdated: new Date()
-    });
-  }
+  console.log("Existing clock in syncService:", existing);
+  
+  const updatedClock = {
+    ...existing,
+    ...clock,
+    lastUpdated: new Date()
+  };
+  
+  console.log("Updated clock in syncService:", updatedClock);
+  
+  this.activeSyncs.set(gameId, updatedClock);
+}
 
   getGameClock(gameId: string): GameClock | undefined {
     return this.activeSyncs.get(gameId);

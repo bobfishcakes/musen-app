@@ -35,10 +35,16 @@ export interface SportRadarGame {
 }
 
 export interface GameDetailsResponse {
-  radarGameId: string;
-  clock: SportRadarGameClock;  // Using default values
-  period: number;              // Using default value
-  status: string;             // This matches what's in the JSON
+  id: string;
+  status: {
+    clock: string;        // API returns clock as string like "3:40"
+    quarter: number;      // API uses quarter instead of period
+    type: string;        // "inprogress", "complete", etc.
+  };
+  scheduled: string;
+  home: SportRadarTeam;
+  away: SportRadarTeam;
+  venue: SportRadarVenue;
 }
 
 export interface SportRadarApiResponse<T> {

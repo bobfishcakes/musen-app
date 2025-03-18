@@ -20,30 +20,70 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId }) => {
   useEffect(() => {
     const pollGameData = async () => {
       try {
+        console.log('Fetching game details for gameId:', gameId);
         const gameDetails = await sportRadarHTTPService.getGameDetails(gameId);
-        
-        if (gameDetails) {
-          // Create properly typed GameClock object using the GameDetailsResponse
+        console.log('Raw API Response:', gameDetails);
+    
+        if (gameDetails && gameDetails.status) {
+          // Log the raw clock string from API
+          console.log('Raw clock string:', gameDetails.status.clock);
+    
+          // Parse and log clock components
+          const [minutesStr, secondsStr] = (gameDetails.status.clock || "0:00").split(':');
+          const minutes = parseInt(minutesStr) || 0;
+          const seconds = parseInt(secondsStr) || 0;
+          
+          console.log('Parsed clock values:', {
+            minutes,
+            seconds,
+            quarter: gameDetails.status.quarter,
+            type: gameDetails.status.type
+          });
+    
+          // Create and log the new clock object
           const newClock: GameClock = {
             gameId,
-            period: gameDetails.period,
-            minutes: gameDetails.clock?.minutes || 0,
-            seconds: gameDetails.clock?.seconds || 0,
-            isRunning: gameDetails.status === 'inprogress',
+            period: gameDetails.status.quarter,
+            minutes: minutes,
+            seconds: seconds,
+            isRunning: gameDetails.status.type === 'inprogress',
             lastUpdated: new Date()
           };
-
+          
+          console.log('Created GameClock object:', newClock);
+    
+          // Log before updating services
+          console.log('Updating sync service with clock:', newClock);
           syncService.updateGameClock(gameId, newClock);
+          
+          // Log state updates
+          console.log('Setting state variables:', {
+            gameClock: newClock,
+            lastUpdate: new Date()
+          });
+          
+          setGameClock(newClock);
           setLastUpdate(new Date());
+        } else {
+          console.warn('Game details or status missing:', gameDetails);
         }
-      } catch (error) {
-        console.error('Error polling game data:', error);
+      } catch (error: unknown) {
+        console.error('Error in pollGameData:', error);
+        
+        if (error instanceof Error) {
+          console.error('Error details:', {
+            message: error.message,
+            stack: error.stack
+          });
+        } else {
+          console.error('Unknown error type:', error);
+        }
       }
     };
-
+  
     const interval = setInterval(pollGameData, 5000);
-    pollGameData();
-
+    pollGameData(); // Initial call
+  
     return () => clearInterval(interval);
   }, [gameId]);
 
