@@ -1,91 +1,19 @@
-// SyncTestPanel.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '/Users/atharvsonawane/musen-app/components/ThemedText';
 import { ListenerSyncControl } from './ListenerSyncControl';
 import { StoppageTimer } from './StoppageTimer';
 import { GameClock, StoppageEvent } from '../../api/sync/syncTypes';
-import { sportRadarHTTPService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/sportRadarHTTPService';
-import { syncService } from '../../api/sync/syncService';
 
 interface SyncTestPanelProps {
   gameId: string;
+  initialClock: GameClock;
 }
 
-export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId }) => {
-  const [gameClock, setGameClock] = useState<GameClock>();
+export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClock }) => {
+  const [gameClock, setGameClock] = useState<GameClock>(initialClock);
   const [stoppage, setStoppage] = useState<StoppageEvent>();
-  const [lastUpdate, setLastUpdate] = useState<Date>();
-
-  useEffect(() => {
-    const pollGameData = async () => {
-      try {
-        console.log('Fetching game details for gameId:', gameId);
-        const gameDetails = await sportRadarHTTPService.getGameDetails(gameId);
-        console.log('Raw API Response:', gameDetails);
-    
-        if (gameDetails && gameDetails.status) {
-          // Log the raw clock string from API
-          console.log('Raw clock string:', gameDetails.status.clock);
-    
-          // Parse and log clock components
-          const [minutesStr, secondsStr] = (gameDetails.status.clock || "0:00").split(':');
-          const minutes = parseInt(minutesStr) || 0;
-          const seconds = parseInt(secondsStr) || 0;
-          
-          console.log('Parsed clock values:', {
-            minutes,
-            seconds,
-            quarter: gameDetails.status.quarter,
-            type: gameDetails.status.type
-          });
-    
-          // Create and log the new clock object
-          const newClock: GameClock = {
-            gameId,
-            period: gameDetails.status.quarter,
-            minutes: minutes,
-            seconds: seconds,
-            isRunning: gameDetails.status.type === 'inprogress',
-            lastUpdated: new Date()
-          };
-          
-          console.log('Created GameClock object:', newClock);
-    
-          // Log before updating services
-          console.log('Updating sync service with clock:', newClock);
-          syncService.updateGameClock(gameId, newClock);
-          
-          // Log state updates
-          console.log('Setting state variables:', {
-            gameClock: newClock,
-            lastUpdate: new Date()
-          });
-          
-          setGameClock(newClock);
-          setLastUpdate(new Date());
-        } else {
-          console.warn('Game details or status missing:', gameDetails);
-        }
-      } catch (error: unknown) {
-        console.error('Error in pollGameData:', error);
-        
-        if (error instanceof Error) {
-          console.error('Error details:', {
-            message: error.message,
-            stack: error.stack
-          });
-        } else {
-          console.error('Unknown error type:', error);
-        }
-      }
-    };
-  
-    const interval = setInterval(pollGameData, 5000);
-    pollGameData(); // Initial call
-  
-    return () => clearInterval(interval);
-  }, [gameId]);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   return (
     <View style={styles.container}>

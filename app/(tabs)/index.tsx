@@ -230,7 +230,8 @@ export default function HomeScreen() {
             radarGameId: sportRadarGameId,
             clock: (() => {
               // Parse the clock string (e.g., "3:40" into minutes and seconds)
-              const [minutesStr, secondsStr] = (gameDetails.status.clock || "0:00").split(':');
+              const [minutesStr, secondsStr] = (gameDetails.clock || "0:00").split(':');
+              console.log('Cock -', gameDetails.clock,  parseInt(minutesStr) , parseInt(secondsStr));
               return {
                 minutes: parseInt(minutesStr) || 0,
                 seconds: parseInt(secondsStr) || 0

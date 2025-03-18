@@ -3,6 +3,11 @@ export interface SportRadarTeam {
   name: string;
   alias: string;
   market: string;
+  points?: number;
+  bonus?: boolean;
+  remaining_timeouts?: number;
+  reference?: string;
+  sr_id?: string;
 }
 
 export interface SportRadarVenue {
@@ -36,15 +41,23 @@ export interface SportRadarGame {
 
 export interface GameDetailsResponse {
   id: string;
-  status: {
-    clock: string;        // API returns clock as string like "3:40"
-    quarter: number;      // API uses quarter instead of period
-    type: string;        // "inprogress", "complete", etc.
-  };
+  status: string;        // "inprogress", "complete", etc.
+  clock: string;         // API returns clock as string like "11:16"
+  clock_decimal?: string;
+  quarter: number;       // API uses quarter instead of period
   scheduled: string;
   home: SportRadarTeam;
   away: SportRadarTeam;
   venue: SportRadarVenue;
+  coverage: string;
+  attendance?: number;
+  sr_id?: string;
+  reference?: string;
+  time_zones?: {
+    away: string;
+    home: string;
+    venue: string;
+  };
 }
 
 export interface SportRadarApiResponse<T> {

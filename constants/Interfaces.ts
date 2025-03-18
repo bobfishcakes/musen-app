@@ -35,12 +35,16 @@ export interface Game {
   scores?: Scores
   streamers?: number;
   listeners?: number;
-  // Add these new properties
   radarGameId?: string;
   clock?: {
     minutes: number;
     seconds: number;
   };
+  // Add these new properties
+  period: number;
+  minutes: number;
+  seconds: number;
+  isRunning: boolean;
 }
 
 export interface Scores {

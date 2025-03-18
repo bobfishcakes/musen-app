@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { router } from 'expo-router'
 import { syncService } from '@/api/sync/syncService'
 import { GameClock, StoppageEvent } from '@/api/sync/syncTypes'
+import { SyncTestPanel } from '@/components/sync/syncTestPanel'
 
 const Header = () => {
   return (
@@ -136,7 +137,19 @@ const Stream = () => {
             <ScoreBoard game={activeStream.game}/>
           </View>
 
-          {isWeb && <SyncDebugPanel gameId={activeStream.game.id} />}
+          {isWeb && (
+  <SyncTestPanel 
+    gameId={activeStream.game.id}
+    initialClock={{
+      gameId: activeStream.game.id,
+      period: activeStream.game.period,
+      minutes: activeStream.game.minutes,
+      seconds: activeStream.game.seconds,
+      isRunning: activeStream.game.isRunning,
+      lastUpdated: new Date()
+    }}
+  />
+)}
 
           <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
             <View style={styles.placeholder} />
