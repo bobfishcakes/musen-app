@@ -179,12 +179,25 @@ export default function HomeScreen() {
     const handleGamePress = async (game: Game) => {
       try {
         if (!game.date) {
+          console.log('Game press failed: No date available');
           throw new Error('Game date is undefined');
         }
+    
+        console.log('Game pressed:', {
+          homeTeam: game.teams.home.name,
+          awayTeam: game.teams.away.name,
+          date: game.date
+        });
     
         // Get the date in YYYY-MM-DD format
         const gameDate = new Date(game.date).toISOString().split('T')[0];
         
+        console.log('Looking for SportRadar game ID with:', {
+          homeTeam: game.teams.home.name,
+          awayTeam: game.teams.away.name,
+          date: gameDate
+        });
+    
         // Find the SportRadar game ID from local JSON
         const sportRadarGameId = await sportRadarLocalService.findGameByTeamsAndDate(
           game.teams.home.name,
@@ -193,12 +206,16 @@ export default function HomeScreen() {
         );
     
         if (!sportRadarGameId) {
-          console.error('SportRadar game ID not found');
+          console.log('SportRadar game ID not found');
           return;
         }
     
+        console.log('Found SportRadar game ID:', sportRadarGameId);
+        console.log('Attempting to fetch game details for ID:', sportRadarGameId);
+    
         // Get game details from backend using the found ID
         const gameDetails = await sportRadarHTTPService.getGameDetails(sportRadarGameId);
+        console.log('Received game details:', gameDetails);
     
         const getLastWord = (teamName: string) => {
           return teamName.split(' ').pop() || teamName;

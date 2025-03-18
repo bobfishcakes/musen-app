@@ -2,16 +2,22 @@
 import { Router } from 'express';
 import { sportRadarHTTPService } from '../api/sportRadar/sportRadarHTTPService';
 import { sportRadarLocalService } from '../api/sportRadar/sportRadarLocalService';
+import axios from 'axios';
 
 const gamesRouter = Router();
 
 gamesRouter.get('/details/:gameId', async (req, res) => {
   try {
     const gameId = req.params.gameId;
-    console.log('Requesting game details for gameId:', gameId);
-    
-    const gameDetails = await sportRadarHTTPService.getGameDetails(gameId);
-    res.json(gameDetails);
+    const response = await axios.get(
+      `https://api.sportradar.com/nba/trial/v8/en/games/${gameId}/boxscore.json`,
+      {
+        params: {
+          api_key: process.env.SPORTRADAR_API_KEY
+        }
+      }
+    );
+    res.json(response.data);
   } catch (error) {
     console.error('Error fetching game details:', error);
     res.status(500).json({ error: 'Failed to fetch game details' });

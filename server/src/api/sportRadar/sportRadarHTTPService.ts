@@ -8,14 +8,13 @@ export class SportRadarHTTPService {
 
   constructor() {
     this.client = axios.create({
-      baseURL: 'http://localhost:3000',
-      timeout: 30000  // Increase timeout to 30 seconds
+      baseURL: 'http://localhost:3000', // Your backend server
+      timeout: 30000
     });
   }
-
+  
   async getGameDetails(gameId: string): Promise<GameDetailsResponse> {
     try {
-      console.log(`Fetching game details for ID: ${gameId}`);
       const response = await this.client.get(`/api/games/details/${gameId}`);
       return response.data;
     } catch (error) {
