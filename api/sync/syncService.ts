@@ -1,5 +1,5 @@
-// api/sync/syncService.ts
 import { GameClock, SyncOffset, StoppageEvent } from './syncTypes';
+import { pushLogger } from '../../utils/logging/pushLogger';
 
 class SyncService {
   private activeSyncs: Map<string, GameClock>;
@@ -12,28 +12,26 @@ class SyncService {
     this.debugPollers = new Map();
   }
 
-// syncService.ts
-updateGameClock(gameId: string, clock: Partial<GameClock>): void {
-  const existing = this.activeSyncs.get(gameId) || {
-    gameId,
-    period: 1,
-    minutes: 12,
-    seconds: 0,
-    isRunning: false,
-    lastUpdated: new Date()
-  };
+  updateGameClock(gameId: string, clock: Partial<GameClock>): void {
+    const existing = this.activeSyncs.get(gameId) || {
+      gameId,
+      period: 1,
+      minutes: 12,
+      seconds: 0,
+      isRunning: false,
+      lastUpdated: new Date()
+    };
 
-  console.log("Existing clock in syncService:", existing);
+
+    const updatedClock = {
+      ...existing,
+      ...clock,
+      lastUpdated: new Date()
+    };
+    
   
-  const updatedClock = {
-    ...existing,
-    ...clock,
-    lastUpdated: new Date()
-  };
-  
-  console.log("Updated clock in syncService:", updatedClock);
-  
-  this.activeSyncs.set(gameId, updatedClock);
+    this.activeSyncs.set(gameId, updatedClock);
+    pushLogger.updates('Clock updated in sync service:', updatedClock);
 }
 
   getGameClock(gameId: string): GameClock | undefined {

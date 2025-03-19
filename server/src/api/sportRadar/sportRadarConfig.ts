@@ -1,5 +1,6 @@
 export const SPORTRADAR_CONFIG = {
   BASE_URL: 'https://api.sportradar.com/nba/trial/v8/en',
+  WS_URL: 'wss://api.sportradar.com/nba/trial/v8/stream/en', // Add this line
   API_KEY: process.env.SPORTRADAR_API_KEY,
   ENDPOINTS: {
       GAMES: '/games',

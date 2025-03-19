@@ -84,6 +84,37 @@ const SyncDebugPanel = ({ gameId }: { gameId: string }) => {
   );
 };
 
+const GameClockPanel = ({ gameId }: { gameId: string }) => {
+  const [clock, setClock] = useState<GameClock>();
+
+  useEffect(() => {
+    syncService.startDebugPolling(gameId, (newClock) => {
+      setClock(newClock);
+    });
+
+    return () => syncService.stopDebugPolling(gameId);
+  }, [gameId]);
+
+  return (
+    <View style={styles.gameClockPanel}>
+      <ThemedText style={styles.clockTitle}>Live Game Clock</ThemedText>
+      <ThemedText style={styles.clockTime}>
+        {clock ? (
+          `${clock.period}Q ${clock.minutes}:${clock.seconds.toString().padStart(2, '0')}`
+        ) : (
+          'Waiting for updates...'
+        )}
+      </ThemedText>
+      <ThemedText style={styles.clockStatus}>
+        Status: {clock?.isRunning ? 'Running' : 'Stopped'}
+      </ThemedText>
+      <ThemedText style={styles.clockHelper}>
+        Use this clock to sync your stream with real-time game updates
+      </ThemedText>
+    </View>
+  );
+};
+
 const Stream = () => {
   const { activeStream } = useActiveStream()
   const isWeb = Platform.OS === 'web'
@@ -136,6 +167,8 @@ const Stream = () => {
           <View style={[styles.scoreBoardWrapper, isWeb && styles.webScoreBoardWrapper]}>
             <ScoreBoard game={activeStream.game}/>
           </View>
+
+          {isWeb && <GameClockPanel gameId={activeStream.game.id} />}
 
           {isWeb && (
   <SyncTestPanel 
@@ -319,6 +352,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6C757D',
     marginTop: 4,
+  },
+  gameClockPanel: {
+    backgroundColor: '#203024',
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  clockTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  clockTime: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    marginVertical: 8,
+  },
+  clockStatus: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    opacity: 0.8,
+  },
+  clockHelper: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    opacity: 0.6,
+    marginTop: 8,
+    textAlign: 'center',
   },
 })
 

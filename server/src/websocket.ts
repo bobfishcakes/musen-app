@@ -1,28 +1,40 @@
 import { Server } from 'http';
 import WebSocket from 'ws';
+import { sportRadarPushService } from './api/sportRadar/sportRadarPushService';
+import { pushLogger } from '/Users/atharvsonawane/musen-app/utils/logging/pushLogger';
 
-export function setupWebSocket(server: Server) {
+export const setupWebSocket = (server: Server) => {
   const wss = new WebSocket.Server({ server });
+  
+  wss.on('listening', () => {
+    pushLogger.connection('WebSocket server is listening');
+  });
 
   wss.on('connection', (ws: WebSocket) => {
-    console.log('Client connected');
-
+    pushLogger.connection('New WebSocket connection established');
+    
     ws.on('message', (message: WebSocket.RawData) => {
       try {
         const data = JSON.parse(message.toString());
-        console.log('Received:', data);
         
-        // Handle different message types here
-        if (data.type === 'subscribe' && data.gameId) {
-          console.log(`Client subscribed to game: ${data.gameId}`);
+        if (data.type === 'subscribe') {
+          sportRadarPushService.subscribeToGame(data.gameId);
+        } else if (data.type === 'unsubscribe') {
+          sportRadarPushService.unsubscribeFromGame(data.gameId);
         }
+        
+        pushLogger.connection('Processed WebSocket message:', data);
       } catch (error) {
-        console.error('WebSocket message error:', error);
+        pushLogger.errors('Error processing WebSocket message:', error);
       }
     });
 
+    ws.on('error', (error) => {
+      pushLogger.errors('WebSocket error:', error);
+    });
+
     ws.on('close', () => {
-      console.log('Client disconnected');
+      pushLogger.connection('Client disconnected');
     });
   });
-}
+};
