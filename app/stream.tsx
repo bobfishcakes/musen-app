@@ -11,6 +11,52 @@ import { GameTabs } from '@/components/gameTabs'
 import { Header } from '@/components/Header';
 import { useStreaming } from '@/contexts/StreamingContext'
 
+const TimerInput = ({ value, onChange }: { value: string, onChange: (text: string) => void }) => {
+  const [minutes, seconds] = value.split(':');
+
+  const handleMinuteChange = (text: string) => {
+    const mins = text.replace(/[^\d]/g, '');
+    if (mins.length <= 2) {
+      const newMinutes = mins.length === 0 ? '00' : mins;
+      onChange(`${newMinutes}:${seconds || '00'}`);
+    }
+  };
+
+  const handleSecondChange = (text: string) => {
+    const secs = text.replace(/[^\d]/g, '');
+    if (secs.length <= 2) {
+      const newSeconds = secs.length === 0 ? '00' : secs;
+      onChange(`${minutes || '00'}:${newSeconds}`);
+    }
+  };
+
+  return (
+    <View style={styles.timerInput}>
+      <TextInput
+        style={styles.timerDigit}
+        value={minutes || '00'}
+        onChangeText={handleMinuteChange}
+        keyboardType="number-pad"
+        maxLength={2}
+        selectTextOnFocus={true}
+      />
+      <ThemedText style={styles.timerSeparator}>:</ThemedText>
+      <TextInput
+        style={styles.timerDigit}
+        value={seconds || '00'}
+        onChangeText={handleSecondChange}
+        keyboardType="number-pad"
+        maxLength={2}
+        selectTextOnFocus={true}
+      />
+    </View>
+  );
+};
+
+const handleBack = () => {
+  router.back();
+};
+
 const Stream = () => {
   const { activeStream } = useActiveStream()
   const { isStreaming } = useStreaming()
@@ -18,7 +64,7 @@ const Stream = () => {
   const [isLiked, setIsLiked] = useState(false)
   const [activeTab, setActiveTab] = useState('game time')
   const [showTimePrompt, setShowTimePrompt] = useState(false)
-  const [gameStartTime, setGameStartTime] = useState('')
+  const [gameStartTime, setGameStartTime] = useState('00:00')
   const [isTimeSet, setIsTimeSet] = useState(false)
 
   useEffect(() => {
@@ -35,14 +81,28 @@ const Stream = () => {
   };
 
   const handleTimeChange = (text: string) => {
-    // Format input as MM:SS
+    // Remove non-digit and non-colon characters
     let formatted = text.replace(/[^\d:]/g, '');
-    if (formatted.length > 5) return;
-
-    if (formatted.length === 2 && !formatted.includes(':') && gameStartTime.length < formatted.length) {
-      formatted = formatted + ':';
-    }
     
+    // Don't allow more than 5 characters (MM:SS format)
+    if (formatted.length > 5) return;
+  
+    // Add colon after 2 digits if not present
+    if (formatted.length === 2 && !formatted.includes(':')) {
+      formatted += ':';
+    }
+  
+    // Validate minutes and seconds
+    const parts = formatted.split(':');
+    if (parts[0] && parseInt(parts[0]) > 59) {
+      parts[0] = '59';
+      formatted = parts.join(':');
+    }
+    if (parts[1] && parseInt(parts[1]) > 59) {
+      parts[1] = '59';
+      formatted = parts.join(':');
+    }
+  
     setGameStartTime(formatted);
   };
 
@@ -68,7 +128,7 @@ const Stream = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {isWeb && <Header showBack />}
+      {isWeb && <Header showBack isStreamPage/>}
       {Platform.OS === 'ios' && (
         <View style={styles.pullDownIndicator} />
       )}
@@ -136,30 +196,43 @@ const Stream = () => {
       </View>
 
       <Modal
-        visible={showTimePrompt && isStreaming}
-        transparent={true}
-        animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <ThemedText type="subtitle">Enter Current Game Time</ThemedText>
-            <TextInput
-              style={styles.timeInput}
-              placeholder="MM:SS"
-              value={gameStartTime}
-              onChangeText={handleTimeChange}
-              keyboardType="numbers-and-punctuation"
-              maxLength={5}
-            />
-            <TouchableOpacity 
-              style={styles.submitButton}
-              onPress={handleTimeSubmit}
-            >
-              <ThemedText style={styles.submitButtonText}>Start Stream</ThemedText>
-            </TouchableOpacity>
-          </View>
+  visible={showTimePrompt && isStreaming}
+  transparent={true}
+  animationType="fade"
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <View style={styles.modalHeader}>
+        <TouchableOpacity onPress={handleBack}>
+          <Ionicons name="arrow-back" size={24} color="#000000" />
+        </TouchableOpacity>
+        <View style={styles.modalTitleContainer}>
+          <ThemedText style={styles.modalTitle}>Enter Current Game Time</ThemedText>
         </View>
-      </Modal>
+      </View>
+      
+      <ThemedText style={styles.quarterText}>
+        {activeStream?.game?.status?.long || 'Not Started'}
+      </ThemedText>
+      
+      <TimerInput
+        value={gameStartTime}
+        onChange={handleTimeChange}
+      />
+
+      <ThemedText style={styles.warningMessage}>
+        Your clock <ThemedText style={styles.warningMessage}>must be running</ThemedText> in order to set your game time
+      </ThemedText>
+
+      <TouchableOpacity 
+        style={styles.submitButton}
+        onPress={handleTimeSubmit}
+      >
+        <ThemedText style={styles.submitButtonText}>Start Stream</ThemedText>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
     </SafeAreaView>
   )
 }
@@ -314,19 +387,32 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     width: Platform.OS === 'web' ? 400 : '80%',
     alignItems: 'center',
+    position: 'relative', // Add this
   },
-  timeInput: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+  timerInput: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 16, // Reduced to accommodate warning message below
+    gap: 8,
+  },
+  timerDigit: {
+    backgroundColor: '#F5F5F5',
     borderRadius: 8,
     padding: 12,
-    width: '100%',
-    marginTop: 16,
-    marginBottom: 24,
-    fontSize: 16,
+    width: 60,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  timerSeparator: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#000000',
   },
   submitButton: {
-    backgroundColor: '#203024',
+    backgroundColor: '#64a675',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -334,9 +420,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  warningMessage: {
+    textAlign: 'center',
+    marginBottom: 24, // Add bottom margin before the button
+    fontSize: 16,
+    color: '#666666',
+  },
+  modalTitle: {
+    color: '#000000',
+    fontSize: 24, // Increased from 18
+    fontWeight: '700', // Made bolder
+    marginBottom: 8,
+  },
+  quarterText: {
+    marginTop: 8,
+    fontSize: 16,
+    color: '#324b39', // Same green as other statuses
     fontWeight: '600',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 8,
+  },
+  modalTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+    marginRight: 24, // To account for the back button width and keep title centered
   },
 })
 

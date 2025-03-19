@@ -83,16 +83,30 @@ const styles = StyleSheet.create({
       default: 24,
     }),
   },
+  modeText: {
+    position: 'absolute',
+    right: 64, // This positions it to the left of the toggle button
+    top: Platform.select({
+      web: 20,
+      ios: 20,
+      default: 32,
+    }),
+    color: 'black',
+    fontSize: 16,
+    fontWeight: '500',
+  },
 });
 
 interface HeaderProps {
   showBack?: boolean;
   onBack?: () => void;
+  isStreamPage?: boolean; // Add this new prop
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   showBack = false, 
-  onBack = () => router.push('/(tabs)') 
+  onBack = () => router.push('/(tabs)'),
+  isStreamPage = false // Add default value
 }) => {
   const isWeb = Platform.OS === 'web';
   const { isStreaming, setIsStreaming } = useStreaming();
@@ -128,20 +142,25 @@ export const Header: React.FC<HeaderProps> = ({
           </View>
         )}
 
-        {isWeb && (
-          <TouchableOpacity 
-            style={[
-              styles.streamButton,
-              { backgroundColor: isStreaming ? '#e74c3c' : '#486B52' }
-            ]}
-            onPress={() => setIsStreaming(!isStreaming)}
-          >
-            <Ionicons 
-              name={isStreaming ? "radio" : "radio-outline"}
-              size={24} 
-              color="white" 
-            />
-          </TouchableOpacity>
+        {isWeb && !isStreamPage && ( // Add !isStreamPage condition here
+          <>
+            <ThemedText style={styles.modeText}>
+              {isStreaming ? 'Streamer Mode' : 'Listener Mode'}
+            </ThemedText>
+            <TouchableOpacity 
+              style={[
+                styles.streamButton,
+                { backgroundColor: isStreaming ? '#e74c3c' : '#486B52' }
+              ]}
+              onPress={() => setIsStreaming(!isStreaming)}
+            >
+              <Ionicons 
+                name={isStreaming ? "radio" : "radio-outline"}
+                size={24} 
+                color="white" 
+              />
+            </TouchableOpacity>
+          </>
         )}
       </View>
     </ThemedView>
