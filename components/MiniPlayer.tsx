@@ -69,7 +69,9 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#64a675',
+        backgroundColor: '#ffffff',
+        borderColor: '#64a675',
+        borderWidth: 3,
         padding: 10,
         borderRadius: 12,
         paddingVertical: Platform.OS === 'ios' ? 25 : 20, // Increase vertical padding for iOS

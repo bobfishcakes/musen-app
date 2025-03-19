@@ -193,7 +193,7 @@ const Header = () => {
           listeners: 1
         };
         setActiveStream(newStream);
-        router.push('/stream-streamer');
+        router.push('/stream');
       };
   
     const renderGameCard = ({ item }: { item: Game }) => (

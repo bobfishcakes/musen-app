@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { View, Image, StyleSheet, SafeAreaView, Platform } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { View, Image, StyleSheet, SafeAreaView, Platform, Modal, TextInput, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import ScoreBoard from '../components/ScoreBoard'
 import { useActiveStream } from '@/hooks/useActiveStream'
@@ -8,28 +8,53 @@ import { ThemedText } from '@/components/ThemedText'
 import { router } from 'expo-router'
 import { GameSyncControl } from '@/components/GameSyncControl'
 import { GameTabs } from '@/components/gameTabs'
-
-const Header = () => {
-  return (
-    <ThemedView style={styles.header}>
-      <View style={styles.webHeaderContent}>
-        <Ionicons 
-          name="arrow-back" 
-          size={32} 
-          color="#000" 
-          style={styles.backButton}
-          onPress={() => router.push('/(tabs)/home-streamer')}
-        />
-      </View>
-    </ThemedView>
-  )
-}
+import { Header } from '@/components/Header';
+import { useStreaming } from '@/contexts/StreamingContext'
 
 const Stream = () => {
   const { activeStream } = useActiveStream()
+  const { isStreaming } = useStreaming()
   const isWeb = Platform.OS === 'web'
   const [isLiked, setIsLiked] = useState(false)
   const [activeTab, setActiveTab] = useState('game time')
+  const [showTimePrompt, setShowTimePrompt] = useState(false)
+  const [gameStartTime, setGameStartTime] = useState('')
+  const [isTimeSet, setIsTimeSet] = useState(false)
+
+  useEffect(() => {
+    // Show prompt only when component mounts, time hasn't been set, AND user is streaming
+    if (activeStream && !isTimeSet && isStreaming) {
+      setShowTimePrompt(true)
+    }
+  }, [activeStream, isTimeSet, isStreaming])
+
+  const validateTimeFormat = (time: string) => {
+    // Accept format MM:SS
+    const timeRegex = /^([0-5]?[0-9]):([0-5][0-9])$/;
+    return timeRegex.test(time);
+  };
+
+  const handleTimeChange = (text: string) => {
+    // Format input as MM:SS
+    let formatted = text.replace(/[^\d:]/g, '');
+    if (formatted.length > 5) return;
+
+    if (formatted.length === 2 && !formatted.includes(':') && gameStartTime.length < formatted.length) {
+      formatted = formatted + ':';
+    }
+    
+    setGameStartTime(formatted);
+  };
+
+  const handleTimeSubmit = () => {
+    if (validateTimeFormat(gameStartTime)) {
+      setIsTimeSet(true);
+      setShowTimePrompt(false);
+    } else {
+      // You might want to show an error message here
+      alert('Please enter a valid time in MM:SS format');
+    }
+  };
 
   if (!activeStream) {
     return (
@@ -43,7 +68,7 @@ const Stream = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {isWeb && <Header />}
+      {isWeb && <Header showBack />}
       {Platform.OS === 'ios' && (
         <View style={styles.pullDownIndicator} />
       )}
@@ -96,7 +121,10 @@ const Stream = () => {
           </View>
   
           <View style={[styles.gameSyncWrapper, isWeb && styles.webGameSyncWrapper]}>
-            <GameSyncControl />
+            <GameSyncControl 
+              initialTime={isTimeSet ? gameStartTime : '00:00'} 
+              isStreaming={isStreaming}
+            />
           </View>
   
           <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
@@ -106,6 +134,32 @@ const Stream = () => {
           </View>
         </View>
       </View>
+
+      <Modal
+        visible={showTimePrompt && isStreaming}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ThemedText type="subtitle">Enter Current Game Time</ThemedText>
+            <TextInput
+              style={styles.timeInput}
+              placeholder="MM:SS"
+              value={gameStartTime}
+              onChangeText={handleTimeChange}
+              keyboardType="numbers-and-punctuation"
+              maxLength={5}
+            />
+            <TouchableOpacity 
+              style={styles.submitButton}
+              onPress={handleTimeSubmit}
+            >
+              <ThemedText style={styles.submitButtonText}>Start Stream</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -131,47 +185,6 @@ const styles = StyleSheet.create({
   webContentWrapper: {
     maxWidth: 850,
     width: '100%',
-  },
-  header: {
-    height: Platform.select({
-      web: 40,
-      ios: 60,
-      default: 80,
-    }),
-    width: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-    backgroundColor: '#64a675',
-  },
-  webHeaderContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center', // Center the content
-    height: '100%',
-    maxWidth: 850,
-    width: '100%',
-    marginHorizontal: 'auto',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  webLogo: {
-    width: 70,
-    height: 70,
-    resizeMode: 'contain',
-    marginLeft: 190,
-  },
-  headerText: {
-    fontSize: 50,
-    color: 'black',
   },
   streamHeader: {
     flexDirection: 'row',
@@ -283,6 +296,47 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 8,
     marginBottom: 8,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: -1, // Ensure it stays below other content when not visible
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    padding: 24,
+    borderRadius: 12,
+    width: Platform.OS === 'web' ? 400 : '80%',
+    alignItems: 'center',
+  },
+  timeInput: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    width: '100%',
+    marginTop: 16,
+    marginBottom: 24,
+    fontSize: 16,
+  },
+  submitButton: {
+    backgroundColor: '#203024',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 })
 

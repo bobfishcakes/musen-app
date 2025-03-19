@@ -3,13 +3,28 @@ import { View, StyleSheet, Pressable, Platform } from 'react-native';
 import { ThemedText } from './ThemedText';
 
 interface GameSyncControlProps {
-  initialMinutes?: number;
+  initialTime?: string;
+  isStreaming?: boolean;
 }
 
-export const GameSyncControl = ({ initialMinutes = 10 }: GameSyncControlProps) => {
-  const [currentTime, setCurrentTime] = useState(initialMinutes * 60 + 54);
+export const GameSyncControl = ({ 
+  initialTime = '00:00',
+  isStreaming = false 
+}: GameSyncControlProps) => {
+  const parseTimeString = (timeStr: string) => {
+    const [minutes, seconds] = timeStr.split(':').map(num => parseInt(num, 10));
+    return (isNaN(minutes) ? 0 : minutes) * 60 + (isNaN(seconds) ? 0 : seconds);
+  };
+
+  const [currentTime, setCurrentTime] = useState(parseTimeString(initialTime));
   const [showConfirm, setShowConfirm] = useState(false);
   const [tempTime, setTempTime] = useState(currentTime);
+
+  useEffect(() => {
+    const parsedTime = parseTimeString(initialTime);
+    setCurrentTime(parsedTime);
+    setTempTime(parsedTime);
+  }, [initialTime]);
 
   const adjustSeconds = (amount: number) => {
     setTempTime(prev => Math.max(0, prev + amount));
@@ -39,32 +54,41 @@ export const GameSyncControl = ({ initialMinutes = 10 }: GameSyncControlProps) =
         </ThemedText>
       </View>
 
-      <ThemedText style={styles.notYourTimeText}>Not your game time?</ThemedText>
+      <ThemedText style={[
+        styles.notYourTimeText,
+        isStreaming && styles.liveText
+      ]}>
+        {isStreaming ? "LIVE" : "Not your game time?"}
+      </ThemedText>
       
-      <View style={styles.adjustButtons}>
-        <Pressable onPress={() => adjustSeconds(-10)} style={styles.negativeTimeButton}>
-          <ThemedText style={styles.buttonText}>-10s</ThemedText>
-        </Pressable>
-        <Pressable onPress={() => adjustSeconds(-5)} style={styles.negativeTimeButton}>
-          <ThemedText style={styles.buttonText}>-5s</ThemedText>
-        </Pressable>
-        <Pressable onPress={() => adjustSeconds(-1)} style={styles.negativeTimeButton}>
-          <ThemedText style={styles.buttonText}>-1s</ThemedText>
-        </Pressable>
-        <Pressable onPress={() => adjustSeconds(1)} style={styles.positiveTimeButton}>
-          <ThemedText style={styles.buttonText}>+1s</ThemedText>
-        </Pressable>
-        <Pressable onPress={() => adjustSeconds(5)} style={styles.positiveTimeButton}>
-          <ThemedText style={styles.buttonText}>+5s</ThemedText>
-        </Pressable>
-        <Pressable onPress={() => adjustSeconds(10)} style={styles.positiveTimeButton}>
-          <ThemedText style={styles.buttonText}>+10s</ThemedText>
-        </Pressable>
-      </View>
+      {!isStreaming && (
+        <View style={styles.adjustButtons}>
+          <Pressable onPress={() => adjustSeconds(-10)} style={styles.negativeTimeButton}>
+            <ThemedText style={styles.buttonText}>-10s</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => adjustSeconds(-5)} style={styles.negativeTimeButton}>
+            <ThemedText style={styles.buttonText}>-5s</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => adjustSeconds(-1)} style={styles.negativeTimeButton}>
+            <ThemedText style={styles.buttonText}>-1s</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => adjustSeconds(1)} style={styles.positiveTimeButton}>
+            <ThemedText style={styles.buttonText}>+1s</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => adjustSeconds(5)} style={styles.positiveTimeButton}>
+            <ThemedText style={styles.buttonText}>+5s</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => adjustSeconds(10)} style={styles.positiveTimeButton}>
+            <ThemedText style={styles.buttonText}>+10s</ThemedText>
+          </Pressable>
+        </View>
+      )}
 
-      {showConfirm && (
+      {showConfirm && !isStreaming && (
         <Pressable onPress={handleConfirm} style={styles.confirmButton}>
-          <ThemedText style={styles.confirmButtonText} type="defaultSemiBold">Confirm</ThemedText>
+          <ThemedText style={styles.confirmButtonText} type="defaultSemiBold">
+            Confirm
+          </ThemedText>
         </Pressable>
       )}
     </View>
@@ -159,5 +183,10 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 16,
     fontWeight: '600',
+  },
+  liveText: {
+    color: '#FF0000',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });

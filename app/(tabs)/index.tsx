@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, ScrollView, FlatList, ActivityIndicator, View, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { StyleSheet, Platform, ScrollView, FlatList, ActivityIndicator, View, TouchableOpacity, ImageBackground, Image, Animated, Easing } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import ScoreBoard from '@/components/ScoreBoard';
@@ -11,22 +11,10 @@ import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
 import { Ionicons } from '@expo/vector-icons';
+import { useStreaming } from '@/contexts/StreamingContext';
+import { Header } from '@/components/Header';
 
 const styles = StyleSheet.create({
-  header: {
-    height: Platform.select({
-      web: 60,
-      ios: 60,
-      default: 80,
-    }),
-    width: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-    backgroundColor: '#64a675',
-  },
   container: {
     flex: 1,
   },
@@ -103,7 +91,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 100, // Increased from 50
     color: 'black',
-    fontWeight: '500', // Added for better visibility at larger size
+    fontWeight: '700', // Changed from '500' to '700' for bolder text
     lineHeight: 100, // Add this to control vertical spacing
   },
   
@@ -127,41 +115,22 @@ const styles = StyleSheet.create({
   },
   viewToggleButton: {
     position: 'absolute',
-    left: '50%',
-    transform: [{ translateX: -50 }],
+    right: 16, // Position on right side
+    top: Platform.select({
+      web: 12,
+      ios: 12,
+      default: 24,
+    }),
     backgroundColor: '#486B52',
     padding: 8,
     borderRadius: 20,
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
     zIndex: 101,
-  },
-  viewToggleText: {
-    color: 'white',
-    fontSize: 16,
+    width: 40, // Fixed width for circular button
+    height: 40, // Fixed height for circular button
   },
 });
-
-const Header = () => {
-  const isWeb = Platform.OS === 'web';
-  
-  return (
-    <ThemedView style={styles.header}>
-      {isWeb && (
-        <TouchableOpacity 
-          style={styles.viewToggleButton}
-          onPress={() => router.push('/(tabs)/home-streamer')}
-        >
-          <Ionicons name="headset" size={24} color="white" />
-          <ThemedText style={styles.viewToggleText}>
-            Switch to Streamer View
-          </ThemedText>
-        </TouchableOpacity>
-      )}
-    </ThemedView>
-  );
-};
 
 export default function HomeScreen() {
   const now = new Date();
@@ -193,7 +162,7 @@ export default function HomeScreen() {
       listeners: 1
     };
     setActiveStream(newStream);
-    router.push('/stream-listener');
+    router.push('/stream');
   };
 
   const renderGameCard = ({ item }: { item: Game }) => (
