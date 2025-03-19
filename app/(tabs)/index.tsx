@@ -10,6 +10,7 @@ import { useBasketballGames } from '@/api/basketball/basketballHooks';
 import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
+import { Ionicons } from '@expo/vector-icons';
 
 const styles = StyleSheet.create({
   header: {
@@ -124,10 +125,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center', // Add this
   },
+  viewToggleButton: {
+    position: 'absolute',
+    left: '50%',
+    transform: [{ translateX: -50 }],
+    backgroundColor: '#486B52',
+    padding: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    zIndex: 101,
+  },
+  viewToggleText: {
+    color: 'white',
+    fontSize: 16,
+  },
 });
 
 const Header = () => {
-  return <ThemedView style={styles.header} />;
+  const isWeb = Platform.OS === 'web';
+  
+  return (
+    <ThemedView style={styles.header}>
+      {isWeb && (
+        <TouchableOpacity 
+          style={styles.viewToggleButton}
+          onPress={() => router.push('/(tabs)/streamer')}
+        >
+          <Ionicons name="headset" size={24} color="white" />
+          <ThemedText style={styles.viewToggleText}>
+            Switch to Streamer View
+          </ThemedText>
+        </TouchableOpacity>
+      )}
+    </ThemedView>
+  );
 };
 
 export default function HomeScreen() {
