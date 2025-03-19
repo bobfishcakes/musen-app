@@ -18,7 +18,7 @@ const Header = () => {
           size={32} 
           color="#000" 
           style={styles.backButton}
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/(tabs)/home-streamer')}
         />
       </View>
     </ThemedView>

@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 const styles = StyleSheet.create({
   header: {
     height: Platform.select({
-      web: 40,
+      web: 70,
       ios: 60,
       default: 80,
     }),
@@ -151,7 +151,7 @@ const Header = () => {
         {isWeb && (
           <TouchableOpacity 
             style={styles.viewToggleButton}
-            onPress={() => router.push('/stream')}
+            onPress={() => router.push('/(tabs)')}
           >
             <Ionicons name="radio" size={24} color="white" />
             <ThemedText style={styles.viewToggleText}>
@@ -193,7 +193,7 @@ const Header = () => {
           listeners: 1
         };
         setActiveStream(newStream);
-        router.push('/streamer-stream');
+        router.push('/stream-streamer');
       };
   
     const renderGameCard = ({ item }: { item: Game }) => (
