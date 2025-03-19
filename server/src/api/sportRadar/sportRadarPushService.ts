@@ -11,6 +11,7 @@ export class SportRadarPushService {
   private readonly MAX_RECONNECT_ATTEMPTS = 3;
   private readonly RECONNECT_DELAY = 5000;
   private clockUpdates$ = new Subject<GameClock>();
+  private activeSubscriptions: Set<string> = new Set();
 
   constructor() {
     this.setupBufferedUpdates();
@@ -19,9 +20,15 @@ export class SportRadarPushService {
 
   private connect() {
     try {
-      this.wsConnection = new WebSocket(
-        `${SPORTRADAR_CONFIG.BASE_URL}/stream/en/clock/subscribe?api_key=${SPORTRADAR_CONFIG.API_KEY}`
-      );
+      // Build URL with match parameter if there are active subscriptions
+      let wsUrl = `${SPORTRADAR_CONFIG.WS_URL}/clock/subscribe?api_key=${SPORTRADAR_CONFIG.API_KEY}`;
+      
+      if (this.activeSubscriptions.size > 0) {
+        const matchIds = Array.from(this.activeSubscriptions).join(',');
+        wsUrl += `&match=${matchIds}`;
+      }
+
+      this.wsConnection = new WebSocket(wsUrl);
 
       this.wsConnection.on('open', () => {
         pushLogger.connection('WebSocket connection established');
@@ -67,7 +74,7 @@ export class SportRadarPushService {
 
   private setupBufferedUpdates() {
     this.clockUpdates$.pipe(
-      bufferTime(100), // Buffer updates for 100ms
+      bufferTime(100),
       filter(updates => updates.length > 0)
     ).subscribe(updates => {
       const latestUpdate = updates[updates.length - 1];
@@ -92,19 +99,29 @@ export class SportRadarPushService {
   }
 
   public subscribeToGame(gameId: string) {
-    if (this.wsConnection?.readyState === WebSocket.OPEN) {
-      this.wsConnection.send(JSON.stringify({
-        match: gameId
-      }));
+    if (!this.activeSubscriptions.has(gameId)) {
+      this.activeSubscriptions.add(gameId);
+      
+      // Reconnect with updated subscription list
+      if (this.wsConnection) {
+        this.wsConnection.close();
+      }
+      this.connect();
+      
       pushLogger.connection(`Subscribed to game: ${gameId}`);
     }
   }
 
   public unsubscribeFromGame(gameId: string) {
-    if (this.wsConnection?.readyState === WebSocket.OPEN) {
-      this.wsConnection.send(JSON.stringify({
-        unsubscribe: gameId
-      }));
+    if (this.activeSubscriptions.has(gameId)) {
+      this.activeSubscriptions.delete(gameId);
+      
+      // Reconnect with updated subscription list
+      if (this.wsConnection) {
+        this.wsConnection.close();
+      }
+      this.connect();
+      
       pushLogger.connection(`Unsubscribed from game: ${gameId}`);
     }
   }

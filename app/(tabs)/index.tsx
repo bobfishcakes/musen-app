@@ -193,12 +193,6 @@ export default function HomeScreen() {
         // Get the date in YYYY-MM-DD format
         const gameDate = new Date(game.date).toISOString().split('T')[0];
         
-        console.log('Looking for SportRadar game ID with:', {
-          homeTeam: game.teams.home.name,
-          awayTeam: game.teams.away.name,
-          date: gameDate
-        });
-    
         // Find the SportRadar game ID from local JSON
         const sportRadarGameId = await sportRadarLocalService.findGameByTeamsAndDate(
           game.teams.home.name,
@@ -212,7 +206,10 @@ export default function HomeScreen() {
         }
     
         console.log('Found SportRadar game ID:', sportRadarGameId);
-        console.log('Attempting to fetch game details for ID:', sportRadarGameId);
+        
+        // Subscribe to push feed updates for this game
+        sportRadarPushService.subscribeToGame(sportRadarGameId);
+        console.log('Subscribed to push feed for game:', sportRadarGameId);
     
         // Get game details from backend using the found ID
         const gameDetails = await sportRadarHTTPService.getGameDetails(sportRadarGameId);
@@ -230,9 +227,7 @@ export default function HomeScreen() {
             ...game,
             radarGameId: sportRadarGameId,
             clock: (() => {
-              // Parse the clock string (e.g., "3:40" into minutes and seconds)
               const [minutesStr, secondsStr] = (gameDetails.clock || "0:00").split(':');
-              console.log('Cock -', gameDetails.clock,  parseInt(minutesStr) , parseInt(secondsStr));
               return {
                 minutes: parseInt(minutesStr) || 0,
                 seconds: parseInt(secondsStr) || 0
