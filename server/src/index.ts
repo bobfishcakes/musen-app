@@ -29,5 +29,11 @@ const server = app.listen(PORT, () => {
   console.log('=================================');
 });
 
-// Setup WebSocket with logging
-setupWebSocket(server);
+// Setup WebSocket with enhanced logging
+try {
+  console.log('Initializing WebSocket server...');
+  const wsServer = setupWebSocket(server);
+  console.log('WebSocket server initialization successful');
+} catch (error) {
+  console.error('Failed to initialize WebSocket server:', error);
+}
