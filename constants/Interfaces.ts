@@ -52,9 +52,10 @@ export interface Score {
 }
 
 export interface Stream {
-  id: string
-  title: string
-  streamer: string
-  game: Game
-  listeners: number
+  id: string;
+  title: string;
+  streamer: string;
+  game: Game;
+  listeners: number;
+  isOwnStream: boolean;
 }

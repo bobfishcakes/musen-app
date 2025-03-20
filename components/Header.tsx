@@ -2,7 +2,6 @@ import { StyleSheet, Platform, TouchableOpacity, View, Image } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
-import { useStreaming } from '@/contexts/StreamingContext';
 import { router } from 'expo-router';
 
 const styles = StyleSheet.create({
@@ -109,7 +108,6 @@ export const Header: React.FC<HeaderProps> = ({
   isStreamPage = false // Add default value
 }) => {
   const isWeb = Platform.OS === 'web';
-  const { isStreaming, setIsStreaming } = useStreaming();
 
   return (
     <ThemedView style={styles.header}>
@@ -131,36 +129,13 @@ export const Header: React.FC<HeaderProps> = ({
         {showBack && (
           <View style={styles.headerCenter}>
             <Image 
-              source={{
-                uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
-              }}
+              source={require('../assets/images/musen-white.png')}
               style={styles.headerLogo}
             />
             <ThemedText style={styles.headerTitle}>
               musen
             </ThemedText>
           </View>
-        )}
-
-        {isWeb && !isStreamPage && ( // Add !isStreamPage condition here
-          <>
-            <ThemedText style={styles.modeText}>
-              {isStreaming ? 'Streamer Mode' : 'Listener Mode'}
-            </ThemedText>
-            <TouchableOpacity 
-              style={[
-                styles.streamButton,
-                { backgroundColor: isStreaming ? '#e74c3c' : '#486B52' }
-              ]}
-              onPress={() => setIsStreaming(!isStreaming)}
-            >
-              <Ionicons 
-                name={isStreaming ? "radio" : "radio-outline"}
-                size={24} 
-                color="white" 
-              />
-            </TouchableOpacity>
-          </>
         )}
       </View>
     </ThemedView>

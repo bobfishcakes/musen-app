@@ -158,6 +158,7 @@ export default function HomeScreen() {
       id: `1`,
       title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
       streamer: 'bobfishcakes',
+      isOwnStream: false,
       game: game,
       listeners: 1
     };
@@ -182,9 +183,7 @@ export default function HomeScreen() {
 {isWeb && (
   <View style={styles.logoContent}>
     <Image 
-      source={{
-        uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
-      }}
+      source={require('../../assets/images/musen-logo.png')}
       style={styles.webLogo}
     />
     <View style={styles.textContainer}>

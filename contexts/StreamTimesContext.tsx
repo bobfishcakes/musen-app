@@ -1,28 +1,45 @@
 import React, { createContext, useContext, useState } from 'react';
 
+type StreamState = {
+  time: string;
+  isTimeSet: boolean;  // Explicitly track if time was set by user
+};
+
 type StreamTimesContextType = {
   setStreamTime: (streamId: string, time: string) => void;
   hasTimeSet: (streamId: string) => boolean;
+  getStreamTime: (streamId: string) => string;
 };
 
 const StreamTimesContext = createContext<StreamTimesContextType | null>(null);
 
 export const StreamTimesProvider = ({ children }: { children: React.ReactNode }) => {
-  const [streamTimes, setStreamTimes] = useState<Record<string, string>>({});
+  const [streamStates, setStreamStates] = useState<Record<string, StreamState>>({});
 
   const setStreamTime = (streamId: string, time: string) => {
-    setStreamTimes(prev => ({
+    setStreamStates(prev => ({
       ...prev,
-      [streamId]: time
+      [streamId]: {
+        time,
+        isTimeSet: true
+      }
     }));
   };
 
   const hasTimeSet = (streamId: string) => {
-    return !!streamTimes[streamId];
+    return streamStates[streamId]?.isTimeSet || false;
+  };
+
+  const getStreamTime = (streamId: string) => {
+    return streamStates[streamId]?.time || '00:00';
   };
 
   return (
-    <StreamTimesContext.Provider value={{ setStreamTime, hasTimeSet }}>
+    <StreamTimesContext.Provider value={{ 
+      setStreamTime, 
+      hasTimeSet,
+      getStreamTime 
+    }}>
       {children}
     </StreamTimesContext.Provider>
   );
