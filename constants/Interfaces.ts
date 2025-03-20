@@ -20,6 +20,13 @@ export interface GameDate {
   time: string
 }
 
+export interface GameClock {
+  minutes: number;
+  seconds: number;
+  period: number;
+  isRunning: boolean;
+}
+
 export interface Game {
   id: string
   teams: Teams
@@ -35,16 +42,14 @@ export interface Game {
   scores?: Scores
   streamers?: number;
   listeners?: number;
-  radarGameId?: string;
-  clock?: {
-    minutes: number;
-    seconds: number;
-  };
-  // Add these new properties
-  period: number;
-  minutes: number;
-  seconds: number;
-  isRunning: boolean;
+  radarGameId: string; // Make this required
+  clock?: GameClock;
+  // Game clock properties
+  period?: number;
+  minutes?: number;
+  seconds?: number;
+  isRunning?: boolean;
+  lastUpdated?: Date;
 }
 
 export interface Scores {
@@ -67,4 +72,21 @@ export interface Stream {
   streamer: string
   game: Game
   listeners: number
+}
+
+// Add these new interfaces for sync functionality
+export interface GameClockUpdate {
+  gameId: string;
+  period: number;
+  minutes: number;
+  seconds: number;
+  isRunning: boolean;
+  lastUpdated: Date;
+}
+
+export interface StoppageEvent {
+  gameId: string;
+  type: 'timeout' | 'injury' | 'other';
+  timestamp: Date;
+  duration?: number;
 }

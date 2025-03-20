@@ -1,11 +1,12 @@
-// server/src/index.ts
+import dotenv from 'dotenv';
+// Load env variables first
+dotenv.config();
+
+// Then other imports
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { gamesRouter } from './routes/games';
 import { setupWebSocket } from './websocket';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

@@ -1,4 +1,3 @@
-// server/src/websocket.ts
 import { Server } from 'http';
 import WebSocket from 'ws';
 import { sportRadarPushService } from './api/sportRadar/sportRadarPushService';
@@ -26,17 +25,16 @@ export const setupWebSocket = (server: Server) => {
     // Keep track of subscribed games for this connection
     const subscribedGames = new Set<string>();
 
-    ws.on('message', (message: WebSocket.RawData) => {
+    ws.on('message', async (message: WebSocket.RawData) => {
       try {
         const data = JSON.parse(message.toString());
         console.log('Received WebSocket message:', data);
         
         if (data.type === 'subscribe') {
           console.log('Subscribing to game:', data.gameId);
-          sportRadarPushService.subscribeToGame(data.gameId);
+          await sportRadarPushService.subscribeToGame(data.gameId, ws);
           subscribedGames.add(data.gameId);
           
-          // Send confirmation back to client
           ws.send(JSON.stringify({
             type: 'subscribed',
             gameId: data.gameId,
@@ -44,10 +42,9 @@ export const setupWebSocket = (server: Server) => {
           }));
         } else if (data.type === 'unsubscribe') {
           console.log('Unsubscribing from game:', data.gameId);
-          sportRadarPushService.unsubscribeFromGame(data.gameId);
+          sportRadarPushService.unsubscribeFromGame(data.gameId, ws);
           subscribedGames.delete(data.gameId);
           
-          // Send confirmation back to client
           ws.send(JSON.stringify({
             type: 'unsubscribed',
             gameId: data.gameId,
@@ -60,7 +57,6 @@ export const setupWebSocket = (server: Server) => {
         console.error('Error processing WebSocket message:', error);
         pushLogger.errors('Error processing WebSocket message:', error);
         
-        // Send error back to client
         ws.send(JSON.stringify({
           type: 'error',
           message: 'Failed to process message',
@@ -76,15 +72,13 @@ export const setupWebSocket = (server: Server) => {
 
     ws.on('close', () => {
       console.log('Client disconnected, cleaning up subscriptions');
-      // Cleanup subscriptions when client disconnects
       subscribedGames.forEach(gameId => {
-        sportRadarPushService.unsubscribeFromGame(gameId);
+        sportRadarPushService.unsubscribeFromGame(gameId, ws);
       });
       subscribedGames.clear();
       pushLogger.connection('Client disconnected');
     });
 
-    // Send initial connection confirmation
     ws.send(JSON.stringify({
       type: 'connected',
       timestamp: new Date().toISOString()

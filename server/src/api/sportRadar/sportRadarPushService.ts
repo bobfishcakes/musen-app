@@ -83,22 +83,36 @@ export class SportRadarPushService {
   }
 
   private handleClockUpdate(payload: any) {
-    const { game, clocks, period } = payload;
-    
-    const clockData: GameClock = {
-      gameId: game.id,
-      period: period.number,
-      minutes: Math.floor(parseInt(clocks.game) / 60),
-      seconds: parseInt(clocks.game) % 60,
-      isRunning: clocks.running,
-      lastUpdated: new Date()
-    };
-
-    this.clockUpdates$.next(clockData);
-    pushLogger.updates('Clock update received:', clockData);
+    try {
+      const { game, clocks, period } = payload;
+      
+      console.log('Raw clock update payload:', payload); // Add this line
+      
+      if (!game?.id || !clocks?.game || !period?.number) {
+        pushLogger.errors('Invalid payload structure:', payload);
+        return;
+      }
+  
+      const clockData: GameClock = {
+        gameId: game.id,
+        period: period.number,
+        minutes: Math.floor(parseInt(clocks.game) / 60),
+        seconds: parseInt(clocks.game) % 60,
+        isRunning: clocks.running,
+        lastUpdated: new Date()
+      };
+  
+      console.log('Processed clock data:', clockData); // Add this line
+      
+      this.clockUpdates$.next(clockData);
+      pushLogger.updates('Clock update received:', clockData);
+    } catch (error) {
+      pushLogger.errors('Error handling clock update:', error);
+    }
   }
 
-  public subscribeToGame(gameId: string) {
+  // Update the method signatures to accept the client WebSocket
+  public subscribeToGame(gameId: string, clientWs?: WebSocket) {
     if (!this.activeSubscriptions.has(gameId)) {
       this.activeSubscriptions.add(gameId);
       
@@ -112,7 +126,7 @@ export class SportRadarPushService {
     }
   }
 
-  public unsubscribeFromGame(gameId: string) {
+  public unsubscribeFromGame(gameId: string, clientWs?: WebSocket) {
     if (this.activeSubscriptions.has(gameId)) {
       this.activeSubscriptions.delete(gameId);
       

@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { ThemedText } from '/Users/atharvsonawane/musen-app/components/ThemedText';
-import { ListenerSyncControl } from './ListenerSyncControl';
-import { StoppageTimer } from './StoppageTimer';
-import { GameClock, StoppageEvent } from '../../api/sync/syncTypes';
+import { ThemedText } from '@/components/ThemedText';
+import { GameClock, StoppageEvent } from '@/api/sync/syncTypes';
+import { syncService } from '@/api/sync/syncService';
 
 interface SyncTestPanelProps {
   gameId: string;
@@ -12,8 +11,32 @@ interface SyncTestPanelProps {
 
 export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClock }) => {
   const [gameClock, setGameClock] = useState<GameClock>(initialClock);
-  const [stoppage, setStoppage] = useState<StoppageEvent>();
+  const [stoppage, setStoppage] = useState<StoppageEvent | undefined>();
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  useEffect(() => {
+    console.log(`SyncTestPanel mounted for game ${gameId} with initial clock:`, initialClock);
+    
+    const handleUpdate = (clock: GameClock | undefined, stoppage: StoppageEvent | undefined) => {
+      console.log(`Received update for game ${gameId}:`, { clock, stoppage });
+      
+      if (clock) {
+        setGameClock(clock);
+        setLastUpdate(new Date());
+      }
+      
+      setStoppage(stoppage);
+    };
+
+    // Start polling
+    syncService.startDebugPolling(gameId, handleUpdate);
+
+    // Cleanup function
+    return () => {
+      console.log(`SyncTestPanel unmounting for game ${gameId}`);
+      syncService.stopDebugPolling(gameId);
+    };
+  }, [gameId, initialClock]);
 
   return (
     <View style={styles.container}>
@@ -26,56 +49,41 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClo
         <ThemedText>
           Status: {gameClock?.isRunning ? 'Running' : 'Stopped'}
         </ThemedText>
-        {lastUpdate && (
-          <ThemedText style={styles.updateTime}>
-            Last Update: {lastUpdate.toLocaleTimeString()}
-          </ThemedText>
-        )}
+        <ThemedText style={styles.updateTime}>
+          Last Update: {lastUpdate.toLocaleTimeString()}
+        </ThemedText>
       </View>
 
       <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Stoppage</ThemedText>
+        <ThemedText style={styles.sectionTitle}>Stoppage Status</ThemedText>
         {stoppage ? (
-          <StoppageTimer 
-            startTime={stoppage.startTime}
-            onEnd={() => setStoppage(undefined)}
-          />
+          <>
+            <ThemedText>Type: {stoppage.type}</ThemedText>
+            <ThemedText>Started: {stoppage.startTime.toLocaleTimeString()}</ThemedText>
+          </>
         ) : (
           <ThemedText>No active stoppage</ThemedText>
         )}
       </View>
-
-      <ListenerSyncControl
-        gameId={gameId}
-        onClockUpdate={setGameClock}
-        onStoppageStart={setStoppage}
-        onStoppageEnd={() => setStoppage(undefined)}
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    margin: 16,
+    padding: 10,
   },
   section: {
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: 'white',
-    borderRadius: 6,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   updateTime: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+    marginTop: 5,
+    opacity: 1,
   },
 });

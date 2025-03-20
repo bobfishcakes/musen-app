@@ -40,59 +40,33 @@ const Header = () => {
   )
 }
 
-const SyncDebugPanel = ({ gameId }: { gameId: string }) => {
-  const [clock, setClock] = useState<GameClock>();
-  const [stoppage, setStoppage] = useState<StoppageEvent>();
-
-  useEffect(() => {
-    syncService.startDebugPolling(gameId, (newClock, newStoppage) => {
-      setClock(newClock);
-      setStoppage(newStoppage);
-    });
-
-    return () => syncService.stopDebugPolling(gameId);
-  }, [gameId]);
-
-  return (
-    <View style={styles.debugPanel}>
-      <ThemedText style={styles.debugTitle}>Sync Debug Panel</ThemedText>
-      
-      <View style={styles.debugSection}>
-        <ThemedText style={styles.debugLabel}>Game Clock:</ThemedText>
-        <ThemedText>
-          Period: {clock?.period || '-'} | 
-          Time: {clock?.minutes || '--'}:{clock?.seconds.toString().padStart(2, '0') || '--'}
-        </ThemedText>
-        <ThemedText>Status: {clock?.isRunning ? 'Running' : 'Stopped'}</ThemedText>
-        <ThemedText style={styles.debugTimestamp}>
-          Last Update: {clock?.lastUpdated?.toLocaleTimeString() || '-'}
-        </ThemedText>
-      </View>
-
-      <View style={styles.debugSection}>
-        <ThemedText style={styles.debugLabel}>Stoppage Status:</ThemedText>
-        {stoppage ? (
-          <>
-            <ThemedText>Type: {stoppage.type}</ThemedText>
-            <ThemedText>Started: {stoppage.startTime.toLocaleTimeString()}</ThemedText>
-          </>
-        ) : (
-          <ThemedText>No active stoppage</ThemedText>
-        )}
-      </View>
-    </View>
-  );
-};
-
 const GameClockPanel = ({ gameId }: { gameId: string }) => {
   const [clock, setClock] = useState<GameClock>();
 
   useEffect(() => {
-    syncService.startDebugPolling(gameId, (newClock) => {
-      setClock(newClock);
+    console.log('GameClockPanel mounted for game:', gameId);
+    
+    // Initialize clock with current game data
+    syncService.updateGameClock(gameId, {
+      gameId,
+      period: 1,
+      minutes: 12,
+      seconds: 0,
+      isRunning: false,
+      lastUpdated: new Date()
+    });
+    
+    syncService.startDebugPolling(gameId, (newClock, stoppage) => {
+      console.log('Clock update received in GameClockPanel:', newClock);
+      if (newClock) {
+        setClock(newClock);
+      }
     });
 
-    return () => syncService.stopDebugPolling(gameId);
+    return () => {
+      console.log('GameClockPanel unmounting, stopping polling');
+      syncService.stopDebugPolling(gameId);
+    };
   }, [gameId]);
 
   return (
@@ -108,9 +82,6 @@ const GameClockPanel = ({ gameId }: { gameId: string }) => {
       <ThemedText style={styles.clockStatus}>
         Status: {clock?.isRunning ? 'Running' : 'Stopped'}
       </ThemedText>
-      <ThemedText style={styles.clockHelper}>
-        Use this clock to sync your stream with real-time game updates
-      </ThemedText>
     </View>
   );
 };
@@ -119,8 +90,43 @@ const Stream = () => {
   const { activeStream } = useActiveStream()
   const isWeb = Platform.OS === 'web'
   const [isLiked, setIsLiked] = React.useState(false)
+  const [game, setGame] = useState(activeStream?.game)
 
-  if (!activeStream) {
+  useEffect(() => {
+    if (activeStream?.game?.radarGameId) {  // Add check for radarGameId
+      console.log('Setting initial game state:', activeStream.game);
+      setGame(activeStream.game);
+      
+      // Initialize sync service with game data using radarGameId
+      syncService.updateGameClock(activeStream.game.radarGameId, {
+        gameId: activeStream.game.radarGameId,
+        period: activeStream.game.period || 1,
+        minutes: activeStream.game.minutes || 0,
+        seconds: activeStream.game.seconds || 0,
+        isRunning: activeStream.game.isRunning || false,
+        lastUpdated: new Date()
+      });
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (activeStream?.game?.radarGameId && activeStream.game.id !== game?.id) {  // Add check for radarGameId
+      console.log('Game updated in stream:', activeStream.game);
+      setGame(activeStream.game);
+      
+      // Update sync service when game changes using radarGameId
+      syncService.updateGameClock(activeStream.game.radarGameId, {
+        gameId: activeStream.game.radarGameId,
+        period: activeStream.game.period || 1,
+        minutes: activeStream.game.minutes || 0,
+        seconds: activeStream.game.seconds || 0,
+        isRunning: activeStream.game.isRunning || false,
+        lastUpdated: new Date()
+      });
+    }
+  }, [activeStream]);
+
+  if (!activeStream || !game) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
@@ -135,65 +141,35 @@ const Stream = () => {
       {isWeb && <Header />}
       <View style={[styles.container, isWeb && styles.webContainer]}>
         <View style={[styles.contentWrapper, isWeb && styles.webContentWrapper]}>
-          <View style={[styles.streamHeader, isWeb && styles.webStreamHeader]}>
-            <ThemedText type="subtitle" style={{ color: '#000000' }}>{activeStream.title}</ThemedText>
-            <View style={styles.controls}>
-              <Ionicons name="bluetooth" size={24} color="#203024" />
-              <Ionicons name="volume-mute" size={24} color="#203024" />
-            </View>
-          </View>
-
-          <View style={[styles.profile, isWeb && styles.webProfile]}>
-            <Image
-              source={{
-                uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
-              }}
-              style={styles.profilePic}
-            />
-            <ThemedText type="defaultSemiBold" style={styles.username}>bobfishcakes</ThemedText>
-            
-            <View style={styles.viewerCount}>
-              <Ionicons
-                name={isLiked ? 'heart' : 'heart-outline'}
-                size={24}
-                color={isLiked ? '#FF4444' : '#333'}
-                onPress={() => setIsLiked(!isLiked)}
-              />
-              <Ionicons name="headset" size={24} color="#333" />
-              <ThemedText style={styles.countText}>{activeStream.listeners}</ThemedText>
-            </View>
-          </View>
+          {/* ... other components ... */}
 
           <View style={[styles.scoreBoardWrapper, isWeb && styles.webScoreBoardWrapper]}>
-            <ScoreBoard game={activeStream.game}/>
+            <ScoreBoard game={game}/>
           </View>
 
-          {isWeb && <GameClockPanel gameId={activeStream.game.id} />}
-
-          {isWeb && (
-  <SyncTestPanel 
-    gameId={activeStream.game.id}
-    initialClock={{
-      gameId: activeStream.game.id,
-      period: activeStream.game.period,
-      minutes: activeStream.game.minutes,
-      seconds: activeStream.game.seconds,
-      isRunning: activeStream.game.isRunning,
-      lastUpdated: new Date()
-    }}
-  />
-)}
-
-          <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
-            <View style={styles.placeholder} />
-            <View style={styles.placeholder} />
-            <View style={styles.placeholder} />
-          </View>
+          {isWeb && game.radarGameId && (
+            <View style={styles.clockContainer}>
+              <GameClockPanel gameId={game.radarGameId} />
+              <SyncTestPanel 
+                gameId={game.radarGameId}
+                initialClock={{
+                  gameId: game.radarGameId,
+                  period: game.period || 1,
+                  minutes: game.minutes || 0,
+                  seconds: game.seconds || 0,
+                  isRunning: game.isRunning || false,
+                  lastUpdated: new Date()
+                }}
+              />
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
   )
 }
+
+
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -354,28 +330,30 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   gameClockPanel: {
-    backgroundColor: '#203024',
+    backgroundColor: '#FFFFFF', // Change to white background
     padding: 16,
     borderRadius: 8,
     marginTop: 16,
     width: '100%',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   clockTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#000000', // Change to black text
     marginBottom: 8,
   },
   clockTime: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#203024', // Change to dark color
     marginVertical: 8,
   },
   clockStatus: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: '#203024', // Change to dark color
     opacity: 0.8,
   },
   clockHelper: {
@@ -385,6 +363,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
   },
+  clockContainer: {
+    width: '100%',
+    marginTop: 20,
+    gap: 16,
+  }
 })
 
 export default Stream

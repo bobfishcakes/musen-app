@@ -16,6 +16,10 @@ import { sportRadarPushService } from '/Users/atharvsonawane/musen-app/server/sr
 
 const BACKEND_URL = 'http://localhost:3000';
 
+const getLastWord = (str: string) => {
+  return str.split(' ').pop() || str;
+};
+
 const styles = StyleSheet.create({
   contentContainer: {
     marginTop: Platform.select({
@@ -179,21 +183,17 @@ export default function HomeScreen() {
 
     const handleGamePress = async (game: Game) => {
       try {
+        console.log('=== Starting handleGamePress ===');
+        console.log('Initial game object:', JSON.stringify(game, null, 2));
+    
         if (!game.date) {
-          console.log('Game press failed: No date available');
+          console.warn('Game press failed: No date available');
           throw new Error('Game date is undefined');
         }
     
-        console.log('Game pressed:', {
-          homeTeam: game.teams.home.name,
-          awayTeam: game.teams.away.name,
-          date: game.date
-        });
-    
-        // Get the date in YYYY-MM-DD format
         const gameDate = new Date(game.date).toISOString().split('T')[0];
-        
-        // Find the SportRadar game ID from local JSON
+        console.log('Formatted game date:', gameDate);
+    
         const sportRadarGameId = await sportRadarLocalService.findGameByTeamsAndDate(
           game.teams.home.name,
           game.teams.away.name,
@@ -201,23 +201,25 @@ export default function HomeScreen() {
         );
     
         if (!sportRadarGameId) {
-          console.log('SportRadar game ID not found');
+          console.warn('SportRadar game ID not found');
           return;
         }
     
         console.log('Found SportRadar game ID:', sportRadarGameId);
         
-        // Subscribe to push feed updates for this game
         sportRadarPushService.subscribeToGame(sportRadarGameId);
-        console.log('Subscribed to push feed for game:', sportRadarGameId);
+        console.log('Successfully subscribed to push feed');
     
-        // Get game details from backend using the found ID
         const gameDetails = await sportRadarHTTPService.getGameDetails(sportRadarGameId);
-        console.log('Received game details:', gameDetails);
-    
-        const getLastWord = (teamName: string) => {
-          return teamName.split(' ').pop() || teamName;
-        };
+        console.log('Game details structure:', {
+          clock: gameDetails.clock,
+          period: gameDetails.quarter,
+          status: gameDetails.status,
+          scores: {
+            home: gameDetails.home?.points,
+            away: gameDetails.away?.points
+          }
+        });
     
         const newStream: Stream = {
           id: `1`,
@@ -226,22 +228,24 @@ export default function HomeScreen() {
           game: {
             ...game,
             radarGameId: sportRadarGameId,
-            clock: (() => {
-              const [minutesStr, secondsStr] = (gameDetails.clock || "0:00").split(':');
-              return {
-                minutes: parseInt(minutesStr) || 0,
-                seconds: parseInt(secondsStr) || 0
-              };
-            })()
+            period: gameDetails.quarter || 1,
+            minutes: parseInt((gameDetails.clock || "0:00").split(':')[0]) || 0,
+            seconds: parseInt((gameDetails.clock || "0:00").split(':')[1]) || 0,
+            isRunning: gameDetails.status === "inprogress"
           },
           listeners: 1
         };
     
+        console.log('Created new stream object:', JSON.stringify(newStream, null, 2));
         setActiveStream(newStream);
-        router.push('/stream');
+        console.log('Active stream set successfully');
     
-      } catch (error) {
-        console.error('Error handling game press:', error);
+        router.push('/stream');
+        console.log('=== Completed handleGamePress ===');
+    
+      } catch (error: any) {
+        console.error('Error in handleGamePress:', error);
+        console.error('Error stack:', error?.stack);
       }
     };
 

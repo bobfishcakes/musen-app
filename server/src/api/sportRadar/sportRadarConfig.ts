@@ -1,6 +1,10 @@
-if (!process.env.SPORTRADAR_API_KEY) {
-  console.error('SPORTRADAR_API_KEY environment variable is not set');
-}
+const validateConfig = () => {
+  if (!process.env.SPORTRADAR_API_KEY) {
+    console.error('SPORTRADAR_API_KEY environment variable is not set');
+    return false;
+  }
+  return true;
+};
 
 export const SPORTRADAR_CONFIG = {
   BASE_URL: 'https://api.sportradar.com/nba/trial/v8/en',
@@ -11,4 +15,5 @@ export const SPORTRADAR_CONFIG = {
     GAME_SUMMARY: '/games/{gameId}/boxscore.json',
   },
   REQUEST_TIMEOUT: 10000,
+  isValid: validateConfig()
 };
