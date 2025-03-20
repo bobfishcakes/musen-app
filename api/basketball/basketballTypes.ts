@@ -179,18 +179,19 @@ export function convertBasketballGame(game: BasketballGame): ConvertedBasketball
 
   return {
     id: game.id.toString(),
+    radarGameId: game.id.toString(), // Add this line to include the required radarGameId
     teams: {
       home: {
         id: game.teams.home.id.toString(),
         name: game.teams.home.name,
         logo: game.teams.home.logo,
-        primaryColor: homeColor // Use the calculated contrasting color
+        primaryColor: homeColor
       },
       away: {
         id: game.teams.away.id.toString(),
         name: game.teams.away.name,
         logo: game.teams.away.logo,
-        primaryColor: awayColor // Use the calculated contrasting color
+        primaryColor: awayColor
       }
     },
     league: {
