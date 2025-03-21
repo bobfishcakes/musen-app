@@ -56,13 +56,12 @@ const GameClockPanel = ({ gameId }: { gameId: string }) => {
       lastUpdated: new Date()
     });
     
-    syncService.startDebugPolling(gameId, (newClock, stoppage) => {
-      console.log('Clock update received in GameClockPanel:', newClock);
-      if (newClock) {
-        setClock(newClock);
-      }
+    // Use properly typed callback
+    syncService.startDebugPolling(gameId, (updatedClock: GameClock) => {
+      console.log('Clock update received in GameClockPanel:', updatedClock);
+      setClock(updatedClock);
     });
-
+  
     return () => {
       console.log('GameClockPanel unmounting, stopping polling');
       syncService.stopDebugPolling(gameId);

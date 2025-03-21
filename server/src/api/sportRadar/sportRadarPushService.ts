@@ -102,27 +102,27 @@ export class SportRadarPushService {
         lastUpdated: new Date()
       };
   
-      console.log('Processed clock data:', clockData); // Add this line
+      console.log('Received payload:', payload);
+      console.log('Processed clock data:', clockData);
       
       this.clockUpdates$.next(clockData);
-      pushLogger.updates('Clock update received:', clockData);
+      pushLogger.updates('Clock update processed:', clockData);
     } catch (error) {
-      pushLogger.errors('Error handling clock update:', error);
+      pushLogger.errors('Error processing clock update:', error);
+      console.error('Clock update processing error:', error);
     }
   }
 
-  // Update the method signatures to accept the client WebSocket
   public subscribeToGame(gameId: string, clientWs?: WebSocket) {
+    console.log('Subscribing to game:', gameId);
     if (!this.activeSubscriptions.has(gameId)) {
       this.activeSubscriptions.add(gameId);
+      console.log('Active subscriptions:', this.activeSubscriptions);
       
-      // Reconnect with updated subscription list
-      if (this.wsConnection) {
-        this.wsConnection.close();
+      // Don't recreate connection if it exists and is open
+      if (!this.wsConnection || this.wsConnection.readyState !== WebSocket.OPEN) {
+        this.connect();
       }
-      this.connect();
-      
-      pushLogger.connection(`Subscribed to game: ${gameId}`);
     }
   }
 

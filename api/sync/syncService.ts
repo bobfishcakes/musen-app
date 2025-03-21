@@ -1,3 +1,4 @@
+// syncService.ts
 import { GameClock, StoppageEvent } from './syncTypes';
 import { pushLogger } from '../../utils/logging/pushLogger';
 import { Subject } from 'rxjs';
@@ -15,7 +16,10 @@ class SyncService {
   }
 
   updateGameClock(gameId: string, clock: Partial<GameClock>): void {
-    console.log('SyncService updating game clock:', gameId, clock);
+    console.log('⏰ [SyncService] Updating clock:', {
+      gameId,
+      newClock: clock
+    });
     const existing = this.activeSyncs.get(gameId) || {
       gameId,
       period: 1,
@@ -31,9 +35,9 @@ class SyncService {
       lastUpdated: new Date()
     };
   
-    console.log('Emitting updated clock:', updatedClock); // Add this line
     this.activeSyncs.set(gameId, updatedClock);
     this.clockUpdates$.next(updatedClock);
+    console.log('✅ [SyncService] Clock updated:', updatedClock);
     pushLogger.updates('Clock updated in sync service:', updatedClock);
   }
 
@@ -41,21 +45,35 @@ class SyncService {
     return this.activeSyncs.get(gameId);
   }
 
-  startDebugPolling(gameId: string, onUpdate: (clock: GameClock | undefined, stoppage: StoppageEvent | undefined) => void) {
-    if (this.debugPollers.has(gameId)) {
-      this.stopDebugPolling(gameId);
-    }
-
-    const poller = setInterval(() => {
-      const clock = this.getGameClock(gameId);
-      const stoppage = this.stoppages.get(gameId);
-      onUpdate(clock, stoppage);
-    }, 1000);
-
-    this.debugPollers.set(gameId, poller);
+// In syncService.ts
+startDebugPolling(gameId: string, onUpdate?: (clock: GameClock) => void): void {
+  if (this.debugPollers.has(gameId)) {
+    this.stopDebugPolling(gameId);
   }
 
-  stopDebugPolling(gameId: string) {
+  const poller = setInterval(() => {
+    const clock = this.getGameClock(gameId);
+    if (clock) {
+      // Simulate clock updates for debugging
+      const updatedClock = {
+        ...clock,
+        seconds: (clock.seconds - 1 + 60) % 60,
+        minutes: clock.seconds === 0 ? Math.max(0, clock.minutes - 1) : clock.minutes,
+        isRunning: true
+      };
+      this.updateGameClock(gameId, updatedClock);
+      
+      // Call the callback if provided
+      if (onUpdate) {
+        onUpdate(updatedClock);
+      }
+    }
+  }, 1000);
+
+  this.debugPollers.set(gameId, poller);
+}
+
+  stopDebugPolling(gameId: string): void {
     const poller = this.debugPollers.get(gameId);
     if (poller) {
       clearInterval(poller);

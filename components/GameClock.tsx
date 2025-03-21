@@ -1,42 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { sportRadarPushService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/sportRadarPushService';
+import { pushFeedService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/pushFeedService';
 import { syncService } from '@/api/sync/syncService';
 import { GameClock } from '@/api/sync/syncTypes';
 
-const GameClockPanel = ({ gameId }: { gameId: string }) => {
+interface GameClockPanelProps {
+  gameId: string;
+}
+
+const GameClockPanel: React.FC<GameClockPanelProps> = ({ gameId }) => {
   const [clock, setClock] = useState<GameClock>();
 
   useEffect(() => {
     console.log('GameClockPanel mounting for game:', gameId);
     
-    // Get initial clock state
-    const initialClock = syncService.getGameClock(gameId);
-    console.log('Initial clock state:', initialClock);
-    if (initialClock) {
-      setClock(initialClock);
-    }
-
-    // Subscribe to clock updates
-    const subscription = syncService.clockUpdates$.subscribe(newClock => {
-      console.log('GameClockPanel received update:', newClock);
-      if (newClock.gameId === gameId) {
-        console.log('Updating clock state for game:', gameId);
-        setClock(newClock);
+    // Connect to WebSocket server
+    const ws = new WebSocket('ws://your-server-url');
+    
+    ws.onopen = () => {
+      // Subscribe to game
+      ws.send(JSON.stringify({
+        type: 'subscribe',
+        gameId: gameId
+      }));
+    };
+  
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'clockUpdate') {
+        setClock(data.clock);
       }
-    });
-
+    };
+  
     return () => {
-      console.log('GameClockPanel unmounting for game:', gameId);
-      subscription.unsubscribe();
+      ws.close();
     };
   }, [gameId]);
-
-  // Add render logging
-  useEffect(() => {
-    console.log('Clock state updated:', clock);
-  }, [clock]);
 
   const formatTime = (minutes: number, seconds: number) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
