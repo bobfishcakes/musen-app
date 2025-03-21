@@ -8,6 +8,8 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ActiveStreamProvider } from '../contexts/ActiveStreamContext';
+import { StreamingProvider } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamingContext';
+import { StreamTimesProvider } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamTimesContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -36,23 +38,27 @@ export default function RootLayout() {
   }
 
   return (
-    <ActiveStreamProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="stream"
-            options={{
-              gestureEnabled: true,
-              gestureDirection: 'vertical',
-              animationDuration: 400,
-              headerShown: false,
-              animation: 'slide_from_bottom'
-            }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </ActiveStreamProvider>
+    <StreamingProvider>
+      <ActiveStreamProvider>
+        <StreamTimesProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="stream"
+                options={{
+                  gestureEnabled: true,
+                  gestureDirection: 'vertical',
+                  animationDuration: 400,
+                  headerShown: false,
+                  animation: 'slide_from_bottom'
+                }}
+              />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </StreamTimesProvider>
+      </ActiveStreamProvider>
+    </StreamingProvider>
   );
 }

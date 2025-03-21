@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Image, StyleSheet, SafeAreaView, Platform } from 'react-native'
+import { View, Image, StyleSheet, SafeAreaView, Platform, Modal, TextInput, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import ScoreBoard from '../components/ScoreBoard'
 import { useActiveStream } from '@/hooks/useActiveStream'
@@ -9,36 +9,58 @@ import { router } from 'expo-router'
 import { syncService } from '@/api/sync/syncService'
 import { GameClock, StoppageEvent } from '@/api/sync/syncTypes'
 import { SyncTestPanel } from '@/components/sync/syncTestPanel'
+import { GameSyncControl } from '@/components/GameSyncControl'
+import { GameTabs } from '@/components/gameTabs'
+import { Header } from '@/components/Header';
+import { useStreaming } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamingContext'
 
-const Header = () => {
-  return (
-    <ThemedView style={styles.header}>
-      <View style={styles.webHeaderContent}>
-        <View style={styles.headerLeft}>
-          <Ionicons 
-            name="arrow-back" 
-            size={32} 
-            color="#000" 
-            style={styles.backButton}
-            onPress={() => router.push('/')}
-          />
-          <Image 
-            source={{
-              uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
-            }}
-            style={styles.webLogo}
-          />
-          <ThemedText 
-            type="default" 
-            style={styles.headerText}
-          >
-            musen
-          </ThemedText>
-        </View>
+
+  const TimerInput = ({ value, onChange }: { value: string, onChange: (text: string) => void }) => {
+    const [minutes, seconds] = value.split(':');
+
+    const handleMinuteChange = (text: string) => {
+      const mins = text.replace(/[^\d]/g, '');
+      if (mins.length <= 2) {
+        const newMinutes = mins.length === 0 ? '00' : mins;
+        onChange(`${newMinutes}:${seconds || '00'}`);
+      }
+    };
+
+    const handleSecondChange = (text: string) => {
+      const secs = text.replace(/[^\d]/g, '');
+      if (secs.length <= 2) {
+        const newSeconds = secs.length === 0 ? '00' : secs;
+        onChange(`${minutes || '00'}:${newSeconds}`);
+      }
+    };
+
+    return (
+      <View style={styles.timerInput}>
+        <TextInput
+          style={styles.timerDigit}
+          value={minutes || '00'}
+          onChangeText={handleMinuteChange}
+          keyboardType="number-pad"
+          maxLength={2}
+          selectTextOnFocus={true}
+        />
+        <ThemedText style={styles.timerSeparator}>:</ThemedText>
+        <TextInput
+          style={styles.timerDigit}
+          value={seconds || '00'}
+          onChangeText={handleSecondChange}
+          keyboardType="number-pad"
+          maxLength={2}
+          selectTextOnFocus={true}
+        />
       </View>
-    </ThemedView>
-  )
-}
+    );
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
+
 
 const GameClockPanel = ({ gameId }: { gameId: string }) => {
   const [clock, setClock] = useState<GameClock>();
@@ -90,6 +112,50 @@ const Stream = () => {
   const isWeb = Platform.OS === 'web'
   const [isLiked, setIsLiked] = React.useState(false)
   const [game, setGame] = useState(activeStream?.game)
+  const { isStreaming } = useStreaming()
+  const [activeTab, setActiveTab] = useState('game time')
+  const [showTimePrompt, setShowTimePrompt] = useState(false)
+  const [gameStartTime, setGameStartTime] = useState('00:00')
+  const [isTimeSet, setIsTimeSet] = useState(false)
+
+  useEffect(() => {
+    // Show prompt only when component mounts, time hasn't been set, AND user is streaming
+    if (activeStream && !isTimeSet && isStreaming) {
+      setShowTimePrompt(true)
+    }
+  }, [activeStream, isTimeSet, isStreaming])
+
+  const validateTimeFormat = (time: string) => {
+    // Accept format MM:SS
+    const timeRegex = /^([0-5]?[0-9]):([0-5][0-9])$/;
+    return timeRegex.test(time);
+  };
+
+  const handleTimeChange = (text: string) => {
+    // Remove non-digit and non-colon characters
+    let formatted = text.replace(/[^\d:]/g, '');
+    
+    // Don't allow more than 5 characters (MM:SS format)
+    if (formatted.length > 5) return;
+  
+    // Add colon after 2 digits if not present
+    if (formatted.length === 2 && !formatted.includes(':')) {
+      formatted += ':';
+    }
+  
+    // Validate minutes and seconds
+    const parts = formatted.split(':');
+    if (parts[0] && parseInt(parts[0]) > 59) {
+      parts[0] = '59';
+      formatted = parts.join(':');
+    }
+    if (parts[1] && parseInt(parts[1]) > 59) {
+      parts[1] = '59';
+      formatted = parts.join(':');
+    }
+  
+    setGameStartTime(formatted);
+  };
 
   useEffect(() => {
     if (activeStream?.game?.radarGameId) {  // Add check for radarGameId
@@ -137,15 +203,66 @@ const Stream = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {isWeb && <Header />}
+      {isWeb && <Header showBack isStreamPage/>}
+      {Platform.OS === 'ios' && (
+        <View style={styles.pullDownIndicator} />
+      )}
       <View style={[styles.container, isWeb && styles.webContainer]}>
         <View style={[styles.contentWrapper, isWeb && styles.webContentWrapper]}>
-          {/* ... other components ... */}
-
+          <View style={[styles.streamHeader, isWeb && styles.webStreamHeader]}>
+            <ThemedText type="subtitle" style={{ color: '#000000' }}>{activeStream.title}</ThemedText>
+            <View style={styles.controls}>
+              <Ionicons name="bluetooth" size={24} color="#203024" />
+              <Ionicons name="volume-mute" size={24} color="#203024" />
+            </View>
+          </View>
+          
+          {/* Separator added here */}
+          {isWeb && (
+            <View style={styles.separator} />
+          )}
+  
+          <View style={[styles.profile, isWeb && styles.webProfile]}>
+            <Image
+              source={{
+                uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
+              }}
+              style={styles.profilePic}
+            />
+            <ThemedText type="defaultSemiBold" style={styles.username}>bobfishcakes</ThemedText>
+            
+            <View style={styles.viewerCount}>
+              <Ionicons
+                name={isLiked ? 'heart' : 'heart-outline'}
+                size={Platform.OS === 'web' ? 32 : 24}
+                color={isLiked ? '#FF4444' : '#333'}
+                onPress={() => setIsLiked(!isLiked)}
+              />
+              <Ionicons 
+                name="headset" 
+                size={Platform.OS === 'web' ? 32 : 24}
+                color="#333" 
+              />
+              <ThemedText style={styles.countText}>{activeStream.listeners}</ThemedText>
+            </View>
+          </View>
+  
           <View style={[styles.scoreBoardWrapper, isWeb && styles.webScoreBoardWrapper]}>
-            <ScoreBoard game={game}/>
+            <ScoreBoard game={activeStream.game}/>
+          </View>
+  
+          <View style={[styles.tabsWrapper, isWeb && styles.webTabsWrapper]}>
+            <GameTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          </View>
+  
+          <View style={[styles.gameSyncWrapper, isWeb && styles.webGameSyncWrapper]}>
+            <GameSyncControl 
+              initialTime={isTimeSet ? gameStartTime : '00:00'} 
+              isStreaming={isStreaming}
+            />
           </View>
 
+          {/* Add Game Clock and Sync Test Panel here */}
           {isWeb && game.radarGameId && (
             <View style={styles.clockContainer}>
               <GameClockPanel gameId={game.radarGameId} />
@@ -162,12 +279,25 @@ const Stream = () => {
               />
             </View>
           )}
+  
+          <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
+            <View style={styles.placeholder} />
+            <View style={styles.placeholder} />
+            <View style={styles.placeholder} />
+          </View>
         </View>
       </View>
+
+      <Modal
+        visible={showTimePrompt && isStreaming}
+        transparent={true}
+        animationType="fade"
+      >
+        {/* Modal content */}
+      </Modal>
     </SafeAreaView>
   )
 }
-
 
 
 const styles = StyleSheet.create({
@@ -366,7 +496,64 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 20,
     gap: 16,
-  }
+  },
+  tabsWrapper: {
+    width: '100%',
+    marginVertical: 8,
+    marginTop: 20,
+  },
+  webTabsWrapper: {
+    alignItems: 'center',
+    maxWidth: 850,
+  },
+  gameSyncWrapper: {
+    width: '100%',
+    marginTop: 0,
+    marginBottom: 20,
+  },
+  webGameSyncWrapper: {
+    alignItems: 'center',
+    width: '100%', // Ensure full width
+    maxWidth: 850, // Match the content wrapper width instead of 749
+  },
+  pullDownIndicator: {
+    width: 36,
+    height: 5,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 2.5,
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    width: '100%',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  timerInput: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 16, // Reduced to accommodate warning message below
+    gap: 8,
+  },
+  timerDigit: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    padding: 12,
+    width: 60,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  timerSeparator: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#000000',
+  },
 })
 
 export default Stream

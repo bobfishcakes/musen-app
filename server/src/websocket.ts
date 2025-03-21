@@ -1,7 +1,7 @@
 import { Server } from 'http';
 import WebSocket from 'ws';
 import { sportRadarPushService } from './api/sportRadar/sportRadarPushService';
-import { pushLogger } from '/Users/atharvsonawane/musen-app/utils/logging/pushLogger';
+import { pushLogger } from '/Users/atharvsonawane/musen-app-push-feed/utils/logging/pushLogger';
 
 export const setupWebSocket = (server: Server) => {
   console.log('Setting up WebSocket server...');
