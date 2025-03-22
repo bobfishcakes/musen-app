@@ -13,7 +13,8 @@ import { GameSyncControl } from '@/components/GameSyncControl'
 import { GameTabs } from '@/components/gameTabs'
 import { Header } from '@/components/Header';
 import { useStreaming } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamingContext'
-
+import { GameStatsPanel } from '@/components/GameStatsPanel'
+import { getNBATeamColor } from '@/api/basketball/basketballTypes'
 
   const TimerInput = ({ value, onChange }: { value: string, onChange: (text: string) => void }) => {
     const [minutes, seconds] = value.split(':');
@@ -256,10 +257,26 @@ const Stream = () => {
           </View>
   
           <View style={[styles.gameSyncWrapper, isWeb && styles.webGameSyncWrapper]}>
-            <GameSyncControl 
-              initialTime={isTimeSet ? gameStartTime : '00:00'} 
-              isStreaming={isStreaming}
-            />
+            {activeTab === 'game time' ? (
+              <GameSyncControl 
+                initialTime={isTimeSet ? gameStartTime : '00:00'} 
+                isStreaming={isStreaming}
+              />
+            ) : activeTab === 'stats' ? (
+              <GameStatsPanel
+                gameId={game.radarGameId}
+                homeTeam={{
+                  name: game.teams.home.name,
+                  primaryColor: getNBATeamColor(game.teams.home.name),
+                  logo: game.teams.home.logo
+                }}
+                awayTeam={{
+                  name: game.teams.away.name,
+                  primaryColor: getNBATeamColor(game.teams.away.name),
+                  logo: game.teams.away.logo
+                }}
+              />
+            ) : null}
           </View>
 
           {/* Add Game Clock and Sync Test Panel here */}

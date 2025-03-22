@@ -76,18 +76,18 @@ const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
 const styles = StyleSheet.create({
   scoreBoard: {
     alignItems: 'center',
-    borderRadius: 11, // Reduced from 16
-    padding: 14, // Reduced from 20
-    marginTop: 6, // Reduced from 8
+    borderRadius: 11,
+    padding: 14,
+    marginTop: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 }, // Reduced from 3
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3, // Reduced from 4
+    shadowRadius: 3,
     elevation: 4,
     overflow: 'hidden',
-    width: Platform.OS === 'web' ? 749 : '100%', // Reduced from 1070
+    width: Platform.OS === 'web' ? '100%' : '100%', // Changed from fixed 749px to 100%
     ...(Platform.OS === 'web' && {
-      height: 280, // Reduced from 400
+      height: 280,
       position: 'relative'
     })
   },
@@ -146,10 +146,11 @@ const styles = StyleSheet.create({
     color: '#000000',
     textAlign: 'center',
   },
-  gameStatus: {
-    color: '#324b39',
-    textAlign: 'center',
-  },
+gameStatus: {
+  color: '#324b39',
+  textAlign: 'center',
+  fontSize: 18, // Add this to match GameCard's default font size
+},
   touchable: {
     width: '100%',
   },

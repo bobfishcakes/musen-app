@@ -39,24 +39,44 @@ export interface SportRadarGame {
   venue: SportRadarVenue;
 }
 
+export interface PlayerStats {
+  id: string;
+  full_name: string;
+  jersey_number: string;
+  position: string;
+  primary_position: string;
+  statistics: {
+    points: number;
+    rebounds: number;
+    assists: number;
+    minutes: string;
+  };
+}
+
+export interface TeamLeaders {
+  points: PlayerStats;
+  rebounds: PlayerStats;
+  assists: PlayerStats;
+}
+
 export interface GameDetailsResponse {
   id: string;
-  status: string;        // "inprogress", "complete", etc.
-  clock: string;         // API returns clock as string like "11:16"
-  clock_decimal?: string;
-  quarter: number;       // API uses quarter instead of period
-  scheduled: string;
-  home: SportRadarTeam;
-  away: SportRadarTeam;
-  venue: SportRadarVenue;
+  status: string;
   coverage: string;
-  attendance?: number;
-  sr_id?: string;
-  reference?: string;
-  time_zones?: {
-    away: string;
-    home: string;
-    venue: string;
+  scheduled: string;
+  clock: string;
+  quarter: number;
+  home: {
+    name: string;
+    alias: string;
+    points: number;
+    leaders: TeamLeaders;
+  };
+  away: {
+    name: string;
+    alias: string;
+    points: number;
+    leaders: TeamLeaders;
   };
 }
 
