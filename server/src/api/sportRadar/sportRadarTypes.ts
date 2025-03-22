@@ -40,9 +40,9 @@ export interface SportRadarGame {
 }
 
 export interface PlayerStats {
-  id: string;
   full_name: string;
   jersey_number: string;
+  id: string;
   position: string;
   primary_position: string;
   statistics: {
@@ -50,13 +50,14 @@ export interface PlayerStats {
     rebounds: number;
     assists: number;
     minutes: string;
+    // Add other statistics as needed
   };
 }
 
 export interface TeamLeaders {
-  points: PlayerStats;
-  rebounds: PlayerStats;
-  assists: PlayerStats;
+  points: PlayerStats[];  // Changed to array since the API returns an array
+  rebounds: PlayerStats[];
+  assists: PlayerStats[];
 }
 
 export interface GameDetailsResponse {
@@ -79,7 +80,6 @@ export interface GameDetailsResponse {
     leaders: TeamLeaders;
   };
 }
-
 export interface SportRadarApiResponse<T> {
   status: string;
   data: T;

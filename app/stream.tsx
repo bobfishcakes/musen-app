@@ -257,27 +257,37 @@ const Stream = () => {
           </View>
   
           <View style={[styles.gameSyncWrapper, isWeb && styles.webGameSyncWrapper]}>
-            {activeTab === 'game time' ? (
-              <GameSyncControl 
-                initialTime={isTimeSet ? gameStartTime : '00:00'} 
-                isStreaming={isStreaming}
-              />
-            ) : activeTab === 'stats' ? (
-              <GameStatsPanel
-                gameId={game.radarGameId}
-                homeTeam={{
-                  name: game.teams.home.name,
-                  primaryColor: getNBATeamColor(game.teams.home.name),
-                  logo: game.teams.home.logo
-                }}
-                awayTeam={{
-                  name: game.teams.away.name,
-                  primaryColor: getNBATeamColor(game.teams.away.name),
-                  logo: game.teams.away.logo
-                }}
-              />
-            ) : null}
-          </View>
+  {activeTab === 'game time' ? (
+    <GameSyncControl 
+      initialTime={isTimeSet ? gameStartTime : '00:00'} 
+      isStreaming={isStreaming}
+    />
+  ) : activeTab === 'stats' ? (
+<GameStatsPanel 
+  gameId={game.radarGameId} 
+  game={{
+    teams: {
+      home: {
+        ...game.teams.home,
+        colors: [
+          game.teams.home.primaryColor || '#CCCCCC',
+          game.teams.home.primaryColor || '#CCCCCC',
+          game.teams.home.primaryColor || '#CCCCCC'
+        ]
+      },
+      away: {
+        ...game.teams.away,
+        colors: [
+          game.teams.away.primaryColor || '#CCCCCC',
+          game.teams.away.primaryColor || '#CCCCCC',
+          game.teams.away.primaryColor || '#CCCCCC'
+        ]
+      }
+    }
+  }}
+/>
+  ) : null}
+</View>
 
           {/* Add Game Clock and Sync Test Panel here */}
           {isWeb && game.radarGameId && (
@@ -336,6 +346,7 @@ const styles = StyleSheet.create({
   webContentWrapper: {
     maxWidth: 850,
     width: '100%',
+    marginTop: 60, // Add this line to push content below header
   },
   header: {
     height: 80,

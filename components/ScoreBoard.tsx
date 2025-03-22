@@ -18,7 +18,7 @@ const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
   const Content = (
     <View style={styles.scoreBoard}>
       <LinearGradient
-        colors={[awayColor, homeColor]}
+        colors={[homeColor, awayColor]} // Flipped colors
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
@@ -28,15 +28,15 @@ const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
         <View style={styles.teamSection}>
           <View style={styles.scoreContainer}>
             <ThemedText type="title" style={styles.score}>
-              {game.scores?.away.total}
+              {game.scores?.home.total}
             </ThemedText>
           </View>
           <Image
-            source={{ uri: game.teams.away.logo }}
+            source={{ uri: game.teams.home.logo }}
             style={styles.teamLogo}
           />
           <ThemedText type="default" style={styles.teamName}>
-            {game.teams.away.name}
+            {game.teams.home.name}
           </ThemedText>
         </View>
 
@@ -51,15 +51,15 @@ const ScoreBoard = ({ game, onPress }: ScoreBoardProps) => {
         <View style={styles.teamSection}>
           <View style={styles.scoreContainer}>
             <ThemedText type="title" style={styles.score}>
-              {game.scores?.home.total}
+              {game.scores?.away.total}
             </ThemedText>
           </View>
           <Image
-            source={{ uri: game.teams.home.logo }}
+            source={{ uri: game.teams.away.logo }}
             style={styles.teamLogo}
           />
           <ThemedText type="default" style={styles.teamName}>
-            {game.teams.home.name}
+            {game.teams.away.name}
           </ThemedText>
         </View>
       </View>
