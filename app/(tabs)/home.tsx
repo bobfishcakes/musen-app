@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, ScrollView, FlatList, ActivityIndicator, View, TouchableOpacity, ImageBackground, Image, Animated, Easing } from 'react-native';
+import { StyleSheet, Platform, ScrollView, FlatList, ActivityIndicator, View, TouchableOpacity, ImageBackground, Image } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import ScoreBoard from '@/components/ScoreBoard';
@@ -11,19 +11,22 @@ import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
 import { Ionicons } from '@expo/vector-icons';
-import { useStreaming } from '@/contexts/StreamingContext';
-import { Header } from '@/components/Header';
-import { sportRadarHTTPService } from '../../server/src/api/sportRadar/sportRadarHTTPService';
-import { sportRadarLocalService } from '../../server/src/api/sportRadar/sportRadarLocalService';
-import { sportRadarPushService } from '../../server/src/api/sportRadar/sportRadarPushService';
-
-const BACKEND_URL = 'http://localhost:3000';
-
-const getLastWord = (str: string) => {
-  return str.split(' ').pop() || str;
-};
 
 const styles = StyleSheet.create({
+  header: {
+    height: Platform.select({
+      web: 70,
+      ios: 60,
+      default: 80,
+    }),
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    backgroundColor: '#64a675',
+  },
   container: {
     flex: 1,
   },
@@ -96,14 +99,14 @@ const styles = StyleSheet.create({
     height: 130, // Increased from 70
     resizeMode: 'contain',
   },
-
+  
   headerText: {
     fontSize: 100, // Increased from 50
     color: 'black',
-    fontWeight: '700', // Changed from '500' to '700' for bolder text
+    fontWeight: '500', // Added for better visibility at larger size
     lineHeight: 100, // Add this to control vertical spacing
   },
-
+  
   logoContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -124,141 +127,83 @@ const styles = StyleSheet.create({
   },
   viewToggleButton: {
     position: 'absolute',
-    right: 16, // Position on right side
-    top: Platform.select({
-      web: 12,
-      ios: 12,
-      default: 24,
-    }),
+    left: '50%',
+    transform: [{ translateX: -50 }],
     backgroundColor: '#486B52',
     padding: 8,
     borderRadius: 20,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 8,
     zIndex: 101,
-    width: 40, // Fixed width for circular button
-    height: 40, // Fixed height for circular button
   },
-
+  viewToggleText: {
+    color: 'white',
+    fontSize: 16,
+  },
 });
 
-export default function HomeScreen() {
-  const now = new Date();
-  const formattedDate = now.toISOString().split('T')[0];
-  const { games: basketballGames, loading, error } = useBasketballGames(formattedDate);
-  const { setActiveStream } = useActiveStream();
-  const isWeb = Platform.OS === 'web';
-  const [nflExpanded, setNflExpanded] = useState(false);
-  const [nbaExpanded, setNbaExpanded] = useState(false);
+const Header = () => {
+    const isWeb = Platform.OS === 'web';
+    
+    return (
+      <ThemedView style={styles.header}>
+        {isWeb && (
+          <TouchableOpacity 
+            style={styles.viewToggleButton}
+            onPress={() => router.push('/(tabs)')}
+          >
+            <Ionicons name="radio" size={24} color="white" />
+            <ThemedText style={styles.viewToggleText}>
+              Switch to Listener View
+            </ThemedText>
+          </TouchableOpacity>
+        )}
+      </ThemedView>
+    );
+  };
+
+  export default function HomeScreen() {
+    const now = new Date();
+    const formattedDate = now.toISOString().split('T')[0];
+    const { games: basketballGames, loading, error } = useBasketballGames(formattedDate);
+    const { setActiveStream } = useActiveStream();
+    const isWeb = Platform.OS === 'web';
+    const [nflExpanded, setNflExpanded] = useState(false);
+    const [nbaExpanded, setNbaExpanded] = useState(false);
+    
+    const nbaGames = basketballGames
+      ?.filter(game => {
+        if (game.league.name !== "NBA") return false;
+        const liveStatuses = ["Q1", "Q2", "Q3", "Q4", "HT", "OT", "NS", "LIVE"];
+        return liveStatuses.includes(game.status.short);
+      })
+      .map(convertBasketballGame) || [];
   
-  const nbaGames = basketballGames
-    ?.filter(game => {
-      if (game.league.name !== "NBA") return false;
-      const liveStatuses = ["Q1", "Q2", "Q3", "Q4", "HT", "OT", "NS", "LIVE"];
-      return liveStatuses.includes(game.status.short);
-    })
-    .map(convertBasketballGame) || [];
-
-    const handleGamePress = async (game: Game) => {
-      try {
-        console.log('=== Starting handleGamePress ===');
-        console.log('Initial game object:', JSON.stringify(game, null, 2));
-
-        // Check if it's an NFL game
-        if (game.league.name === 'NFL' || game.league.alias === 'NFL') {
-          // For NFL games, create stream without SportRadar integration
-          const newStream: Stream = {
-            id: `1`,
-            title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
-            streamer: 'bobfishcakes',
-            game: {
-              ...game,
-              radarGameId: game.id, // Use game.id as fallback
-              period: 1,
-              minutes: 15,
-              seconds: 0,
-              isRunning: true
-            },
-            listeners: 1
-          };
-
-          console.log('Created new NFL stream object:', JSON.stringify(newStream, null, 2));
-          setActiveStream(newStream);
-          router.push('/stream');
-          return;
-        }
-
-        // Original NBA game handling
-        if (!game.date) {
-          console.warn('Game press failed: No date available');
-          throw new Error('Game date is undefined');
-        }
-
-        const gameDate = new Date(game.date).toISOString().split('T')[0];
-        console.log('Formatted game date:', gameDate);
-
-        const sportRadarGameId = await sportRadarLocalService.findGameByTeamsAndDate(
-          game.teams.home.name,
-          game.teams.away.name,
-          gameDate
-        );
-
-        if (!sportRadarGameId) {
-          console.warn('SportRadar game ID not found');
-          return;
-        }
-
-        console.log('Found SportRadar game ID:', sportRadarGameId);
-
-        sportRadarPushService.subscribeToGame(sportRadarGameId);
-        console.log('Successfully subscribed to push feed');
-
-        const gameDetails = await sportRadarHTTPService.getGameDetails(sportRadarGameId);
-        console.log('Game details structure:', {
-          clock: gameDetails.clock,
-          period: gameDetails.quarter,
-          status: gameDetails.status,
-          scores: {
-            home: gameDetails.home?.points,
-            away: gameDetails.away?.points
-          }
-        });
-
+      const handleGamePress = (game: Game) => {
+        const getLastWord = (teamName: string) => {
+          return teamName.split(' ').pop() || teamName;
+        };
+    
         const newStream: Stream = {
           id: `1`,
           title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
           streamer: 'bobfishcakes',
-          game: {
-            ...game,
-            radarGameId: sportRadarGameId,
-            period: gameDetails.quarter || 1,
-            minutes: parseInt((gameDetails.clock || "0:00").split(':')[0]) || 0,
-            seconds: parseInt((gameDetails.clock || "0:00").split(':')[1]) || 0,
-            isRunning: gameDetails.status === "inprogress"
-          },
+          game: game,
           listeners: 1
         };
-
-        console.log('Created new stream object:', JSON.stringify(newStream, null, 2));
         setActiveStream(newStream);
-        console.log('Active stream set successfully');
-
         router.push('/stream');
-        console.log('=== Completed handleGamePress ===');
-
-      } catch (error: any) {
-        console.error('Error in handleGamePress:', error);
-        console.error('Error stack:', error?.stack);
-      }
-    };
+      };
+  
     const renderGameCard = ({ item }: { item: Game }) => (
-      <GameCard
-        key={item.id}
-        game={item}
+      <GameCard 
+        key={item.id} 
+        game={item} 
         onPress={() => handleGamePress(item)}
       />
     );
-
+  
     const renderContent = () => (
       <ScrollView
         contentContainerStyle={[styles.scrollViewContent, isWeb && styles.webContainer]}
@@ -267,21 +212,21 @@ export default function HomeScreen() {
   {/* Logo Section */}
   {isWeb && (
     <View style={styles.logoContent}>
-      <Image
+      <Image 
         source={{
           uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
         }}
         style={styles.webLogo}
       />
       <View style={styles.textContainer}>
-        <ThemedText
-          type="default"
+        <ThemedText 
+          type="default" 
           style={styles.headerText}
         >
           musen
         </ThemedText>
-        <ThemedText
-          type="default"
+        <ThemedText 
+          type="default" 
           style={styles.taglineText}
         >
           Tune into what really matters
@@ -289,7 +234,7 @@ export default function HomeScreen() {
       </View>
     </View>
   )}
-
+  
         {/* Popular Section */}
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Popular</ThemedText>
@@ -304,7 +249,7 @@ export default function HomeScreen() {
           </ScrollView>
         </ThemedView>
         <View style={styles.dividerLine} />
-
+  
         {/* NFL Section */}
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>NFL</ThemedText>
@@ -314,16 +259,16 @@ export default function HomeScreen() {
                 {mockNflGames
                   .slice(0, nflExpanded ? undefined : 3)
                   .map((game) => (
-                    <GameCard
-                      key={game.id}
-                      game={game}
+                    <GameCard 
+                      key={game.id} 
+                      game={game} 
                       onPress={() => handleGamePress(game)}
                     />
                   ))}
               </View>
               {mockNflGames.length > 3 && (
                 <View style={styles.buttonContainer}>
-                  <TouchableOpacity
+                  <TouchableOpacity 
                     style={styles.showMoreButton}
                     onPress={() => setNflExpanded(!nflExpanded)}
                   >
@@ -355,7 +300,7 @@ export default function HomeScreen() {
           )}
         </ThemedView>
         <View style={styles.dividerLine} />
-
+  
         {/* NBA Section */}
         <ThemedView style={styles.section}>
           {loading ? (
@@ -371,15 +316,15 @@ export default function HomeScreen() {
                     {nbaGames
                       .slice(0, nbaExpanded ? undefined : 3)
                       .map((game) => (
-                        <GameCard
-                          key={game.id}
-                          game={game}
+                        <GameCard 
+                          key={game.id} 
+                          game={game} 
                           onPress={() => handleGamePress(game)}
                         />
                       ))}
                   </View>
                   {nbaGames.length > 3 && (
-                    <TouchableOpacity
+                    <TouchableOpacity 
                       style={styles.showMoreButton}
                       onPress={() => setNbaExpanded(!nbaExpanded)}
                     >
@@ -391,30 +336,30 @@ export default function HomeScreen() {
                 </>
               ) : (
                 <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                directionalLockEnabled={true}
-                alwaysBounceVertical={false}
-              >
-                <FlatList
-                  contentContainerStyle={styles.gamesContainer}
-                  numColumns={Math.ceil(nbaGames.length / 2)}
-                  showsVerticalScrollIndicator={false}
+                  horizontal
                   showsHorizontalScrollIndicator={false}
-                  data={nbaGames}
                   directionalLockEnabled={true}
                   alwaysBounceVertical={false}
-                  renderItem={renderGameCard}
-                />
-              </ScrollView>
-            )}
-          </>
+                >
+                  <FlatList
+                    contentContainerStyle={styles.gamesContainer}
+                    numColumns={Math.ceil(nbaGames.length / 2)}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    data={nbaGames}
+                    directionalLockEnabled={true}
+                    alwaysBounceVertical={false}
+                    renderItem={renderGameCard}
+                  />
+                </ScrollView>
+              )}
+            </>
           )}
         </ThemedView>
         <View style={styles.dividerLine} />
       </ScrollView>
     );
-
+    
     return (
       <ThemedView style={styles.container}>
         <Header />

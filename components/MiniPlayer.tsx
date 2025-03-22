@@ -57,17 +57,17 @@ export const MiniPlayer = ({ style }: ViewProps) => {
         inputRange: [0, 0.25, 0.5, 0.75, 1],
         outputRange: [0, 1, 1, 0, 0]
     })
-    
+
     const startY = moveAnim.interpolate({
         inputRange: [0, 0.25, 0.5, 0.75, 1],
         outputRange: [0, 0, 1, 1, 0]
     })
-    
+
     const endX = moveAnim.interpolate({
         inputRange: [0, 0.25, 0.5, 0.75, 1],
         outputRange: [1, 1, 0, 0, 1]
     })
-    
+
     const endY = moveAnim.interpolate({
         inputRange: [0, 0.25, 0.5, 0.75, 1],
         outputRange: [1, 0, 0, 1, 1]
@@ -93,9 +93,9 @@ export const MiniPlayer = ({ style }: ViewProps) => {
                         />
                     )}
                 </View>
-                <TouchableOpacity 
-                    onPress={handlePress} 
-                    activeOpacity={0.9} 
+                <TouchableOpacity
+                    onPress={handlePress}
+                    activeOpacity={0.9}
                     style={[styles.container, isWeb && styles.webContainer]}
                 >
                     <View style={styles.scoreContainer}>
@@ -141,6 +141,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#ffffff',
+        borderColor: '#64a675',
+        borderWidth: 3,
         padding: 10,
         borderRadius: 12,
         paddingVertical: Platform.OS === 'ios' ? 25 : 20, // Increase vertical padding for iOS
@@ -149,7 +151,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5,
         shadowRadius: 4,
         elevation: 3,
-        width: '100%',
+        width: '95%',
     },
     webWrapper: {
         alignItems: 'center',

@@ -2,7 +2,7 @@ import { StyleSheet, Platform, TouchableOpacity, View, Image } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
-import { useStreaming } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamingContext';
+import { useStreaming } from '@/contexts/StreamingContext';
 import { router } from 'expo-router';
 
 const styles = StyleSheet.create({
