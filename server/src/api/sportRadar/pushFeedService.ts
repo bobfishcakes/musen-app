@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
-import { pushLogger } from '/Users/atharvsonawane/musen-app/utils/logging/pushLogger';
-import { GameClock } from '/Users/atharvsonawane/musen-app/api/sync/syncTypes';
+import { pushLogger } from '/Users/atharvsonawane/musen-app-push-feed/utils/logging/pushLogger';
+import { GameClock } from '/Users/atharvsonawane/musen-app-push-feed/api/sync/syncTypes';
 
 class PushFeedService {
   private ws: WebSocket | null = null;

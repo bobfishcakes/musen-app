@@ -2,38 +2,38 @@ import { Game, Teams, League, GameDate, Scores } from '../../constants/Interface
 
 // NBA Team Colors (60% tinted) with Primary, Secondary, and Tertiary Variants
 export const nbaTeamColors: { 
-  [key: string]: { primary: string; secondary: string; tertiary: string } 
+  [key: string]: { primary: string; secondary: string; } 
 } = {
-  "Atlanta Hawks": { primary: "#DDA6A6", secondary: "#B39986", tertiary: "#999999" }, // Red, Wine, Black
-  "Boston Celtics": { primary: "#99CC99", secondary: "#B3A6E6", tertiary: "#999999" }, // Green, Purple, Black
-  "Brooklyn Nets": { primary: "#999999", secondary: "#B3B3B3", tertiary: "#CCCCCC" }, // Black, Gray, Light Gray
-  "Charlotte Hornets": { primary: "#B3A6E6", secondary: "#99CCE6", tertiary: "#999999" }, // Purple, Teal, Black
-  "Chicago Bulls": { primary: "#DDA6A6", secondary: "#999999", tertiary: "#B39986" }, // Red, Black, Wine
-  "Cleveland Cavaliers": { primary: "#B39986", secondary: "#DDA6A6", tertiary: "#999999" }, // Wine, Red, Black
-  "Dallas Mavericks": { primary: "#99B3E6", secondary: "#999999", tertiary: "#99CCE6" }, // Blue, Black, Teal
-  "Denver Nuggets": { primary: "#99B3E6", secondary: "#FFB366", tertiary: "#FFE666" }, // Blue, Gold, Yellow
-  "Detroit Pistons": { primary: "#DDA6A6", secondary: "#99B3E6", tertiary: "#999999" }, // Red, Blue, Black
-  "Golden State Warriors": { primary: "#FFE666", secondary: "#99B3E6", tertiary: "#999999" }, // Gold, Blue, Black
-  "Houston Rockets": { primary: "#DDA6A6", secondary: "#999999", tertiary: "#B3A6E6" }, // Red, Black, Purple
-  "Indiana Pacers": { primary: "#FFB366", secondary: "#99B3E6", tertiary: "#999999" }, // Gold, Blue, Black
-  "Los Angeles Clippers": { primary: "#DDA6A6", secondary: "#99B3E6", tertiary: "#999999" }, // Red, Blue, Black
-  "Los Angeles Lakers": { primary: "#ADA6CC", secondary: "#FFE666", tertiary: "#999999" }, // Purple, Gold, Black
-  "Memphis Grizzlies": { primary: "#99B3E6", secondary: "#999999", tertiary: "#99CCE6" }, // Blue, Black, Teal
-  "Miami Heat": { primary: "#DDA6A6", secondary: "#999999", tertiary: "#B39986" }, // Red, Black, Wine
-  "Milwaukee Bucks": { primary: "#99CC99", secondary: "#999999", tertiary: "#B3A6E6" }, // Green, Black, Purple
-  "Minnesota Timberwolves": { primary: "#99B3E6", secondary: "#99CC99", tertiary: "#999999" }, // Blue, Green, Black
-  "New Orleans Pelicans": { primary: "#99B3E6", secondary: "#FFB366", tertiary: "#999999" }, // Blue, Gold, Black
-  "New York Knicks": { primary: "#FFA666", secondary: "#99B3E6", tertiary: "#999999" }, // Orange, Blue, Black
-  "Oklahoma City Thunder": { primary: "#99B3E6", secondary: "#FFA666", tertiary: "#999999" }, // Blue, Orange, Black
-  "Orlando Magic": { primary: "#99B3E6", secondary: "#999999", tertiary: "#99CCE6" }, // Blue, Black, Teal
-  "Philadelphia 76ers": { primary: "#99B3E6", secondary: "#DDA6A6", tertiary: "#999999" }, // Blue, Red, Black
-  "Phoenix Suns": { primary: "#ADA6CC", secondary: "#FFA666", tertiary: "#999999" }, // Purple, Orange, Black
-  "Portland Trail Blazers": { primary: "#DDA6A6", secondary: "#999999", tertiary: "#ADA6CC" }, // Red, Black, Purple
-  "Sacramento Kings": { primary: "#ADA6CC", secondary: "#999999", tertiary: "#DDA6A6" }, // Purple, Black, Red
-  "San Antonio Spurs": { primary: "#999999", secondary: "#B3B3B3", tertiary: "#CCCCCC" }, // Black, Gray, Light Gray
-  "Toronto Raptors": { primary: "#DDA6A6", secondary: "#999999", tertiary: "#B39986" }, // Red, Black, Wine
-  "Utah Jazz": { primary: "#99B3E6", secondary: "#FFB366", tertiary: "#999999" }, // Blue, Gold, Black
-  "Washington Wizards": { primary: "#99B3E6", secondary: "#DDA6A6", tertiary: "#999999" } // Blue, Red, Black
+  "Atlanta Hawks": { primary: "#F1CFCF", secondary: "#D6C9BF" },
+  "Boston Celtics": { primary: "#CCE5CC", secondary: "#DCD3F2" },
+  "Brooklyn Nets": { primary: "#CCCCCC", secondary: "#D6D6D6" },
+  "Charlotte Hornets": { primary: "#DCD3F2", secondary: "#CCE5F2" },
+  "Chicago Bulls": { primary: "#F1CFCF", secondary: "#D6C9BF" },
+  "Cleveland Cavaliers": { primary: "#D6C9BF", secondary: "#F1CFCF" },
+  "Dallas Mavericks": { primary: "#CCD9F2", secondary: "#CCE5F2" },
+  "Denver Nuggets": { primary: "#CCD9F2", secondary: "#FFD9B3" },
+  "Detroit Pistons": { primary: "#F1CFCF", secondary: "#CCD9F2" },
+  "Golden State Warriors": { primary: "#FFF2B3", secondary: "#CCD9F2" },
+  "Houston Rockets": { primary: "#F1CFCF", secondary: "#DCD3F2" },
+  "Indiana Pacers": { primary: "#FFD9B3", secondary: "#CCD9F2" },
+  "Los Angeles Clippers": { primary: "#F1CFCF", secondary: "#CCD9F2" },
+  "Los Angeles Lakers": { primary: "#D6D3E6", secondary: "#FFF2B3" },
+  "Memphis Grizzlies": { primary: "#CCD9F2", secondary: "#CCE5F2" },
+  "Miami Heat": { primary: "#F1CFCF", secondary: "#D6C9BF" },
+  "Milwaukee Bucks": { primary: "#CCE5CC", secondary: "#DCD3F2" },
+  "Minnesota Timberwolves": { primary: "#CCD9F2", secondary: "#CCE5CC" },
+  "New Orleans Pelicans": { primary: "#CCD9F2", secondary: "#FFD9B3" },
+  "New York Knicks": { primary: "#FFD1B3", secondary: "#CCD9F2" },
+  "Oklahoma City Thunder": { primary: "#CCD9F2", secondary: "#FFD1B3" },
+  "Orlando Magic": { primary: "#CCD9F2", secondary: "#CCE5F2" },
+  "Philadelphia 76ers": { primary: "#CCD9F2", secondary: "#F1CFCF" },
+  "Phoenix Suns": { primary: "#D6D3E6", secondary: "#FFD1B3" },
+  "Portland Trail Blazers": { primary: "#F1CFCF", secondary: "#D6D3E6" },
+  "Sacramento Kings": { primary: "#D6D3E6", secondary: "#F1CFCF" },
+  "San Antonio Spurs": { primary: "#CCCCCC", secondary: "#D6D6D6" },
+  "Toronto Raptors": { primary: "#F1CFCF", secondary: "#D6C9BF" },
+  "Utah Jazz": { primary: "#CCD9F2", secondary: "#FFD9B3" },
+  "Washington Wizards": { primary: "#CCD9F2", secondary: "#F1CFCF" }
 };
 
 
@@ -73,8 +73,8 @@ export const getBestContrastingColors = (homeTeam: string, awayTeam: string): [s
     return ['#000000', '#FFFFFF'];
   }
 
-  const homeColorOptions = [homeColors.primary, homeColors.secondary, homeColors.tertiary];
-  const awayColorOptions = [awayColors.primary, awayColors.secondary, awayColors.tertiary];
+  const homeColorOptions = [homeColors.primary, homeColors.secondary];
+  const awayColorOptions = [awayColors.primary, awayColors.secondary];
   
   let bestContrast = 0;
   let bestPair: [string, string] = [homeColors.primary, awayColors.primary];

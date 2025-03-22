@@ -283,6 +283,10 @@ const Stream = () => {
           game.teams.away.primaryColor || '#CCCCCC'
         ]
       }
+    },
+    league: {
+      name: game.league?.name || 'NFL',  // Use the league from game object or default to 'NFL'
+      alias: game.league?.alias || 'NFL'  // Use the league alias from game object or default to 'NFL'
     }
   }}
 />
@@ -290,7 +294,7 @@ const Stream = () => {
 </View>
 
           {/* Add Game Clock and Sync Test Panel here */}
-          {isWeb && game.radarGameId && (
+          {game.radarGameId && ( // Remove the isWeb check
             <View style={styles.clockContainer}>
               <GameClockPanel gameId={game.radarGameId} />
               <SyncTestPanel 
@@ -524,6 +528,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 20,
     gap: 16,
+    paddingHorizontal: Platform.OS === 'ios' ? 16 : 0,
   },
   tabsWrapper: {
     width: '100%',

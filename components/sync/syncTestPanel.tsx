@@ -17,16 +17,21 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClo
   useEffect(() => {
     console.log(`SyncTestPanel mounted for game ${gameId} with initial clock:`, initialClock);
     
-    const handleUpdate = (clock: GameClock | undefined, stoppage: StoppageEvent | undefined) => {
-      console.log(`Received update for game ${gameId}:`, { clock, stoppage });
+    const handleUpdate = (clock: GameClock) => {
+      console.log(`Received update for game ${gameId}:`, { clock });
       
       if (clock) {
         setGameClock(clock);
         setLastUpdate(new Date());
       }
-      
-      setStoppage(stoppage);
     };
+
+    // Subscribe to clock updates
+    const subscription = syncService.clockUpdates$.subscribe((clock) => {
+      if (clock.gameId === gameId) {
+        handleUpdate(clock);
+      }
+    });
 
     // Start polling
     syncService.startDebugPolling(gameId, handleUpdate);
@@ -35,6 +40,7 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClo
     return () => {
       console.log(`SyncTestPanel unmounting for game ${gameId}`);
       syncService.stopDebugPolling(gameId);
+      subscription.unsubscribe();
     };
   }, [gameId, initialClock]);
 

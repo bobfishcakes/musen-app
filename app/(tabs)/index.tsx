@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
     width: 40, // Fixed width for circular button
     height: 40, // Fixed height for circular button
   },
+
 });
 
 export default function HomeScreen() {
@@ -161,6 +162,31 @@ export default function HomeScreen() {
         console.log('=== Starting handleGamePress ===');
         console.log('Initial game object:', JSON.stringify(game, null, 2));
     
+        // Check if it's an NFL game
+        if (game.league.name === 'NFL' || game.league.alias === 'NFL') {
+          // For NFL games, create stream without SportRadar integration
+          const newStream: Stream = {
+            id: `1`,
+            title: `${getLastWord(game.teams.away.name)} vs ${getLastWord(game.teams.home.name)}`,
+            streamer: 'bobfishcakes',
+            game: {
+              ...game,
+              radarGameId: game.id, // Use game.id as fallback
+              period: 1,
+              minutes: 15,
+              seconds: 0,
+              isRunning: true
+            },
+            listeners: 1
+          };
+    
+          console.log('Created new NFL stream object:', JSON.stringify(newStream, null, 2));
+          setActiveStream(newStream);
+          router.push('/stream');
+          return;
+        }
+    
+        // Original NBA game handling
         if (!game.date) {
           console.warn('Game press failed: No date available');
           throw new Error('Game date is undefined');
@@ -223,7 +249,6 @@ export default function HomeScreen() {
         console.error('Error stack:', error?.stack);
       }
     };
-
     const renderGameCard = ({ item }: { item: Game }) => (
       <GameCard 
         key={item.id} 
@@ -364,24 +389,24 @@ export default function HomeScreen() {
                 </>
               ) : (
                 <ScrollView
-                  horizontal
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                directionalLockEnabled={true}
+                alwaysBounceVertical={false}
+              >
+                <FlatList
+                  contentContainerStyle={styles.gamesContainer}
+                  numColumns={Math.ceil(nbaGames.length / 2)}
+                  showsVerticalScrollIndicator={false}
                   showsHorizontalScrollIndicator={false}
+                  data={nbaGames}
                   directionalLockEnabled={true}
                   alwaysBounceVertical={false}
-                >
-                  <FlatList
-                    contentContainerStyle={styles.gamesContainer}
-                    numColumns={Math.ceil(nbaGames.length / 2)}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    data={nbaGames}
-                    directionalLockEnabled={true}
-                    alwaysBounceVertical={false}
-                    renderItem={renderGameCard}
-                  />
-                </ScrollView>
-              )}
-            </>
+                  renderItem={renderGameCard}
+                />
+              </ScrollView>
+            )}
+          </>
           )}
         </ThemedView>
         <View style={styles.dividerLine} />

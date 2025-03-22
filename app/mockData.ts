@@ -1,41 +1,82 @@
 import { Game } from '../constants/Interfaces';
 
-export const teamColors: { [key: string]: string } = {
-  "Arizona Cardinals": "#DDA6A6", // 60% tinted red
-  "Atlanta Falcons": "#DDA6A6", // 60% tinted red
-  "Baltimore Ravens": "#ADA6CC", // 60% tinted purple
-  "Buffalo Bills": "#99B3E6", // 60% tinted royal blue
-  "Carolina Panthers": "#99B3E6", // 60% tinted blue
-  "Chicago Bears": "#99A6B3", // 60% tinted navy
-  "Cincinnati Bengals": "#FDC0A6", // 60% tinted orange
-  "Cleveland Browns": "#B39986", // 60% tinted brown
-  "Dallas Cowboys": "#99B3E6", // 60% tinted royal blue
-  "Denver Broncos": "#FFA666", // 60% tinted orange
-  "Detroit Lions": "#99CCE6", // 60% tinted blue
-  "Green Bay Packers": "#99CC99", // 60% tinted green
-  "Houston Texans": "#DDA6A6", // 60% tinted red
-  "Indianapolis Colts": "#99B3E6", // 60% tinted royal blue
-  "Jacksonville Jaguars": "#99C6CC", // 60% tinted teal
-  "Kansas City Chiefs": "#DDA6A6", // 60% tinted red
-  "Las Vegas Raiders": "#999999", // 60% tinted black
-  "Los Angeles Chargers": "#99B3E6", // 60% tinted powder blue
-  "Los Angeles Rams": "#99B3E6", // 60% tinted royal blue
-  "Miami Dolphins": "#99E6CC", // 60% tinted aqua
-  "Minnesota Vikings": "#ADA6CC", // 60% tinted purple
-  "New England Patriots": "#99A6B3", // 60% tinted navy
-  "New Orleans Saints": "#B3B3B3", // 60% tinted gold
-  "New York Giants": "#9DA6CC", // 60% tinted blue
-  "New York Jets": "#99CC99", // 60% tinted green
-  "Philadelphia Eagles": "#99CC99", // 60% tinted green
-  "Pittsburgh Steelers": "#FFE666", // 60% tinted gold
-  "San Francisco 49ers": "#DDA6A6", // 60% tinted red
-  "Seattle Seahawks": "#99CC99", // 60% tinted action green
-  "Tampa Bay Buccaneers": "#DDA6A6", // 60% tinted red
-  "Tennessee Titans": "#9EA6B3", // 60% tinted navy
-  "Washington Commanders": "#B39986", // 60% tinted burgundy
-  "Los Angeles Lakers": "#B491E4", // 60% tinted purple 
-  "Dallas Mavericks": "#3B90D9", // 60% tinted blue
+// Add this to mockData.ts
+export const mockNFLStats: { [key: string]: any } = {
+  "1": { // Raiders vs Ravens game
+    home: {
+      leaders: {
+        points: [{
+          full_name: "Josh Jacobs",
+          statistics: { points: 14 }
+        }],
+        rebounds: [{ // Using rushing yards for "rebounds"
+          full_name: "Josh Jacobs",
+          statistics: { rebounds: 89 }
+        }],
+        assists: [{ // Using passing yards for "assists"
+          full_name: "Jimmy Garoppolo",
+          statistics: { assists: 243 }
+        }]
+      }
+    },
+    away: {
+      leaders: {
+        points: [{
+          full_name: "Lamar Jackson",
+          statistics: { points: 21 }
+        }],
+        rebounds: [{
+          full_name: "Justice Hill",
+          statistics: { rebounds: 67 }
+        }],
+        assists: [{
+          full_name: "Lamar Jackson",
+          statistics: { assists: 287 }
+        }]
+      }
+    }
+  },
+  // Add more games as needed...
 };
+
+export const teamColors: { [key: string]: string } = {
+  "Arizona Cardinals": "#D88080", // moderately bold red
+  "Atlanta Falcons": "#D88080",
+  "Baltimore Ravens": "#A080D6", // moderately bold purple
+  "Buffalo Bills": "#80A6E6", // moderately bold royal blue
+  "Carolina Panthers": "#80A6E6", // moderately bold blue
+  "Chicago Bears": "#808C99", // moderately bold navy
+  "Cincinnati Bengals": "#FFAA80", // moderately bold orange
+  "Cleveland Browns": "#B38666", // moderately bold brown
+  "Dallas Cowboys": "#80A6E6", // moderately bold royal blue
+  "Denver Broncos": "#FFA64D", // moderately bold orange
+  "Detroit Lions": "#80D0E6", // moderately bold blue
+  "Green Bay Packers": "#80CC80", // moderately bold green
+  "Houston Texans": "#D88080", // moderately bold red
+  "Indianapolis Colts": "#80A6E6", // moderately bold royal blue
+  "Jacksonville Jaguars": "#80C6CC", // moderately bold teal
+  "Kansas City Chiefs": "#D88080", // moderately bold red
+  "Las Vegas Raiders": "#808080", // moderately bold black/gray
+  "Los Angeles Chargers": "#80A6E6", // moderately bold powder blue
+  "Los Angeles Rams": "#80A6E6", // moderately bold royal blue
+  "Miami Dolphins": "#80E6CC", // moderately bold aqua
+  "Minnesota Vikings": "#A080D6", // moderately bold purple
+  "New England Patriots": "#808C99", // moderately bold navy
+  "New Orleans Saints": "#B3A673", // moderately bold gold
+  "New York Giants": "#8596D6", // moderately bold blue
+  "New York Jets": "#80CC80", // moderately bold green
+  "Philadelphia Eagles": "#80CC80",
+  "Pittsburgh Steelers": "#FFE066", // moderately bold gold
+  "San Francisco 49ers": "#D88080", // moderately bold red
+  "Seattle Seahawks": "#80CC80", // moderately bold action green
+  "Tampa Bay Buccaneers": "#D88080", // moderately bold red
+  "Tennessee Titans": "#8A93A6", // moderately bold navy
+  "Washington Commanders": "#B37F66", // moderately bold burgundy
+  "Los Angeles Lakers": "#A67FE7", // moderately bold purple
+  "Dallas Mavericks": "#357FCF", // moderately bold blue
+};
+
+
 
 // Helper function to get team color
 export const getTeamColor = (teamName: string): string => {
@@ -91,7 +132,8 @@ export const mockNcaaFootballGames: Game[] = [
     scores: {
       home: { total: 14 },
       away: { total: 0 }
-    }
+    },
+    radarGameId: ''
   },
 ];
 
@@ -301,7 +343,8 @@ export const mockNbaGames: Game[] = [
     scores: {
       home: { total: 0 },
       away: { total: 0 }
-    }
+    },
+    radarGameId: ''
   },
   {
     id: "134",
@@ -335,7 +378,8 @@ export const mockNbaGames: Game[] = [
     scores: {
       home: { total: 0 },
       away: { total: 0 }
-    }
+    },
+    radarGameId: ''
   },
   {
     id: "136",
@@ -369,7 +413,8 @@ export const mockNbaGames: Game[] = [
     scores: {
       home: { total: 95 },
       away: { total: 99 }
-    }
+    },
+    radarGameId: ''
   }
 ];
 
@@ -406,7 +451,8 @@ export const mockNcaaBasketballGames: Game[] = [
     scores: {
       home: { total: 82 },
       away: { total: 79 }
-    }
+    },
+    radarGameId: ''
   },
   {
     id: "222",
@@ -440,6 +486,7 @@ export const mockNcaaBasketballGames: Game[] = [
     scores: {
       home: { total: 88 },
       away: { total: 85 }
-    }
+    },
+    radarGameId: ''
   }
 ];

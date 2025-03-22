@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { pushFeedService } from '/Users/atharvsonawane/musen-app/server/src/api/sportRadar/pushFeedService';
+import { pushFeedService } from '/Users/atharvsonawane/musen-app-push-feed/server/src/api/sportRadar/pushFeedService';
 import { syncService } from '@/api/sync/syncService';
 import { GameClock } from '@/api/sync/syncTypes';
 
