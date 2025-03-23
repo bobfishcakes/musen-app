@@ -1,9 +1,9 @@
 import WebSocket from 'ws';
 import { Subject, bufferTime, filter } from 'rxjs';
 import { SPORTRADAR_CONFIG } from './sportRadarConfig';
-import { GameClock } from '/Users/atharvsonawane/musen-app-push-feed/api/sync/syncTypes';
-import { syncService } from '/Users/atharvsonawane/musen-app-push-feed/api/sync/syncService';
-import { pushLogger } from '/Users/atharvsonawane/musen-app-push-feed/utils/logging/pushLogger';
+import { GameClock } from '@/api/sync/syncTypes';
+import { syncService } from '@/api/sync/syncService';
+import { pushLogger } from '@/utils/logging/pushLogger';
 
 export class SportRadarPushService {
   private wsConnection: WebSocket | null = null;

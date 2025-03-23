@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { ThemedText } from './ThemedText';
-import { sportRadarHTTPService } from '/Users/atharvsonawane/musen-app-push-feed/server/src/api/sportRadar/sportRadarHTTPService';
+import { sportRadarHTTPService } from '@/server/src/api/sportRadar/sportRadarHTTPService';
 import { mockNFLStats } from '@/app/mockData';
 
 const styles = StyleSheet.create({

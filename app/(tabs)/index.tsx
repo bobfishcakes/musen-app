@@ -11,9 +11,9 @@ import { convertBasketballGame } from '@/api/basketball/basketballTypes';
 import { useActiveStream } from '@/hooks/useActiveStream';
 import type { Game, Stream } from '@/constants/Interfaces';
 import { Header } from '@/components/Header';
-import { sportRadarHTTPService } from '/Users/atharvsonawane/musen-app-push-feed/server/src/api/sportRadar/sportRadarHTTPService';
-import { sportRadarLocalService } from '/Users/atharvsonawane/musen-app-push-feed/server/src/api/sportRadar/sportRadarLocalService';
-import { sportRadarPushService } from '/Users/atharvsonawane/musen-app-push-feed/server/src/api/sportRadar/sportRadarPushService';
+import { sportRadarHTTPService } from '@/server/src/api/sportRadar/sportRadarHTTPService';
+import { sportRadarLocalService } from '@/server/src/api/sportRadar/sportRadarLocalService';
+import { sportRadarPushService } from '@/server/src/api/sportRadar/sportRadarPushService';
 
 const BACKEND_URL = 'http://localhost:3000';
 

@@ -8,8 +8,8 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { ActiveStreamProvider } from '../contexts/ActiveStreamContext';
-import { StreamingProvider } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamingContext';
-import { StreamTimesProvider } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamTimesContext';
+import { StreamingProvider } from '@/contexts/streamingContext';
+import { StreamTimesProvider } from '@/contexts/streamTimesContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

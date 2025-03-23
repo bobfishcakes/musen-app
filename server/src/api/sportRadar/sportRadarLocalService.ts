@@ -1,4 +1,4 @@
-import nbaSchedule from '/Users/atharvsonawane/musen-app-push-feed/api/sportradar/nbaSchedule.json';
+import nbaSchedule from '@/api/sportradar/nbaSchedule.json';
 import { SportRadarGame } from './sportRadarTypes';
 
 // Define interface matching the JSON structure

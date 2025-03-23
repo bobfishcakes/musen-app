@@ -12,7 +12,7 @@ import { SyncTestPanel } from '@/components/sync/syncTestPanel'
 import { GameSyncControl } from '@/components/GameSyncControl'
 import { GameTabs } from '@/components/gameTabs'
 import { Header } from '@/components/Header';
-import { useStreaming } from '/Users/atharvsonawane/musen-app-push-feed/contexts/streamingContext'
+import { useStreaming } from '@/contexts/streamingContext'
 import { GameStatsPanel } from '@/components/GameStatsPanel'
 import { getNBATeamColor } from '@/api/basketball/basketballTypes'
 
