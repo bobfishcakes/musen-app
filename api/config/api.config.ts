@@ -10,7 +10,7 @@ export const API_CONFIG = {
   },
   SOCCER: {
     BASE_URL: 'https://v3.football.api-sports.io',
-    API_KEY: process.env.SOCCER_API_KEY || process.env.NEXT_PUBLIC_SOCCER_API_KEY,
+    API_KEY: process.env.SOCCER_API_KEY || '6c3c11fe1af925ff889d220229ff3297',
   },
   DEFAULT_TIMEZONE: 'America/New_York',
   HEADERS: {
@@ -20,7 +20,7 @@ export const API_CONFIG = {
     },
     SOCCER: {
       'x-rapidapi-host': 'v3.football.api-sports.io',
-      'x-rapidapi-key': process.env.SOCCER_API_KEY || process.env.NEXT_PUBLIC_SOCCER_API_KEY
+      'x-rapidapi-key': process.env.SOCCER_API_KEY || '6c3c11fe1af925ff889d220229ff3297'
     }
   },
   SOCCER_LEAGUES: {

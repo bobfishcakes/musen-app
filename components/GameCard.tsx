@@ -55,14 +55,16 @@ const GameCard = ({ game, onPress }: GameCardProps) => {
   return (
     <View style={styles.cardWrapper}>
       <TouchableOpacity onPress={onPress} style={styles.touchable}>
-        <View style={[styles.card, isWeb && styles.webCard]}>
-          <LinearGradient
-            colors={[homeColor, awayColor]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-          />
-          <View style={[styles.gameContainer, isWeb && styles.webGameContainer]}>
+      <View style={[styles.card, isWeb && styles.webCard]}>
+      {(homeColor && awayColor) ? (
+        <LinearGradient
+          colors={[homeColor, awayColor]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFillObject}
+        />
+      ) : null}
+      <View style={[styles.gameContainer, isWeb && styles.webGameContainer]}>
             {isWeb ? (
               <>
 <View style={styles.webTeamContainer}>
@@ -167,6 +169,7 @@ const styles = StyleSheet.create({
     width: 300,
     borderRadius: 8,
     overflow: 'hidden',
+    backgroundColor: '#f2f2f2', // This will show when gradient is not rendered
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

@@ -26,6 +26,7 @@ const getLastWord = (str: string) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f2f2f2', // Add this line
   },
   section: {
     backgroundColor: 'rgba(0, 0, 0, 0.00)',
@@ -145,14 +146,20 @@ const styles = StyleSheet.create({
 export default function HomeScreen() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
-  const { games: basketballGames, loading: basketballLoading, error: basketballError } = useBasketballGames(formattedDate);
-  const { games: soccerGames, loading: soccerLoading, error: soccerError } = useSoccerGames(formattedDate);
-  console.log('Raw basketball games:', basketballGames);
-  const { setActiveStream } = useActiveStream();
   const isWeb = Platform.OS === 'web';
+  
+  // Group all useState declarations together at the top
   const [nflExpanded, setNflExpanded] = useState(false);
   const [nbaExpanded, setNbaExpanded] = useState(false);
   const [soccerExpanded, setSoccerExpanded] = useState(false);
+  const [useSoccerFilter, setUseSoccerFilter] = useState(false); // toggle to major leagues by changing to true
+
+  // Then use the hooks that depend on state
+  const { games: basketballGames, loading: basketballLoading, error: basketballError } = useBasketballGames(formattedDate);
+  const { games: soccerGames, loading: soccerLoading, error: soccerError } = useSoccerGames(formattedDate, useSoccerFilter);
+  const { setActiveStream } = useActiveStream();
+
+  // Rest of your component code...
   
   const nbaGames = basketballGames
     ?.filter(game => {
@@ -162,12 +169,15 @@ export default function HomeScreen() {
     })
     .map(convertBasketballGame) || [];
 
-  const majorSoccerGames = soccerGames
-  ?.filter(game => {
-    const majorLeagues = [39, 140, 78, 135, 2]; // Premier League, La Liga, Bundesliga, Serie A, Champions League
-    return majorLeagues.includes(game.league.id);
-  })
-  .map(convertSoccerGame) || [];
+    const soccerGamesDisplay = soccerGames
+    ?.map(game => {
+      console.log('Converting game:', game);
+      const converted = convertSoccerGame(game);
+      console.log('Converted game:', converted);
+      return converted;
+    }) || [];
+  
+  console.log('Final soccer games:', soccerGamesDisplay);
 
     const handleGamePress = async (game: Game) => {
       try {
@@ -423,61 +433,63 @@ export default function HomeScreen() {
         </ThemedView>
         <View style={styles.dividerLine} />
     
-        {/* Soccer Section */}
-        <ThemedView style={styles.section}>
-          {soccerLoading ? (
-            <ActivityIndicator size="large" color="#50775B" />
-          ) : soccerError ? (
-            <ThemedText>Error loading soccer games</ThemedText>
+{/* Soccer Section */}
+<ThemedView style={styles.section}>
+  {soccerLoading ? (
+    <ActivityIndicator size="large" color="#50775B" />
+  ) : soccerError ? (
+    <ThemedText>Error loading soccer games</ThemedText>
+  ) : (
+    <>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>Soccer</ThemedText>
+      </View>
+      
+      {isWeb ? (
+        <View style={styles.webGamesContainer}>
+          {soccerGamesDisplay.length > 0 ? (
+            soccerGamesDisplay.map((game) => (
+              <GameCard
+                key={game.id}
+                game={game}
+                onPress={() => handleGamePress(game)}
+              />
+            ))
           ) : (
-            <>
-              <ThemedText type="subtitle" style={styles.sectionTitle}>Soccer</ThemedText>
-              {isWeb ? (
-                <>
-                  <View style={styles.webGamesContainer}>
-                    {majorSoccerGames
-                      .slice(0, soccerExpanded ? undefined : 3)
-                      .map((game) => (
-                        <GameCard
-                          key={game.id}
-                          game={game}
-                          onPress={() => handleGamePress(game)}
-                        />
-                      ))}
-                  </View>
-                  {majorSoccerGames.length > 3 && (
-                    <TouchableOpacity
-                      style={styles.showMoreButton}
-                      onPress={() => setSoccerExpanded(!soccerExpanded)}
-                    >
-                      <ThemedText style={styles.showMoreText}>
-                        {soccerExpanded ? 'Show Less' : 'Show More'}
-                      </ThemedText>
-                    </TouchableOpacity>
-                  )}
-                </>
-              ) : (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  directionalLockEnabled={true}
-                  alwaysBounceVertical={false}
-                >
-                  <FlatList
-                    contentContainerStyle={styles.gamesContainer}
-                    numColumns={Math.ceil(majorSoccerGames.length / 2)}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    data={majorSoccerGames}
-                    directionalLockEnabled={true}
-                    alwaysBounceVertical={false}
-                    renderItem={renderGameCard}
-                  />
-                </ScrollView>
-              )}
-            </>
+            <ThemedText style={{ textAlign: 'center', padding: 20 }}>
+              No {useSoccerFilter ? 'major league ' : ''}games available
+            </ThemedText>
           )}
-        </ThemedView>
+        </View>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          directionalLockEnabled={true}
+          alwaysBounceVertical={false}
+        >
+          {soccerGamesDisplay.length > 0 ? (
+            <FlatList
+              contentContainerStyle={styles.gamesContainer}
+              numColumns={Math.ceil(soccerGamesDisplay.length / 2)}
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+              data={soccerGamesDisplay}
+              directionalLockEnabled={true}
+              alwaysBounceVertical={false}
+              renderItem={renderGameCard}
+              keyExtractor={(item) => item.id}
+            />
+          ) : (
+            <ThemedText style={{ textAlign: 'center', padding: 20 }}>
+              No {useSoccerFilter ? 'major league ' : ''}games available
+            </ThemedText>
+          )}
+        </ScrollView>
+      )}
+    </>
+  )}
+</ThemedView>
         <View style={styles.dividerLine} />
       </ScrollView>
     );
@@ -488,5 +500,5 @@ export default function HomeScreen() {
         {renderContent()}
       </View>
     );
-  
+    
   }

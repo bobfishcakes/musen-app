@@ -65,40 +65,40 @@ export interface SoccerGame {
 }
 
 export function convertSoccerGame(game: SoccerGame): Game {
-  return {
-    id: game.fixture.id.toString(),
-    radarGameId: game.fixture.id.toString(),
-    teams: {
-      home: {
-        id: game.teams.home.id.toString(),
-        name: game.teams.home.name,
-        logo: game.teams.home.logo,
-        primaryColor: '#000000' // You can add team colors similar to basketball
+    return {
+      id: game.fixture.id.toString(),
+      radarGameId: game.fixture.id.toString(),
+      teams: {
+        home: {
+          id: game.teams.home.id.toString(),
+          name: game.teams.home.name,
+          logo: game.teams.home.logo,
+          primaryColor: '#000000'
+        },
+        away: {
+          id: game.teams.away.id.toString(),
+          name: game.teams.away.name,
+          logo: game.teams.away.logo,
+          primaryColor: '#000000'
+        }
       },
-      away: {
-        id: game.teams.away.id.toString(),
-        name: game.teams.away.name,
-        logo: game.teams.away.logo,
-        primaryColor: '#FFFFFF'
-      }
-    },
-    league: {
-      name: game.league.name,
-      alias: game.league.country,
-      logo: game.league.logo
-    },
-    status: {
-      long: game.fixture.status.long,
-      short: game.fixture.status.short
-    },
-    scores: {
-      home: {
-        total: game.goals.home || 0
+      league: {
+        name: game.league.name,
+        alias: game.league.name,
+        logo: game.league.logo
       },
-      away: {
-        total: game.goals.away || 0
-      }
-    },
-    date: game.fixture.date
-  };
-}
+      status: {
+        long: game.fixture.status.long,
+        short: game.fixture.status.short
+      },
+      scores: {
+        home: {
+          total: game.goals.home || 0
+        },
+        away: {
+          total: game.goals.away || 0
+        }
+      },
+      date: game.fixture.date
+    };
+  }
