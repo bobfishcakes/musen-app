@@ -1,142 +1,171 @@
 import WebSocket from 'ws';
 import { Subject, bufferTime, filter } from 'rxjs';
 import { SPORTRADAR_CONFIG } from './sportRadarConfig';
-import { GameClock } from '@/api/sync/syncTypes';
-import { syncService } from '@/api/sync/syncService';
-import { pushLogger } from '@/utils/logging/pushLogger';
+
+interface ClockUpdate {
+  gameId: string;
+  period: number;
+  clock: {
+    minutes: number;
+    seconds: number;
+    isRunning: boolean;
+  };
+}
 
 export class SportRadarPushService {
   private wsConnection: WebSocket | null = null;
   private reconnectAttempts = 0;
-  private readonly MAX_RECONNECT_ATTEMPTS = 3;
+  private readonly MAX_RECONNECT_ATTEMPTS = 5;
   private readonly RECONNECT_DELAY = 5000;
-  private clockUpdates$ = new Subject<GameClock>();
   private activeSubscriptions: Set<string> = new Set();
+  public clockUpdates$ = new Subject<ClockUpdate>();
 
   constructor() {
-    this.setupBufferedUpdates();
-    this.connect();
+    // Buffer clock updates to prevent flooding
+    this.clockUpdates$.pipe(
+      bufferTime(100),
+      filter(updates => updates.length > 0)
+    ).subscribe(updates => {
+      // Emit only the latest update
+      const latestUpdate = updates[updates.length - 1];
+      this.clockUpdates$.next(latestUpdate);
+    });
   }
 
   private connect() {
+    console.log('🔍 Connect method called with active subscriptions:', 
+      Array.from(this.activeSubscriptions));
+    
+    if (!SPORTRADAR_CONFIG.API_KEY || this.activeSubscriptions.size === 0) {
+      console.log('❌ Connection attempt blocked:', {
+        hasApiKey: !!SPORTRADAR_CONFIG.API_KEY,
+        activeSubscriptions: this.activeSubscriptions.size
+      });
+      return;
+    }
+  
+    const wsUrl = `${SPORTRADAR_CONFIG.WS_URL}/clock/subscribe?api_key=${SPORTRADAR_CONFIG.API_KEY}&match=${Array.from(this.activeSubscriptions).join(',')}&status=inprogress`;
+    console.log('🔄 Attempting WebSocket connection to:', wsUrl);
+  
     try {
-      // Build URL with match parameter if there are active subscriptions
-      let wsUrl = `${SPORTRADAR_CONFIG.WS_URL}/clock/subscribe?api_key=${SPORTRADAR_CONFIG.API_KEY}`;
-      
-      if (this.activeSubscriptions.size > 0) {
-        const matchIds = Array.from(this.activeSubscriptions).join(',');
-        wsUrl += `&match=${matchIds}`;
+      // Close existing connection if any
+      if (this.wsConnection) {
+        this.wsConnection.close();
+        this.wsConnection = null;
       }
 
       this.wsConnection = new WebSocket(wsUrl);
-
+      
       this.wsConnection.on('open', () => {
-        pushLogger.connection('WebSocket connection established');
+        console.log('🟢 WebSocket connected with subscriptions:', Array.from(this.activeSubscriptions));
         this.reconnectAttempts = 0;
       });
-
+  
       this.wsConnection.on('message', (data: WebSocket.Data) => {
         try {
+          console.log('📥 Raw WebSocket message received:', data.toString());
           const parsedData = JSON.parse(data.toString());
-          if (parsedData.payload?.game) {
-            this.handleClockUpdate(parsedData.payload);
+          console.log('📦 Parsed WebSocket data:', parsedData);
+          
+          if (parsedData.payload) {
+            this.handleGameUpdate(parsedData.payload);
+          } else {
+            console.log('⚠️ No payload in message');
           }
         } catch (error) {
-          pushLogger.errors('Error parsing WebSocket message:', error);
+          console.error('❌ Error parsing message:', error);
         }
       });
-
-      this.wsConnection.on('close', () => {
-        pushLogger.connection('WebSocket connection closed');
+  
+      this.wsConnection.on('close', (code: number, reason: string) => {
+        console.log('🔌 WebSocket disconnected:', {
+          code,
+          reason,
+          wasClean: code === 1000
+        });
         this.handleReconnection();
       });
-
+  
       this.wsConnection.on('error', (error) => {
-        pushLogger.errors('WebSocket error:', error);
+        console.error('🔴 WebSocket error:', {
+          error,
+          readyState: this.wsConnection?.readyState
+        });
         this.handleReconnection();
       });
-
+  
     } catch (error) {
-      pushLogger.errors('Error establishing WebSocket connection:', error);
+      console.error('❌ Failed to connect:', error);
       this.handleReconnection();
+    }
+  }
+
+  private handleGameUpdate(payload: any) {
+    try {
+      console.log('🎮 Processing game update payload:', payload);
+      
+      if (!payload.game?.id || !payload.period?.number || !payload.clocks?.game) {
+        console.error('❌ Invalid payload structure:', payload);
+        return;
+      }
+
+      const update: ClockUpdate = {
+        gameId: payload.game.id,
+        period: payload.period.number,
+        clock: {
+          minutes: Math.floor(payload.clocks.game / 60),
+          seconds: payload.clocks.game % 60,
+          isRunning: payload.clocks.running
+        }
+      };
+      
+      console.log('⏰ Emitting clock update:', update);
+      this.clockUpdates$.next(update);
+    } catch (error) {
+      console.error('❌ Error processing update:', error, 'Payload:', payload);
     }
   }
 
   private handleReconnection() {
     if (this.reconnectAttempts < this.MAX_RECONNECT_ATTEMPTS) {
       this.reconnectAttempts++;
-      pushLogger.connection(`Attempting reconnection ${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS}`);
+      console.log(`🔄 Attempting reconnection ${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS}`);
       setTimeout(() => this.connect(), this.RECONNECT_DELAY);
     } else {
-      pushLogger.errors('Max reconnection attempts reached');
+      console.error('❌ Max reconnection attempts reached');
     }
   }
 
-  private setupBufferedUpdates() {
-    this.clockUpdates$.pipe(
-      bufferTime(100),
-      filter(updates => updates.length > 0)
-    ).subscribe(updates => {
-      const latestUpdate = updates[updates.length - 1];
-      syncService.updateGameClock(latestUpdate.gameId, latestUpdate);
-    });
-  }
-
-  private handleClockUpdate(payload: any) {
-    try {
-      const { game, clocks, period } = payload;
-      
-      console.log('Raw clock update payload:', payload); // Add this line
-      
-      if (!game?.id || !clocks?.game || !period?.number) {
-        pushLogger.errors('Invalid payload structure:', payload);
-        return;
-      }
-  
-      const clockData: GameClock = {
-        gameId: game.id,
-        period: period.number,
-        minutes: Math.floor(parseInt(clocks.game) / 60),
-        seconds: parseInt(clocks.game) % 60,
-        isRunning: clocks.running,
-        lastUpdated: new Date()
-      };
-  
-      console.log('Received payload:', payload);
-      console.log('Processed clock data:', clockData);
-      
-      this.clockUpdates$.next(clockData);
-      pushLogger.updates('Clock update processed:', clockData);
-    } catch (error) {
-      pushLogger.errors('Error processing clock update:', error);
-      console.error('Clock update processing error:', error);
-    }
-  }
-
-  public subscribeToGame(gameId: string, clientWs?: WebSocket) {
-    console.log('Subscribing to game:', gameId);
+  public subscribeToGame(gameId: string) {
+    console.log('📝 Subscription requested for game:', gameId);
+    console.log('Current WebSocket state:', this.wsConnection?.readyState);
+    
     if (!this.activeSubscriptions.has(gameId)) {
       this.activeSubscriptions.add(gameId);
-      console.log('Active subscriptions:', this.activeSubscriptions);
-      
-      // Don't recreate connection if it exists and is open
+      this.connect();
+    } else {
+      console.log('ℹ️ Game already subscribed:', gameId);
       if (!this.wsConnection || this.wsConnection.readyState !== WebSocket.OPEN) {
+        console.log('🔄 Forcing reconnection for existing subscription');
         this.connect();
       }
     }
   }
-
-  public unsubscribeFromGame(gameId: string, clientWs?: WebSocket) {
+  
+  public unsubscribeFromGame(gameId: string) {
+    console.log('🗑️ Unsubscription requested for game:', gameId);
     if (this.activeSubscriptions.has(gameId)) {
       this.activeSubscriptions.delete(gameId);
+      console.log('➖ Removed subscription, remaining subscriptions:', Array.from(this.activeSubscriptions));
       
-      // Reconnect with updated subscription list
-      if (this.wsConnection) {
-        this.wsConnection.close();
+      if (this.activeSubscriptions.size === 0) {
+        console.log('🔄 No active subscriptions, closing connection');
+        this.wsConnection?.close();
+        this.wsConnection = null;
+      } else {
+        console.log('🔄 Reconnecting with updated subscriptions');
+        this.connect();
       }
-      this.connect();
-      
-      pushLogger.connection(`Unsubscribed from game: ${gameId}`);
     }
   }
 }

@@ -4,102 +4,6 @@ import { ThemedText } from './ThemedText';
 import { sportRadarHTTPService } from '@/server/src/api/sportRadar/sportRadarHTTPService';
 import { mockNFLStats } from '@/app/mockData';
 
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    ...Platform.select({
-      web: {
-        maxWidth: 850,
-      },
-    }),
-  },
-  statsContainer: {
-    position: 'relative',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  backgroundHalf: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: '50%',
-  },
-  contentContainer: {
-    width: '100%',
-    padding: 16,
-    zIndex: 1,
-  },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginHorizontal: -16,
-    paddingHorizontal: 16,
-    minHeight: 60,
-  },
-  topRowStyle: {
-    paddingBottom: 8,
-    marginBottom: 0,
-  },
-  middleRowStyle: {
-    marginTop: -1, // This will overlap with the border of the row above
-    paddingVertical: 12,
-  },
-  bottomRowStyle: {
-    marginTop: 6, // This will overlap with the border of the row above
-    paddingTop: 8,
-  },
-  statHalf: {
-    flex: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 4,
-  },
-  statLabel: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, .4)',
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginHorizontal: 8,
-    minHeight: 32,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '700', // Change from '500' to '700' for bolder text
-    color: '#000000',
-    textAlign: 'center',
-    width: '100%',
-  },
-  playerName: {
-    fontSize: 16,
-    color: '#000000',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  statValue: {
-    fontSize: 24,
-    color: '#000000',
-    textAlign: 'center',
-    lineHeight: 28,
-  },
-  topRowValue: {
-    fontSize: 24,
-    color: '#000000',
-    textAlign: 'center',
-    lineHeight: 28,
-    marginTop: 4,
-  },
-  bottomRowValue: {
-    fontSize: 24,
-    color: '#000000',
-    textAlign: 'center',
-    lineHeight: 28,
-    marginBottom: 4,
-  },
-});
-
 interface StatLeader {
   full_name: string;
   value: number;
@@ -130,9 +34,104 @@ interface GameStatsPanelProps {
       alias: string;
     };
   };
+  outerRowOpacity?: number;
+  middleRowOpacity?: number;
 }
 
-export const GameStatsPanel = ({ gameId, game }: GameStatsPanelProps) => {
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    ...Platform.select({
+      web: {
+        maxWidth: 850,
+      },
+    }),
+  },
+  statsContainer: {
+    position: 'relative',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  backgroundHalf: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: '50%',
+  },
+  contentContainer: {
+    width: '100%',
+    padding: 16,
+    zIndex: 1,
+  },
+  rowWrapper: {
+    width: '100%',
+    position: 'relative',
+  },
+  rowBackground: {
+    position: 'absolute',
+    left: -16,
+    right: -16,
+    top: 0,
+    bottom: 0,
+    backgroundColor: '#FFFFFF',
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    minHeight: 60,
+  },
+  topRowStyle: {
+    paddingBottom: 8,
+  },
+  middleRowStyle: {
+    paddingVertical: 12,
+  },
+  bottomRowStyle: {
+    paddingTop: 8,
+  },
+  statHalf: {
+    flex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  statLabel: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, .3)',
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginHorizontal: 8,
+    minHeight: 32,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '700',
+    textAlign: 'center',
+    width: '100%',
+  },
+  playerName: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  statValue: {
+    fontSize: 24,
+    textAlign: 'center',
+    lineHeight: 28,
+  },
+});
+
+export const GameStatsPanel = ({
+  gameId,
+  game,
+  outerRowOpacity = 0.0,
+  middleRowOpacity = 0.35,
+}: GameStatsPanelProps) => {
   const [stats, setStats] = useState<{home: TeamStats; away: TeamStats} | null>(null);
 
   const formatStatLabel = (label: string, league: string) => {
@@ -147,10 +146,62 @@ export const GameStatsPanel = ({ gameId, game }: GameStatsPanelProps) => {
     return `${label} LEADER`;
   };
 
+  const StatRow: React.FC<{
+    label: string;
+    home: StatLeader;
+    away: StatLeader;
+    league: string;
+    isMiddleRow?: boolean;
+    isLastRow?: boolean;
+    isFirstRow?: boolean;
+    opacity: number;
+  }> = ({
+    label,
+    home,
+    away,
+    league,
+    isMiddleRow = false,
+    isLastRow = false,
+    isFirstRow = false,
+    opacity,
+  }) => (
+    <View style={styles.rowWrapper}>
+      <View style={[styles.rowBackground, { opacity }]} />
+      <View style={[
+        styles.statRow,
+        isFirstRow && styles.topRowStyle,
+        isMiddleRow && styles.middleRowStyle,
+        isLastRow && styles.bottomRowStyle,
+      ]}>
+        <View style={styles.statHalf}>
+          <ThemedText type="default" style={styles.playerName}>
+            {home.full_name}
+          </ThemedText>
+          <ThemedText type="default" style={styles.statValue}>
+            {home.value}
+          </ThemedText>
+        </View>
+        <View style={styles.statLabel}>
+          <ThemedText type="defaultSemiBold" style={styles.label}>
+            {formatStatLabel(label, league)}
+          </ThemedText>
+        </View>
+        <View style={styles.statHalf}>
+          <ThemedText type="default" style={styles.playerName}>
+            {away.full_name}
+          </ThemedText>
+          <ThemedText type="default" style={styles.statValue}>
+            {away.value}
+          </ThemedText>
+        </View>
+      </View>
+    </View>
+  );
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        if (!game || !game.league) {
+        if (!game?.league) {
           console.error('Game or league object is undefined');
           return;
         }
@@ -227,132 +278,67 @@ export const GameStatsPanel = ({ gameId, game }: GameStatsPanelProps) => {
       }
     };
 
-    if (gameId && game && game.league) {
+    if (gameId && game?.league) {
       fetchStats();
     }
+  
+    // Set up polling every 30 seconds
+    const statsInterval = setInterval(() => {
+      if (gameId && game?.league) {
+        fetchStats();
+      }
+    }, 30000);  // 30 seconds
+  
+    return () => clearInterval(statsInterval);
   }, [gameId, game]);
 
-  const StatRow = ({ 
-    label, 
-    home, 
-    away, 
-    league,
-    isMiddleRow = false,
-    isLastRow = false,
-    isFirstRow = false,
-  }: { 
-    label: string; 
-    home: StatLeader; 
-    away: StatLeader;
-    league: string;
-    isMiddleRow?: boolean;
-    isLastRow?: boolean;
-    isFirstRow?: boolean;
-  }) => (
-    <View style={[
-      styles.statRow,
-      isFirstRow && styles.topRowStyle,
-      isMiddleRow && styles.middleRowStyle,
-      isLastRow && styles.bottomRowStyle,
-      isMiddleRow && { backgroundColor: 'rgba(255, 255, 255, 0.4)' }
-    ]}>
-      <View style={styles.statHalf}>
-        <ThemedText 
-          type="default" 
-          style={[
-            styles.playerName,
-            isFirstRow && { marginTop: 2 },
-            isLastRow && { marginBottom: 2 }
-          ]}
-        >
-          {home.full_name}
-        </ThemedText>
-        <ThemedText 
-          type="default" 
-          style={[
-            styles.statValue,
-            isFirstRow && styles.topRowValue,
-            isLastRow && styles.bottomRowValue
-          ]}
-        >
-          {home.value}
-        </ThemedText>
-      </View>
-      <View style={styles.statLabel}>
-        <ThemedText type="defaultSemiBold" style={styles.label}>
-          {formatStatLabel(label, league)}
-        </ThemedText>
-      </View>
-      <View style={styles.statHalf}>
-        <ThemedText 
-          type="default" 
-          style={[
-            styles.playerName,
-            isFirstRow && { marginTop: 2 },
-            isLastRow && { marginBottom: 2 }
-          ]}
-        >
-          {away.full_name}
-        </ThemedText>
-        <ThemedText 
-          type="default" 
-          style={[
-            styles.statValue,
-            isFirstRow && styles.topRowValue,
-            isLastRow && styles.bottomRowValue
-          ]}
-        >
-          {away.value}
-        </ThemedText>
-      </View>
-    </View>
-  );
-
   if (!stats) {
-    return <ThemedText>Loading stats...</ThemedText>;
+    return <ThemedText type="default">Loading stats...</ThemedText>;
   }
 
   return (
     <View style={styles.container}>
-      <View style={[styles.statsContainer, {
-        backgroundColor: 'transparent',
-        flexDirection: 'row',
-      }]}>
+      <View style={[styles.statsContainer, { flexDirection: 'row' }]}>
         <View style={[
           styles.backgroundHalf,
-          { 
-            backgroundColor: `${game.teams.home.primaryColor}CC` || `${game.teams.home.colors?.[0]}CC` || '#CCCCCCCC',
-            left: 0 
+          {
+            left: 0,
+            backgroundColor: game.teams.home.primaryColor || game.teams.home.colors?.[0] || '#CCCCCC',
+            opacity: 0.3
           }
         ]} />
         <View style={[
           styles.backgroundHalf,
-          { 
-            backgroundColor: `${game.teams.away.primaryColor}CC` || `${game.teams.away.colors?.[0]}CC` || '#000000CC',
-            right: 0 
+          {
+            right: 0,
+            backgroundColor: game.teams.away.primaryColor || game.teams.away.colors?.[0] || '#000000',
+            opacity: 0.3
           }
         ]} />
         <View style={styles.contentContainer}>
-          <StatRow 
-            label="POINTS" 
-            home={stats.home.points} 
-            away={stats.away.points} 
+          <StatRow
+            label="POINTS"
+            home={stats.home.points}
+            away={stats.away.points}
             league={game.league.name}
             isFirstRow={true}
+            opacity={outerRowOpacity}
           />
-          <StatRow 
-            label="REBOUNDS" 
-            home={stats.home.rebounds} 
-            away={stats.away.rebounds} 
+          <StatRow
+            label="REBOUNDS"
+            home={stats.home.rebounds}
+            away={stats.away.rebounds}
             league={game.league.name}
             isMiddleRow={true}
+            opacity={middleRowOpacity}
           />
-          <StatRow 
-            label="ASSISTS" 
-            home={stats.home.assists} 
-            away={stats.away.assists} 
+          <StatRow
+            label="ASSISTS"
+            home={stats.home.assists}
+            away={stats.away.assists}
             league={game.league.name}
             isLastRow={true}
+            opacity={outerRowOpacity}
           />
         </View>
       </View>

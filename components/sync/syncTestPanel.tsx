@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { GameClock, StoppageEvent } from '@/api/sync/syncTypes';
 import { syncService } from '@/api/sync/syncService';
+import { sportRadarPushService } from '@/server/src/api/sportRadar/sportRadarPushService';
 
 interface SyncTestPanelProps {
   gameId: string;
@@ -15,10 +16,13 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClo
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
-    console.log(`SyncTestPanel mounted for game ${gameId} with initial clock:`, initialClock);
+    console.log(`🏀 SyncTestPanel mounted for game ${gameId} with initial clock:`, initialClock);
     
+    // Subscribe to game updates via SportRadar
+    sportRadarPushService.subscribeToGame(gameId);
+
     const handleUpdate = (clock: GameClock) => {
-      console.log(`Received update for game ${gameId}:`, { clock });
+      console.log(`⏰ Received update for game ${gameId}:`, { clock });
       
       if (clock) {
         setGameClock(clock);
@@ -26,36 +30,47 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClo
       }
     };
 
-    // Subscribe to clock updates
+    // Subscribe to clock updates from sync service
     const subscription = syncService.clockUpdates$.subscribe((clock) => {
       if (clock.gameId === gameId) {
         handleUpdate(clock);
       }
     });
 
-    // Start polling
+    // Start polling for debug purposes
     syncService.startDebugPolling(gameId, handleUpdate);
 
     // Cleanup function
     return () => {
-      console.log(`SyncTestPanel unmounting for game ${gameId}`);
+      console.log(`👋 SyncTestPanel unmounting for game ${gameId}`);
+      sportRadarPushService.unsubscribeFromGame(gameId);
       syncService.stopDebugPolling(gameId);
       subscription.unsubscribe();
     };
   }, [gameId, initialClock]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.panel}>
       <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Game Clock</ThemedText>
-        <ThemedText>
-          Period: {gameClock?.period || '-'} | 
-          Time: {gameClock?.minutes || '--'}:{(gameClock?.seconds || 0).toString().padStart(2, '0')}
+        <ThemedText style={styles.title}>Live Game Clock</ThemedText>
+        <ThemedText style={styles.clockDisplay}>
+          Q{gameClock?.period || '-'} {' '}
+          {gameClock?.minutes || '--'}:{(gameClock?.seconds || 0).toString().padStart(2, '0')}
         </ThemedText>
-        <ThemedText>
-          Status: {gameClock?.isRunning ? 'Running' : 'Stopped'}
-        </ThemedText>
-        <ThemedText style={styles.updateTime}>
+        
+        <View style={styles.statusContainer}>
+          <View 
+            style={[
+              styles.statusIndicator, 
+              { backgroundColor: gameClock?.isRunning ? '#4CAF50' : '#F44336' }
+            ]} 
+          />
+          <ThemedText style={styles.status}>
+            {gameClock?.isRunning ? 'Clock Running' : 'Clock Stopped'}
+          </ThemedText>
+        </View>
+
+        <ThemedText style={styles.lastUpdate}>
           Last Update: {lastUpdate.toLocaleTimeString()}
         </ThemedText>
       </View>
@@ -64,11 +79,13 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClo
         <ThemedText style={styles.sectionTitle}>Stoppage Status</ThemedText>
         {stoppage ? (
           <>
-            <ThemedText>Type: {stoppage.type}</ThemedText>
-            <ThemedText>Started: {stoppage.startTime.toLocaleTimeString()}</ThemedText>
+            <ThemedText style={styles.stoppageText}>Type: {stoppage.type}</ThemedText>
+            <ThemedText style={styles.stoppageText}>
+              Started: {stoppage.startTime.toLocaleTimeString()}
+            </ThemedText>
           </>
         ) : (
-          <ThemedText>No active stoppage</ThemedText>
+          <ThemedText style={styles.stoppageText}>No active stoppage</ThemedText>
         )}
       </View>
     </View>
@@ -76,20 +93,67 @@ export const SyncTestPanel: React.FC<SyncTestPanelProps> = ({ gameId, initialClo
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 10,
+  panel: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 8,
+    marginVertical: 8,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  sectionTitle: {
+  title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    color: '#000000',
+    marginBottom: 8,
   },
-  updateTime: {
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  clockDisplay: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginVertical: 8,
+    textAlign: 'center',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  status: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  lastUpdate: {
     fontSize: 12,
-    marginTop: 5,
-    opacity: 1,
+    color: '#999999',
+    textAlign: 'center',
+    marginTop: 8,
   },
+  stoppageText: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 4,
+  }
 });
+
+export default SyncTestPanel;

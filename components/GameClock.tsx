@@ -1,40 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { pushFeedService } from '@/server/src/api/sportRadar/pushFeedService';
-import { syncService } from '@/api/sync/syncService';
-import { GameClock } from '@/api/sync/syncTypes';
+import { sportRadarPushService } from '@/server/src/api/sportRadar/sportRadarPushService';
 
-interface GameClockPanelProps {
-  gameId: string;
+interface ClockState {
+  period: number;
+  minutes: number;
+  seconds: number;
+  isRunning: boolean;
+  lastUpdate: Date;
 }
 
-const GameClockPanel: React.FC<GameClockPanelProps> = ({ gameId }) => {
-  const [clock, setClock] = useState<GameClock>();
+const GameClockPanel: React.FC<{ gameId: string }> = ({ gameId }) => {
+  const [clockState, setClockState] = useState<ClockState>();
 
   useEffect(() => {
     console.log('GameClockPanel mounting for game:', gameId);
     
-    // Connect to WebSocket server
-    const ws = new WebSocket('ws://your-server-url');
-    
-    ws.onopen = () => {
-      // Subscribe to game
-      ws.send(JSON.stringify({
-        type: 'subscribe',
-        gameId: gameId
-      }));
-    };
-  
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'clockUpdate') {
-        setClock(data.clock);
+    const subscription = sportRadarPushService.clockUpdates$.subscribe(update => {
+      if (update.gameId === gameId) {
+        setClockState({
+          period: update.period,
+          minutes: update.clock.minutes,
+          seconds: update.clock.seconds,
+          isRunning: update.clock.isRunning,
+          lastUpdate: new Date()
+        });
       }
-    };
-  
+    });
+
+    // Subscribe to push feed
+    sportRadarPushService.subscribeToGame(gameId);
+
     return () => {
-      ws.close();
+      subscription.unsubscribe();
+      sportRadarPushService.unsubscribeFromGame(gameId);
     };
   }, [gameId]);
 
@@ -46,13 +46,26 @@ const GameClockPanel: React.FC<GameClockPanelProps> = ({ gameId }) => {
     <View style={styles.panel}>
       <ThemedText style={styles.title}>Live Game Clock</ThemedText>
       <ThemedText style={styles.clockDisplay}>
-        {clock ? 
-          `Q${clock.period} ${formatTime(clock.minutes, clock.seconds)}` : 
+        {clockState ? 
+          `Q${clockState.period} ${formatTime(clockState.minutes, clockState.seconds)}` : 
           "Waiting for updates..."}
       </ThemedText>
-      <ThemedText style={styles.status}>
-        Status: {clock?.isRunning ? 'Running' : 'Stopped'}
-      </ThemedText>
+      <View style={styles.statusContainer}>
+        <View 
+          style={[
+            styles.statusIndicator, 
+            { backgroundColor: clockState?.isRunning ? '#4CAF50' : '#F44336' }
+          ]} 
+        />
+        <ThemedText style={styles.status}>
+          {clockState?.isRunning ? 'Clock Running' : 'Clock Stopped'}
+        </ThemedText>
+      </View>
+      {clockState?.lastUpdate && (
+        <ThemedText style={styles.lastUpdate}>
+          Last update: {clockState.lastUpdate.toLocaleTimeString()}
+        </ThemedText>
+      )}
     </View>
   );
 };
@@ -81,11 +94,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000000',
     marginVertical: 8,
+    textAlign: 'center',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
   },
   status: {
     fontSize: 14,
     color: '#666666',
-    marginTop: 4,
+  },
+  lastUpdate: {
+    fontSize: 12,
+    color: '#999999',
+    textAlign: 'center',
+    marginTop: 8,
   }
 });
 

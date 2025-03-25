@@ -15,6 +15,7 @@ import { Header } from '@/components/Header';
 import { useStreaming } from '@/contexts/streamingContext'
 import { GameStatsPanel } from '@/components/GameStatsPanel'
 import { getNBATeamColor } from '@/api/basketball/basketballTypes'
+import { sportRadarPushService } from '@/server/src/api/sportRadar/sportRadarPushService'
 
   const TimerInput = ({ value, onChange }: { value: string, onChange: (text: string) => void }) => {
     const [minutes, seconds] = value.split(':');
@@ -63,50 +64,102 @@ import { getNBATeamColor } from '@/api/basketball/basketballTypes'
   };
 
 
-const GameClockPanel = ({ gameId }: { gameId: string }) => {
-  const [clock, setClock] = useState<GameClock>();
-
-  useEffect(() => {
-    console.log('GameClockPanel mounted for game:', gameId);
-    
-    // Initialize clock with current game data
-    syncService.updateGameClock(gameId, {
-      gameId,
-      period: 1,
-      minutes: 12,
-      seconds: 0,
-      isRunning: false,
-      lastUpdated: new Date()
-    });
-    
-    // Use properly typed callback
-    syncService.startDebugPolling(gameId, (updatedClock: GameClock) => {
-      console.log('Clock update received in GameClockPanel:', updatedClock);
-      setClock(updatedClock);
-    });
+  const GameClockPanel = ({ gameId }: { gameId: string }) => {
+    const [clock, setClock] = useState<GameClock>();
+    const [displayTime, setDisplayTime] = useState<GameClock>();
   
-    return () => {
-      console.log('GameClockPanel unmounting, stopping polling');
-      syncService.stopDebugPolling(gameId);
+    useEffect(() => {
+      console.log('GameClockPanel mounting for game:', gameId);
+      
+      // Subscribe to SportRadar push feed
+      sportRadarPushService.subscribeToGame(gameId);
+      
+      // Subscribe to clock updates from syncService
+      const subscription = syncService.clockUpdates$.subscribe((updatedClock) => {
+        if (updatedClock.gameId === gameId) {
+          console.log('Clock update received:', updatedClock);
+          setClock(updatedClock);
+          setDisplayTime(updatedClock);
+        }
+      });
+  
+      // Get initial clock state
+      const initialClock = syncService.getGameClock(gameId);
+      if (initialClock) {
+        console.log('Initial clock state:', initialClock);
+        setClock(initialClock);
+        setDisplayTime(initialClock);
+      }
+  
+      return () => {
+        subscription.unsubscribe();
+        sportRadarPushService.unsubscribeFromGame(gameId);
+      };
+    }, [gameId]);
+  
+    // Add timer effect with proper stopping conditions
+    useEffect(() => {
+      if (!clock?.isRunning) return;
+  
+      const timer = setInterval(() => {
+        setDisplayTime(prevTime => {
+          if (!prevTime) return clock;
+  
+          // Check if we should stop the clock
+          if (prevTime.minutes === 0 && prevTime.seconds === 0) {
+            clearInterval(timer);
+            return prevTime;
+          }
+  
+          let newSeconds = prevTime.seconds - 1;
+          let newMinutes = prevTime.minutes;
+  
+          if (newSeconds < 0) {
+            if (newMinutes === 0) {
+              clearInterval(timer);
+              return prevTime;
+            }
+            newSeconds = 59;
+            newMinutes -= 1;
+          }
+  
+          return {
+            ...prevTime,
+            minutes: newMinutes,
+            seconds: newSeconds
+          };
+        });
+      }, 1000);
+  
+      return () => clearInterval(timer);
+    }, [clock?.isRunning]);
+  
+    const formatClockDisplay = () => {
+      if (!displayTime) return <ThemedText>Waiting for updates...</ThemedText>;
+      
+      return (
+        <ThemedText style={styles.clockTime}>
+          {`${displayTime.period}Q ${displayTime.minutes}:${displayTime.seconds.toString().padStart(2, '0')}`}
+        </ThemedText>
+      );
     };
-  }, [gameId]);
-
-  return (
-    <View style={styles.gameClockPanel}>
-      <ThemedText style={styles.clockTitle}>Live Game Clock</ThemedText>
-      <ThemedText style={styles.clockTime}>
-        {clock ? (
-          `${clock.period}Q ${clock.minutes}:${clock.seconds.toString().padStart(2, '0')}`
-        ) : (
-          'Waiting for updates...'
-        )}
-      </ThemedText>
-      <ThemedText style={styles.clockStatus}>
-        Status: {clock?.isRunning ? 'Running' : 'Stopped'}
-      </ThemedText>
-    </View>
-  );
-};
+  
+    const formatStatus = () => {
+      return (
+        <ThemedText style={styles.clockStatus}>
+          {`Status: ${clock?.isRunning ? 'Running' : 'Stopped'}`}
+        </ThemedText>
+      );
+    };
+  
+    return (
+      <View style={styles.gameClockPanel}>
+        <ThemedText style={styles.clockTitle}>Live Game Clock</ThemedText>
+        {formatClockDisplay()}
+        {formatStatus()}
+      </View>
+    );
+  };
 
 const Stream = () => {
   const { activeStream } = useActiveStream()
@@ -159,19 +212,21 @@ const Stream = () => {
   };
 
   useEffect(() => {
-    if (activeStream?.game?.radarGameId) {  // Add check for radarGameId
+    if (activeStream?.game?.radarGameId) {
       console.log('Setting initial game state:', activeStream.game);
       setGame(activeStream.game);
       
-      // Initialize sync service with game data using radarGameId
-      syncService.updateGameClock(activeStream.game.radarGameId, {
-        gameId: activeStream.game.radarGameId,
-        period: activeStream.game.period || 1,
-        minutes: activeStream.game.minutes || 0,
-        seconds: activeStream.game.seconds || 0,
-        isRunning: activeStream.game.isRunning || false,
-        lastUpdated: new Date()
-      });
+      // Only update if we have valid clock data
+      if (activeStream.game.minutes !== undefined || activeStream.game.seconds !== undefined) {
+        syncService.updateGameClock(activeStream.game.radarGameId, {
+          gameId: activeStream.game.radarGameId,
+          period: activeStream.game.period,
+          minutes: activeStream.game.minutes,
+          seconds: activeStream.game.seconds,
+          isRunning: activeStream.game.isRunning,
+          lastUpdated: new Date()
+        });
+      }
     }
   }, []);
   
@@ -294,22 +349,11 @@ const Stream = () => {
 </View>
 
           {/* Add Game Clock and Sync Test Panel here */}
-          {game.radarGameId && ( // Remove the isWeb check
-            <View style={styles.clockContainer}>
-              <GameClockPanel gameId={game.radarGameId} />
-              <SyncTestPanel 
-                gameId={game.radarGameId}
-                initialClock={{
-                  gameId: game.radarGameId,
-                  period: game.period || 1,
-                  minutes: game.minutes || 0,
-                  seconds: game.seconds || 0,
-                  isRunning: game.isRunning || false,
-                  lastUpdated: new Date()
-                }}
-              />
-            </View>
-          )}
+          {game.radarGameId && (
+          <View style={styles.clockContainer}>
+            <GameClockPanel gameId={game.radarGameId} />
+          </View>
+        )}
   
           <View style={[styles.placeholderSection, isWeb && styles.webPlaceholderSection]}>
             <View style={styles.placeholder} />

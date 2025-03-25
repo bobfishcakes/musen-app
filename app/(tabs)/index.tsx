@@ -144,6 +144,7 @@ export default function HomeScreen() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
   const { games: basketballGames, loading, error } = useBasketballGames(formattedDate);
+  console.log('Raw basketball games:', basketballGames);
   const { setActiveStream } = useActiveStream();
   const isWeb = Platform.OS === 'web';
   const [nflExpanded, setNflExpanded] = useState(false);

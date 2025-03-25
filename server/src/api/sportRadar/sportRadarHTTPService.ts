@@ -16,10 +16,10 @@ export class SportRadarHTTPService {
   async getGameDetails(gameId: string): Promise<GameDetailsResponse> {
     try {
       const response = await this.client.get(`/api/games/details/${gameId}`);
-      console.log("API Response:", response.data);
+      console.log(`📊 [SportRadar] Received stats update for game: ${gameId}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching game details:', error);
+      console.error('❌ [SportRadar] Error fetching game details:', error);
       throw error;
     }
   }
