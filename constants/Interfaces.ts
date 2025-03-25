@@ -13,6 +13,7 @@ export interface Teams {
 export interface League {
   name: string
   alias?: string
+  logo?: string; // Add this line
 }
 
 export interface GameDate {

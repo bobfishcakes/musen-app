@@ -14,6 +14,8 @@ import { Header } from '@/components/Header';
 import { sportRadarHTTPService } from '@/server/src/api/sportRadar/sportRadarHTTPService';
 import { sportRadarLocalService } from '@/server/src/api/sportRadar/sportRadarLocalService';
 import { sportRadarPushService } from '@/server/src/api/sportRadar/sportRadarPushService';
+import { useSoccerGames } from '@/api/soccer/soccerHooks';
+import { convertSoccerGame } from '@/api/soccer/soccerTypes';
 
 const BACKEND_URL = 'http://localhost:3000';
 
@@ -143,12 +145,14 @@ const styles = StyleSheet.create({
 export default function HomeScreen() {
   const now = new Date();
   const formattedDate = now.toISOString().split('T')[0];
-  const { games: basketballGames, loading, error } = useBasketballGames(formattedDate);
+  const { games: basketballGames, loading: basketballLoading, error: basketballError } = useBasketballGames(formattedDate);
+  const { games: soccerGames, loading: soccerLoading, error: soccerError } = useSoccerGames(formattedDate);
   console.log('Raw basketball games:', basketballGames);
   const { setActiveStream } = useActiveStream();
   const isWeb = Platform.OS === 'web';
   const [nflExpanded, setNflExpanded] = useState(false);
   const [nbaExpanded, setNbaExpanded] = useState(false);
+  const [soccerExpanded, setSoccerExpanded] = useState(false);
   
   const nbaGames = basketballGames
     ?.filter(game => {
@@ -157,6 +161,13 @@ export default function HomeScreen() {
       return liveStatuses.includes(game.status.short);
     })
     .map(convertBasketballGame) || [];
+
+  const majorSoccerGames = soccerGames
+  ?.filter(game => {
+    const majorLeagues = [39, 140, 78, 135, 2]; // Premier League, La Liga, Bundesliga, Serie A, Champions League
+    return majorLeagues.includes(game.league.id);
+  })
+  .map(convertSoccerGame) || [];
 
     const handleGamePress = async (game: Game) => {
       try {
@@ -263,32 +274,32 @@ export default function HomeScreen() {
         contentContainerStyle={[styles.scrollViewContent, isWeb && styles.webContainer]}
         showsVerticalScrollIndicator={false}
       >
-  {/* Logo Section */}
-  {isWeb && (
-    <View style={styles.logoContent}>
-      <Image 
-        source={{
-          uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
-        }}
-        style={styles.webLogo}
-      />
-      <View style={styles.textContainer}>
-        <ThemedText 
-          type="default" 
-          style={styles.headerText}
-        >
-          musen
-        </ThemedText>
-        <ThemedText 
-          type="default" 
-          style={styles.taglineText}
-        >
-          Tune into what really matters
-        </ThemedText>
-      </View>
-    </View>
-  )}
-  
+        {/* Logo Section */}
+        {isWeb && (
+          <View style={styles.logoContent}>
+            <Image 
+              source={{
+                uri: 'https://framerusercontent.com/images/Wsf9gwWc57UJnuivO96aVeTg.png',
+              }}
+              style={styles.webLogo}
+            />
+            <View style={styles.textContainer}>
+              <ThemedText 
+                type="default" 
+                style={styles.headerText}
+              >
+                musen
+              </ThemedText>
+              <ThemedText 
+                type="default" 
+                style={styles.taglineText}
+              >
+                Tune into what really matters
+              </ThemedText>
+            </View>
+          </View>
+        )}
+        
         {/* Popular Section */}
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>Popular</ThemedText>
@@ -303,7 +314,7 @@ export default function HomeScreen() {
           </ScrollView>
         </ThemedView>
         <View style={styles.dividerLine} />
-  
+    
         {/* NFL Section */}
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>NFL</ThemedText>
@@ -354,12 +365,12 @@ export default function HomeScreen() {
           )}
         </ThemedView>
         <View style={styles.dividerLine} />
-  
+    
         {/* NBA Section */}
         <ThemedView style={styles.section}>
-          {loading ? (
+          {basketballLoading ? (
             <ActivityIndicator size="large" color="#50775B" />
-          ) : error ? (
+          ) : basketballError ? (
             <ThemedText>Error loading NBA games</ThemedText>
           ) : (
             <>
@@ -390,34 +401,92 @@ export default function HomeScreen() {
                 </>
               ) : (
                 <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                directionalLockEnabled={true}
-                alwaysBounceVertical={false}
-              >
-                <FlatList
-                  contentContainerStyle={styles.gamesContainer}
-                  numColumns={Math.ceil(nbaGames.length / 2)}
-                  showsVerticalScrollIndicator={false}
+                  horizontal
                   showsHorizontalScrollIndicator={false}
-                  data={nbaGames}
                   directionalLockEnabled={true}
                   alwaysBounceVertical={false}
-                  renderItem={renderGameCard}
-                />
-              </ScrollView>
-            )}
-          </>
+                >
+                  <FlatList
+                    contentContainerStyle={styles.gamesContainer}
+                    numColumns={Math.ceil(nbaGames.length / 2)}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    data={nbaGames}
+                    directionalLockEnabled={true}
+                    alwaysBounceVertical={false}
+                    renderItem={renderGameCard}
+                  />
+                </ScrollView>
+              )}
+            </>
+          )}
+        </ThemedView>
+        <View style={styles.dividerLine} />
+    
+        {/* Soccer Section */}
+        <ThemedView style={styles.section}>
+          {soccerLoading ? (
+            <ActivityIndicator size="large" color="#50775B" />
+          ) : soccerError ? (
+            <ThemedText>Error loading soccer games</ThemedText>
+          ) : (
+            <>
+              <ThemedText type="subtitle" style={styles.sectionTitle}>Soccer</ThemedText>
+              {isWeb ? (
+                <>
+                  <View style={styles.webGamesContainer}>
+                    {majorSoccerGames
+                      .slice(0, soccerExpanded ? undefined : 3)
+                      .map((game) => (
+                        <GameCard
+                          key={game.id}
+                          game={game}
+                          onPress={() => handleGamePress(game)}
+                        />
+                      ))}
+                  </View>
+                  {majorSoccerGames.length > 3 && (
+                    <TouchableOpacity
+                      style={styles.showMoreButton}
+                      onPress={() => setSoccerExpanded(!soccerExpanded)}
+                    >
+                      <ThemedText style={styles.showMoreText}>
+                        {soccerExpanded ? 'Show Less' : 'Show More'}
+                      </ThemedText>
+                    </TouchableOpacity>
+                  )}
+                </>
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  directionalLockEnabled={true}
+                  alwaysBounceVertical={false}
+                >
+                  <FlatList
+                    contentContainerStyle={styles.gamesContainer}
+                    numColumns={Math.ceil(majorSoccerGames.length / 2)}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    data={majorSoccerGames}
+                    directionalLockEnabled={true}
+                    alwaysBounceVertical={false}
+                    renderItem={renderGameCard}
+                  />
+                </ScrollView>
+              )}
+            </>
           )}
         </ThemedView>
         <View style={styles.dividerLine} />
       </ScrollView>
     );
-    
+
     return (
-      <ThemedView style={styles.container}>
+      <View style={styles.container}>
         <Header />
         {renderContent()}
-      </ThemedView>
+      </View>
     );
+  
   }

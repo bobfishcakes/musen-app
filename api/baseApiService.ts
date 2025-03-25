@@ -1,13 +1,14 @@
+// baseApiService.ts
 import axios, { AxiosInstance } from 'axios';
 import { API_CONFIG } from './config/api.config';
 
 export class BaseApiService {
   protected api: AxiosInstance;
 
-  constructor(baseURL: string) {
+  constructor(baseURL: string, type: 'BASKETBALL' | 'SOCCER') {
     this.api = axios.create({
       baseURL,
-      headers: API_CONFIG.HEADERS
+      headers: API_CONFIG.HEADERS[type]
     });
 
     this.api.interceptors.response.use(
