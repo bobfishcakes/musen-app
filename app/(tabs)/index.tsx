@@ -433,63 +433,71 @@ export default function HomeScreen() {
         </ThemedView>
         <View style={styles.dividerLine} />
     
-{/* Soccer Section */}
-<ThemedView style={styles.section}>
-  {soccerLoading ? (
-    <ActivityIndicator size="large" color="#50775B" />
-  ) : soccerError ? (
-    <ThemedText>Error loading soccer games</ThemedText>
-  ) : (
-    <>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>Soccer</ThemedText>
-      </View>
-      
-      {isWeb ? (
-        <View style={styles.webGamesContainer}>
-          {soccerGamesDisplay.length > 0 ? (
-            soccerGamesDisplay.map((game) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                onPress={() => handleGamePress(game)}
-              />
-            ))
-          ) : (
-            <ThemedText style={{ textAlign: 'center', padding: 20 }}>
-              No {useSoccerFilter ? 'major league ' : ''}games available
-            </ThemedText>
-          )}
-        </View>
+    {/* Soccer Section */}
+    <ThemedView style={styles.section}>
+      {soccerLoading ? (
+        <ActivityIndicator size="large" color="#50775B" />
+      ) : soccerError ? (
+        <ThemedText>Error loading soccer games</ThemedText>
       ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          directionalLockEnabled={true}
-          alwaysBounceVertical={false}
-        >
-          {soccerGamesDisplay.length > 0 ? (
-            <FlatList
-              contentContainerStyle={styles.gamesContainer}
-              numColumns={Math.ceil(soccerGamesDisplay.length / 2)}
-              showsVerticalScrollIndicator={false}
+        <>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+            <ThemedText type="subtitle" style={styles.sectionTitle}>Soccer</ThemedText>
+          </View>
+          
+          {isWeb ? (
+            <>
+              <View style={styles.webGamesContainer}>
+                {soccerGamesDisplay
+                  .slice(0, soccerExpanded ? undefined : 3)
+                  .map((game) => (
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      onPress={() => handleGamePress(game)}
+                    />
+                  ))}
+              </View>
+              {soccerGamesDisplay.length > 3 && (
+                <TouchableOpacity 
+                  style={styles.showMoreButton}
+                  onPress={() => setSoccerExpanded(!soccerExpanded)}
+                >
+                  <ThemedText style={styles.showMoreText}>
+                    {soccerExpanded ? 'Show Less' : 'Show More'}
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
+            </>
+          ) : (
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
-              data={soccerGamesDisplay}
               directionalLockEnabled={true}
               alwaysBounceVertical={false}
-              renderItem={renderGameCard}
-              keyExtractor={(item) => item.id}
-            />
-          ) : (
-            <ThemedText style={{ textAlign: 'center', padding: 20 }}>
-              No {useSoccerFilter ? 'major league ' : ''}games available
-            </ThemedText>
+            >
+              {soccerGamesDisplay.length > 0 ? (
+                <FlatList
+                  contentContainerStyle={styles.gamesContainer}
+                  numColumns={Math.ceil(soccerGamesDisplay.length / 2)}
+                  showsVerticalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={false}
+                  data={soccerGamesDisplay}
+                  directionalLockEnabled={true}
+                  alwaysBounceVertical={false}
+                  renderItem={renderGameCard}
+                  keyExtractor={(item) => item.id}
+                />
+              ) : (
+                <ThemedText style={{ textAlign: 'center', padding: 20 }}>
+                  No {useSoccerFilter ? 'major league ' : ''}games available
+                </ThemedText>
+              )}
+            </ScrollView>
           )}
-        </ScrollView>
+        </>
       )}
-    </>
-  )}
-</ThemedView>
+    </ThemedView>
         <View style={styles.dividerLine} />
       </ScrollView>
     );
